@@ -1,0 +1,35 @@
+# Test: Actionable Condition - INVALID
+# This test demonstrates that Conditions cannot be used directly in Intent.
+# Conditions must be wrapped in PropertyExpectation to have access to Target context.
+
+@prefix ex: <http://example.org/> .
+@prefix fun: <http://tio.models.tmforum.org/tio/v3.6.0/FunctionOntology/> .
+@prefix icm: <http://tio.models.tmforum.org/tio/v3.6.0/IntentCommonModel/> .
+@prefix log: <http://tio.models.tmforum.org/tio/v3.6.0/LogicalOperators/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# INVALID: Intent referencing Conditions directly
+# Conditions must be wrapped in PropertyExpectation
+ex:validIntent
+  a icm:Intent ;
+  log:anyOf ( ex:actionableCondition ex:oneOfCondition ) .
+
+ex:service
+  a icm:Target ;
+  rdfs:label "Service"@en .
+
+# Condition with allOf function property
+ex:actionableCondition
+  a log:Condition ;
+  log:allOf ( "true"^^xsd:boolean "false"^^xsd:boolean ) ;
+  rdfs:label "Actionable Condition"@en .
+
+# Condition with oneOf function property (XOR)
+ex:oneOfCondition
+  a log:Condition ;
+  log:oneOf ( "true"^^xsd:boolean "false"^^xsd:boolean ) ;
+  rdfs:label "One Of Condition"@en .
+
+

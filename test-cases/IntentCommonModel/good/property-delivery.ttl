@@ -1,0 +1,44 @@
+# Test: Valid usage of Delivery properties
+# Concepts covered: chooseFrom, deliveryDescription, deliveryType, targetCount
+# This test validates that delivery-related properties can be used correctly.
+
+@prefix ex: <http://example.org/> .
+@prefix fun: <http://tio.models.tmforum.org/tio/v3.6.0/FunctionOntology/> .
+@prefix icm: <http://tio.models.tmforum.org/tio/v3.6.0/IntentCommonModel/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix log: <http://tio.models.tmforum.org/tio/v3.6.0/LogicalOperators/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# Intent referencing all expectations to avoid unreferenced warnings
+ex:test_intent a icm:Intent ;
+  log:allOf ( ex:test_choosefrom ex:test_deliverydescription ex:test_deliverytype ) .
+
+# === chooseFrom property ===
+# Note: chooseFrom has rdfs:domain icm:DeliveryExpectation, so must be used on DeliveryExpectation
+ex:test_choosefrom
+  a icm:DeliveryExpectation ;
+  icm:target ex:target1 ;
+  icm:chooseFrom [ a rdfs:Container ; rdfs:member ex:option1, ex:option2 ] .
+
+# === deliveryDescription property (must be a Resource) ===
+ex:test_deliverydescription
+  a icm:DeliveryExpectation ;
+  icm:target ex:target1 ;
+  icm:deliveryDescription ex:delivery_desc .
+
+# === deliveryType property ===
+ex:test_deliverytype
+  a icm:DeliveryExpectation ;
+  icm:target ex:target1 ;
+  icm:deliveryType icm:Maintain .
+
+# === targetCount property (must be xsd:nonNegativeInteger) ===
+ex:test_targetcount
+  a icm:TargetReport ;
+  icm:targetCount "5"^^xsd:nonNegativeInteger .
+
+ex:target1 a icm:Target .
+ex:option1 a rdfs:Resource .
+ex:option2 a rdfs:Resource .
+ex:delivery_desc a rdfs:Resource .

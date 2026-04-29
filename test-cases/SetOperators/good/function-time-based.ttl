@@ -1,0 +1,49 @@
+# Test: Valid usage of time-based set functions
+# Concepts covered: membersAfter, membersBefore, membersSameTime, membersWhile, newestMember, oldestMember
+# This test validates that time-based set functions can be used correctly.
+
+@prefix ex: <http://example.org/> .
+@prefix fun: <http://tio.models.tmforum.org/tio/v3.6.0/FunctionOntology/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix set: <http://tio.models.tmforum.org/tio/v3.6.0/SetOperators/> .
+@prefix t: <http://www.w3.org/2006/time#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# === membersAfter function: (timestampProperty, t:Instance, Container...) ===
+ex:test_membersafter
+  a rdfs:Resource ;
+  set:membersAfter ( ex:timestampProp ex:time1 ex:container1 ) .
+
+# === membersBefore function: (timestampProperty, t:Instance, Container...) ===
+ex:test_membersbefore
+  a rdfs:Resource ;
+  set:membersBefore ( ex:timestampProp ex:time1 ex:container1 ) .
+
+# === membersSameTime function: (timestampProperty, t:Instance, Container...) ===
+ex:test_memberssametime
+  a rdfs:Resource ;
+  set:membersSameTime ( ex:timestampProp ex:time1 ex:container1 ) .
+
+# === membersWhile function: (timestampProperty, t:Interval, Container...) ===
+ex:test_memberswhile
+  a rdfs:Resource ;
+  set:membersWhile ( ex:timestampProp ex:interval1 ex:container1 ) .
+
+# === newestMember function: (timestampProperty, Container...) ===
+ex:test_newestmember
+  a rdfs:Resource ;
+  set:newestMember ( ex:timestampProp ex:container1 ) .
+
+# === oldestMember function: (timestampProperty, Container...) ===
+ex:test_oldestmember
+  a rdfs:Resource ;
+  set:oldestMember ( ex:timestampProp ex:container1 ) .
+
+# Supporting instances
+ex:container1 a rdfs:Container .
+ex:timestampProp a rdf:Property .
+# t:Instance is used for temporal instances in OWL Time (points in time)
+ex:time1 a t:Instant, t:Instance .
+# t:Interval is used for time ranges
+ex:interval1 a t:Interval .

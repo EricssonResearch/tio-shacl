@@ -1,0 +1,49 @@
+# Generic rdfs:domain and rdfs:range enforcement
+#
+# Catches type mismatches for ALL TIO properties that declare domain/range,
+# without needing per-property shapes.
+
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix tio-constraints: <http://tio.models.tmforum.org/tio/v3.6.0/shapes/lib/constraints/> .
+
+tio-constraints:DomainMismatchConstraint
+    a sh:SPARQLConstraint ;
+    rdfs:label "Domain Mismatch Constraint" ;
+    sh:message "[vocabulary/domain_mismatch] Property {?p} used on {$this} but rdfs:domain requires {?d}" ;
+    sh:select """
+        PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+        SELECT $this ?p ?d WHERE {
+            $this ?p ?o .
+            ?p rdfs:domain ?d .
+            FILTER(STRSTARTS(STR(?p), "http://tio.models.tmforum.org/tio/v3.6.0/"))
+            FILTER(STR(?d) != "http://www.w3.org/2000/01/rdf-schema#Resource")
+            FILTER(STR(?d) != "http://www.w3.org/2000/01/rdf-schema#Class")
+            FILTER(STR(?p) != "http://tio.models.tmforum.org/tio/v3.6.0/IntentCommonModel/target")
+            FILTER(!isBlank($this))
+            FILTER NOT EXISTS { $this a/rdfs:subClassOf* ?d }
+        }
+    """ .
+
+tio-constraints:RangeMismatchConstraint
+    a sh:SPARQLConstraint ;
+    rdfs:label "Range Mismatch Constraint" ;
+    sh:message "[vocabulary/range_mismatch] Object {?o} of property {?p} should be instance of {?r}" ;
+    sh:select """
+        PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+        SELECT $this ?p ?o ?r WHERE {
+            $this ?p ?o .
+            ?p rdfs:range ?r .
+            FILTER(STRSTARTS(STR(?p), "http://tio.models.tmforum.org/tio/v3.6.0/"))
+            FILTER(isIRI(?o))
+            FILTER(STR(?r) != "http://www.w3.org/2000/01/rdf-schema#Resource")
+            FILTER(STR(?r) != "http://www.w3.org/2000/01/rdf-schema#Class")
+            FILTER(STR(?r) != "http://www.w3.org/2000/01/rdf-schema#Container")
+            FILTER(STR(?p) != "http://tio.models.tmforum.org/tio/v3.6.0/IntentCommonModel/target")
+            FILTER(!isBlank(?o))
+            FILTER NOT EXISTS { ?o a/rdfs:subClassOf* ?r }
+        }
+    """ .

@@ -1,0 +1,32 @@
+# Test: Invalid ObjectTemplate property values
+# This test validates allowedValues and templateType constraints
+# Should FAIL with constraint violation messages
+
+@prefix ex:   <http://example.org/> .
+@prefix insp: <http://tio.models.tmforum.org/tio/v3.6.0/IntentSpecification/> .
+@prefix quan: <http://tio.models.tmforum.org/tio/v3.6.0/QuantityOntology/> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+################################################################################
+# VIOLATION: insp:allowedValues with wrong type
+#
+# insp:allowedValues MUST be an rdfs:Container (rdf:Bag, rdf:Seq, or rdf:Alt)
+################################################################################
+
+# WRONG - using RDF list instead of Container
+ex:template_wrong_allowed
+  a insp:ObjectTemplate ;
+  insp:allowedValues ( "a" "b" ) .
+
+################################################################################
+# VIOLATION: insp:templateType with literal value
+#
+# insp:templateType MUST be an IRI (class reference)
+################################################################################
+
+# WRONG - using literal string instead of IRI reference
+ex:template_literal_type
+  a insp:ObjectTemplate ;
+  insp:templateType "Quantity" .

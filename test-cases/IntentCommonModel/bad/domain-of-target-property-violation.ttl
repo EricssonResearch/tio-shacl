@@ -1,0 +1,36 @@
+# Test: DomainOfTargetPropertyShape violation
+# Tests: icm:target can only be used on icm:Expectation instances
+# Should FAIL with: "icm:target may only be used on icm:Expectation instances"
+
+@prefix ex:   <http://example.org/> .
+@prefix icm:  <http://tio.models.tmforum.org/tio/v3.6.0/IntentCommonModel/> .
+@prefix log:  <http://tio.models.tmforum.org/tio/v3.6.0/LogicalOperators/> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+################################################################################
+# VIOLATION: icm:target used on non-Expectation class
+#
+# Common mistake: Using icm:target on Intent or other non-Expectation classes
+# The icm:target property can ONLY be used on Expectation instances
+# (DeliveryExpectation, PropertyExpectation, ReportingExpectation, etc.)
+################################################################################
+
+# WRONG - icm:target on Intent (Intent is NOT an Expectation)
+ex:wrong_target_domain
+  a icm:Intent ;
+  icm:target ex:myTarget ;  # WRONG: target can only be on Expectation
+  log:allOf ( ex:E1 )
+  .
+
+# Valid expectation (for reference)
+ex:E1
+  a icm:PropertyExpectation ;
+  icm:target ex:myTarget ;  # CORRECT: target on Expectation
+  log:allOf ( "true"^^xsd:boolean )
+  .
+
+ex:myTarget
+  a icm:Target
+  .

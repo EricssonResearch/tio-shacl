@@ -1,0 +1,95 @@
+# ==============================================================================
+# TIO ValidityCandidate Extension
+# ==============================================================================
+#
+# Purpose:
+#   This file extends TM Forum Intent Ontology (TIO) v3.6.0 with semantic
+#   classification for entities that can have validity assigned to them.
+#
+# Rationale:
+#   TIO 3.6.0 iv:sameValidityAs property can only point to Intent OR Expectation.
+#   Currently this requires complex SPARQL with multiple FILTER NOT EXISTS
+#   patterns to validate the union of these two types:
+#
+#   FILTER NOT EXISTS { ?value a ?t . ?t rdfs:subClassOf* icm:Intent . }
+#   FILTER NOT EXISTS { ?value a ?t . ?t rdfs:subClassOf* icm:Expectation . }
+#
+#   This extension provides a single mixin class that enables:
+#   - Simple sh:class validation or single FILTER NOT EXISTS
+#   - Automatic inheritance via rdfs:subClassOf*
+#   - Clear semantic documentation of what can have validity
+#
+# Design:
+#   These extensions are separated from the TIO baseline to:
+#   - Keep TIO 3.6.0 ontology files pristine and unchanged
+#   - Enable clean merging of future TIO updates
+#   - Simplify proposing these additions upstream to TM Forum
+#
+# Compatibility:
+#   - Backward compatible: All existing valid intents remain valid
+#   - Forward compatible: New Intent/Expectation subclasses automatically inherit
+#   - Zero breaking changes to TIO 3.6.0 semantics
+#
+# ==============================================================================
+
+@prefix iv:   <http://tio.models.tmforum.org/tio/v3.6.0/IntentValidityOntology/> .
+@prefix icm:  <http://tio.models.tmforum.org/tio/v3.6.0/IntentCommonModel/> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+# ==============================================================================
+# SECTION 1: Core Class Definition
+# ==============================================================================
+#
+# The iv:ValidityCandidate mixin class identifies entities that can have
+# validity assigned to them. Only Intents and Expectations can have validity -
+# other IntentElement subclasses like Target cannot.
+#
+# ==============================================================================
+
+iv:ValidityCandidate
+  rdfs:label "Validity Candidate Class"@en ;
+  rdfs:comment """Things that can have validity assigned to them.
+
+  Only Intents and Expectations can have validity - other IntentElement
+  subclasses like Target cannot. This mixin class enables:
+  - Simple range constraints for iv:sameValidityAs
+  - Single FILTER NOT EXISTS pattern instead of multiple unions
+  - Clear semantic documentation of validity semantics
+
+  SHACL validation uses rdfs:subClassOf* to find all ValidityCandidate instances."""@en ;
+  rdf:type rdfs:Class
+.
+
+# ==============================================================================
+# SECTION 2: Intent Common Model Extensions
+# ==============================================================================
+#
+# Mark Intent and Expectation as ValidityCandidate.
+# Note: Expectation subclasses (PropertyExpectation, DeliveryExpectation,
+# ReportingExpectation) inherit ValidityCandidate via rdfs:subClassOf*.
+#
+# ==============================================================================
+
+icm:Intent
+  rdfs:subClassOf iv:ValidityCandidate .
+
+icm:Expectation
+  rdfs:subClassOf iv:ValidityCandidate .
+
+# ==============================================================================
+# SECTION 3: Vocabulary Extension
+# ==============================================================================
+#
+# Adds extension term to iv:Vocabulary so it is recognized by vocabulary
+# validation constraints.
+#
+# ==============================================================================
+
+iv:Vocabulary
+  rdfs:member iv:ValidityCandidate .
+
+# ==============================================================================
+# End of ValidityCandidateExtension.ttl
+# ==============================================================================

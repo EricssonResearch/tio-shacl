@@ -1,0 +1,57 @@
+# Test: Valid instances of Report classes and related base classes
+# Concepts covered: Report (base), IntentElement (base),
+#                   ConditionReport, ContextReport, ExpectationReport, IntentReport,
+#                   TargetReport, DeliveryExpectationReport, PropertyExpectationReport,
+#                   ReportingExpectationReport, Reason
+# This test validates that valid instances of report classes can be created.
+
+@prefix ex: <http://example.org/> .
+@prefix fun: <http://tio.models.tmforum.org/tio/v3.6.0/FunctionOntology/> .
+@prefix icm: <http://tio.models.tmforum.org/tio/v3.6.0/IntentCommonModel/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# === ConditionReport ===
+ex:test_conditionreport
+  a icm:ConditionReport .
+
+# === ContextReport ===
+ex:test_contextreport
+  a icm:ContextReport .
+
+# === ExpectationReport ===
+ex:test_expectationreport
+  a icm:ExpectationReport .
+
+# === IntentReport ===
+ex:test_intentreport
+  a icm:IntentReport .
+
+# === TargetReport ===
+ex:test_targetreport
+  a icm:TargetReport .
+
+# === DeliveryExpectationReport ===
+ex:test_deliveryexpectationreport
+  a icm:DeliveryExpectationReport .
+
+# === PropertyExpectationReport ===
+ex:test_propertyexpectationreport
+  a icm:PropertyExpectationReport .
+
+# === ReportingExpectationReport ===
+ex:test_reportingexpectationreport
+  a icm:ReportingExpectationReport .
+
+# === Reason ===
+ex:test_reason
+  a icm:Reason .
+
+# === Report (base class) ===
+ex:test_report_base
+  a icm:Report .
+
+# === IntentElement (base class) ===
+ex:test_intentelement_base
+  a icm:IntentElement .

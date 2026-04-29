@@ -1,0 +1,155 @@
+# ==============================================================================
+# TIO ContainerTyped Extension
+# ==============================================================================
+#
+# Purpose:
+#   This file extends TM Forum Intent Ontology (TIO) v3.6.0 with semantic
+#   classification for container-typed entities (values that are or produce
+#   rdfs:Container instances).
+#
+# Rationale:
+#   TIO 3.6.0 requires validating Container types in multiple places:
+#   - icm:chooseFrom must be rdfs:Container or function returning Container
+#   - icm:reportTriggers must be rdfs:Container
+#   - icm:reportDestinations must be rdfs:Container
+#   - Set functions expect rdfs:Container arguments
+#
+#   Currently this requires complex SPARQL with multiple FILTER NOT EXISTS
+#   patterns to check both explicit typing AND function resultType inference.
+#
+#   This extension provides a single mixin class that enables:
+#   - Simple sh:class validation instead of complex SPARQL
+#   - Automatic inheritance via rdfs:subClassOf*
+#   - Clear semantic documentation of container-typed entities
+#
+# Design:
+#   These extensions are separated from the TIO baseline to:
+#   - Keep TIO 3.6.0 ontology files pristine and unchanged
+#   - Enable clean merging of future TIO updates
+#   - Simplify proposing these additions upstream to TM Forum
+#
+# Compatibility:
+#   - Backward compatible: All existing valid intents remain valid
+#   - Forward compatible: New container-returning functions automatically inherit
+#   - Zero breaking changes to TIO 3.6.0 semantics
+#
+# ==============================================================================
+
+@prefix fun:  <http://tio.models.tmforum.org/tio/v3.6.0/FunctionOntology/> .
+@prefix icm:  <http://tio.models.tmforum.org/tio/v3.6.0/IntentCommonModel/> .
+@prefix set:  <http://tio.models.tmforum.org/tio/v3.6.0/SetOperators/> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+# ==============================================================================
+# SECTION 1: Core Class Definition
+# ==============================================================================
+#
+# The fun:ContainerTyped mixin class identifies entities that are or produce
+# rdfs:Container values. This enables unified validation without checking
+# both explicit type and function resultType inference.
+#
+# ==============================================================================
+
+fun:ContainerTyped
+  rdfs:label "Container Typed Class"@en ;
+  rdfs:comment """Things that are or produce Container values.
+
+  This mixin class marks:
+  - rdfs:Container instances (explicitly typed)
+  - Functions with fun:resultType rdfs:Container
+
+  Enables simple sh:class validation instead of complex SPARQL that must
+  check both explicit typing AND function resultType inference.
+
+  SHACL validation uses rdfs:subClassOf* to find all ContainerTyped instances."""@en ;
+  rdf:type rdfs:Class
+.
+
+# ==============================================================================
+# SECTION 2: Base Container Type Extension
+# ==============================================================================
+#
+# rdfs:Container is the base ContainerTyped class.
+# This enables any explicitly typed Container to pass validation.
+#
+# ==============================================================================
+
+rdfs:Container
+  rdfs:subClassOf fun:ContainerTyped .
+
+# ==============================================================================
+# SECTION 3: Set Operators Extensions (Container-returning functions)
+# ==============================================================================
+#
+# Marks all set operator functions that return rdfs:Container as ContainerTyped.
+# These functions have fun:resultType rdfs:Container in SetOperators.ttl.
+#
+# ==============================================================================
+
+set:difference
+  rdf:type fun:ContainerTyped .
+
+set:intersection
+  rdf:type fun:ContainerTyped .
+
+set:union
+  rdf:type fun:ContainerTyped .
+
+set:resourcesOfType
+  rdf:type fun:ContainerTyped .
+
+set:resourcesWithProperty
+  rdf:type fun:ContainerTyped .
+
+set:resourcesWithPropertyObject
+  rdf:type fun:ContainerTyped .
+
+set:typesOfMembers
+  rdf:type fun:ContainerTyped .
+
+set:membersAfter
+  rdf:type fun:ContainerTyped .
+
+set:membersBefore
+  rdf:type fun:ContainerTyped .
+
+set:membersSameTime
+  rdf:type fun:ContainerTyped .
+
+set:membersWhile
+  rdf:type fun:ContainerTyped .
+
+set:valuesOfObjectProperty
+  rdf:type fun:ContainerTyped .
+
+# ==============================================================================
+# SECTION 4: Intent Common Model Extensions (Container-returning functions)
+# ==============================================================================
+#
+# Marks ICM functions that return rdfs:Container as ContainerTyped.
+#
+# ==============================================================================
+
+icm:intentElements
+  rdf:type fun:ContainerTyped .
+
+icm:valuesOfTargetProperty
+  rdf:type fun:ContainerTyped .
+
+# ==============================================================================
+# SECTION 5: Vocabulary Extension
+# ==============================================================================
+#
+# Adds extension term to fun:Vocabulary so it is recognized by vocabulary
+# validation constraints.
+#
+# ==============================================================================
+
+fun:Vocabulary
+  rdfs:member fun:ContainerTyped .
+
+# ==============================================================================
+# End of ContainerTypedExtension.ttl
+# ==============================================================================

@@ -1,0 +1,96 @@
+# TMF SHACL Reusable Constraint Library
+#
+# This file is part of the modular constraint library.
+# Based on SHACL Advanced Features constraint patterns
+
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix fun: <http://tio.models.tmforum.org/tio/v3.6.0/FunctionOntology/> .
+@prefix tio-constraints: <http://tio.models.tmforum.org/tio/v3.6.0/shapes/lib/constraints/> .
+@prefix tio-lib: <http://tio.models.tmforum.org/tio/v3.6.0/shapes/lib/> .
+
+# =============================================================================
+# VOCABULARY VALIDATION CONSTRAINTS
+# =============================================================================
+# Usage: "Give me all the things that use properties from TMF ontologies, but only if those properties are not defined in the ontology."
+tio-constraints:VocabularyConstraint
+    a sh:SPARQLConstraint ;
+    rdfs:label "Vocabulary Constraint" ;
+    rdfs:comment "Validates that only defined vocabulary is used. Used with parameterized target types to scope validation." ;
+    sh:message "[vocabulary/undefined_property] Property {?undefinedProp} is not defined in TIO v3.6.0. This is likely a typo or non-existent construct. Check the ontology documentation for valid properties and classes in this version." ;
+    sh:prefixes [
+        sh:declare [sh:prefix "rdf" ; sh:namespace "http://www.w3.org/1999/02/22-rdf-syntax-ns#"] ;
+        sh:declare [sh:prefix "rdfs" ; sh:namespace "http://www.w3.org/2000/01/rdf-schema#"] ;
+        sh:declare [sh:prefix "fun" ; sh:namespace "http://tio.models.tmforum.org/tio/v3.6.0/FunctionOntology/"] ;
+    ] ;
+    sh:select """
+        SELECT $this ?undefinedProp
+        WHERE {
+            $this ?undefinedProp ?value .
+            # Only check TMF ontology properties (exclude standard RDF/RDFS properties)
+            FILTER(STRSTARTS(STR(?undefinedProp), "http://tio.models.tmforum.org/tio/v3.6.0/"))
+            # Check if property is defined in any TIO Vocabulary container
+            # This approach works with RDFS inference (unlike checking rdf:Property type)
+            FILTER NOT EXISTS {
+                ?vocab rdfs:member ?undefinedProp .
+            }
+        }
+    """ .
+
+# Validates that all resources used in the data have an rdf:type declaration
+# This catches typos like eri:VideoTarget when eri:VideoCFS_Target was intended
+# Validates that TIO types used in rdf:type are defined in vocabulary
+# This catches typos like set:resourcesOfTypes when set:resourcesOfType was intended
+tio-constraints:UndefinedTypeConstraint
+    a sh:SPARQLConstraint ;
+    rdfs:label "Undefined Type Constraint" ;
+    rdfs:comment "Validates that TIO types used in rdf:type are defined in vocabulary. Catches typos like set:resourcesOfTypes instead of set:resourcesOfType." ;
+    sh:message "[vocabulary/undefined_type] Type {$this} is not defined in TIO v3.6.0. This is likely a typo. Check the ontology documentation for valid class and function names." ;
+    sh:prefixes [
+        sh:declare [sh:prefix "rdf" ; sh:namespace "http://www.w3.org/1999/02/22-rdf-syntax-ns#"] ;
+        sh:declare [sh:prefix "rdfs" ; sh:namespace "http://www.w3.org/2000/01/rdf-schema#"] ;
+    ] ;
+    sh:select """
+        SELECT $this
+        WHERE {
+            # $this is used as a type (object of rdf:type)
+            ?something a $this .
+            # Only check TIO namespace types
+            FILTER(STRSTARTS(STR($this), "http://tio.models.tmforum.org/tio/v3.6.0/"))
+            # Check if it's defined in any TIO Vocabulary container
+            FILTER NOT EXISTS {
+                ?vocab rdfs:member $this .
+            }
+        }
+    """ .
+
+tio-constraints:UndefinedResourceConstraint
+    a sh:SPARQLConstraint ;
+    rdfs:label "Undefined Resource Constraint" ;
+    rdfs:comment "Validates that all resources referenced in the data graph have an rdf:type declaration. Catches undefined/misspelled resource names." ;
+    sh:deactivated true ;
+    sh:message "[vocabulary/undefined_resource] Resource {$this} is used but never defined (no rdf:type declaration). This is likely a typo or reference to a non-existent resource. Check spelling and ensure the resource is properly defined with 'a' or 'rdf:type'." ;
+    sh:prefixes [
+        sh:declare [sh:prefix "rdf" ; sh:namespace "http://www.w3.org/1999/02/22-rdf-syntax-ns#"] ;
+        sh:declare [sh:prefix "rdfs" ; sh:namespace "http://www.w3.org/2000/01/rdf-schema#"] ;
+        sh:declare [sh:prefix "dct" ; sh:namespace "http://purl.org/dc/terms/"] ;
+    ] ;
+    sh:select """
+        SELECT DISTINCT $this
+        WHERE {
+            FILTER(isIRI($this))
+            
+            # OPTIMIZED: Only check user namespaces (positive filter)
+            # This dramatically reduces the number of resources checked
+            FILTER(
+                STRSTARTS(STR($this), "http://example.org/") ||
+                STRSTARTS(STR($this), "http://ericsson.com/") ||
+                STRSTARTS(STR($this), "http://customer.example/")
+            )
+            
+            FILTER NOT EXISTS { $this a ?anyType . }
+        }
+    """ .
+

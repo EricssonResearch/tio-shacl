@@ -1,0 +1,139 @@
+# Test: Blank node Quantity patterns (common in TM Forum examples)
+# This test validates blank node usage for quan:Quantity instances
+# Based on patterns found in TR290B and IG1358 specifications
+
+@prefix ex:   <http://example.org/> .
+@prefix quan: <http://tio.models.tmforum.org/tio/v3.6.0/QuantityOntology/> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+################################################################################
+# PATTERN 1: Blank node Quantity as function argument
+#
+# Most common pattern in TM Forum specs: inline Quantity definition
+# This is the primary use case for blank node Quantities
+################################################################################
+
+ex:test_blank_node_in_smaller
+  a rdfs:Resource ;
+  quan:smaller (
+    [
+      a quan:Quantity ;
+      rdf:value "100"^^xsd:decimal ;
+      quan:unit "ms"
+    ]
+    "200ms"^^quan:quantity
+  )
+  .
+
+################################################################################
+# PATTERN 2: Multiple blank node Quantities
+#
+# Both arguments can be blank nodes
+################################################################################
+
+ex:test_both_blank_nodes
+  a rdfs:Resource ;
+  quan:smaller (
+    [ a quan:Quantity ; rdf:value "50"^^xsd:decimal ; quan:unit "ms" ]
+    [ a quan:Quantity ; rdf:value "100"^^xsd:decimal ; quan:unit "ms" ]
+  )
+  .
+
+################################################################################
+# PATTERN 3: Different numeric types in blank node Quantities
+#
+# Tests xsd:integer, xsd:double, xsd:float
+################################################################################
+
+ex:test_integer_value
+  a rdfs:Resource ;
+  quan:atLeast (
+    [ a quan:Quantity ; rdf:value "50"^^xsd:integer ; quan:unit "%" ]
+    "100"^^xsd:integer
+  )
+  .
+
+ex:test_double_value
+  a rdfs:Resource ;
+  quan:atMost (
+    [ a quan:Quantity ; rdf:value "10.5"^^xsd:double ; quan:unit "GB" ]
+    "20.0"^^xsd:double
+  )
+  .
+
+ex:test_float_value
+  a rdfs:Resource ;
+  quan:greater (
+    [ a quan:Quantity ; rdf:value "99.99"^^xsd:float ; quan:unit "%" ]
+    "95.0"^^xsd:float
+  )
+  .
+
+################################################################################
+# PATTERN 4: Different units in blank node Quantities
+#
+# Tests various unit types: ms, GB, %, Mbps, etc.
+################################################################################
+
+ex:test_milliseconds
+  a rdfs:Resource ;
+  quan:smaller (
+    [ a quan:Quantity ; rdf:value "50"^^xsd:decimal ; quan:unit "ms" ]
+    "100ms"^^quan:quantity
+  )
+  .
+
+ex:test_gigabytes
+  a rdfs:Resource ;
+  quan:atLeast (
+    [ a quan:Quantity ; rdf:value "10"^^xsd:decimal ; quan:unit "GB" ]
+    "5GB"^^quan:quantity
+  )
+  .
+
+ex:test_percentage
+  a rdfs:Resource ;
+  quan:greater (
+    [ a quan:Quantity ; rdf:value "95"^^xsd:decimal ; quan:unit "%" ]
+    "90%"^^quan:quantity
+  )
+  .
+
+ex:test_megabits_per_second
+  a rdfs:Resource ;
+  quan:atLeast (
+    [ a quan:Quantity ; rdf:value "100"^^xsd:decimal ; quan:unit "Mbps" ]
+    "50Mbps"^^quan:quantity
+  )
+  .
+
+################################################################################
+# PATTERN 5: Blank node Quantity with quan:inRange
+#
+# Tests range validation with blank nodes (3 arguments: min, max, value)
+################################################################################
+
+ex:test_inRange_with_blank_nodes
+  a rdfs:Resource ;
+  quan:inRange (
+    [ a quan:Quantity ; rdf:value "10"^^xsd:decimal ; quan:unit "ms" ]
+    [ a quan:Quantity ; rdf:value "100"^^xsd:decimal ; quan:unit "ms" ]
+    "50ms"^^quan:quantity
+  )
+  .
+
+################################################################################
+# PATTERN 6: Blank node as subject with Quantity properties
+#
+# Less common but valid: blank node with quan:unit property
+################################################################################
+
+[
+  a quan:Quantity ;
+  rdf:value "42"^^xsd:decimal ;
+  quan:unit "s" ;
+  rdfs:label "Duration"@en
+]
+  rdfs:comment "Anonymous quantity representing 42 seconds" .

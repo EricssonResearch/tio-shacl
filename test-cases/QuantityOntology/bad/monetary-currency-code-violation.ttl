@@ -1,0 +1,33 @@
+# Test: Invalid currency code on MonetaryQuantity
+# This test validates that MonetaryQuantity unit must be ISO 4217 currency code
+# Should FAIL with: "MonetaryQuantity unit must be 3-letter ISO 4217 currency code"
+
+@prefix ex:   <http://example.org/> .
+@prefix quan: <http://tio.models.tmforum.org/tio/v3.6.0/QuantityOntology/> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+################################################################################
+# VIOLATION: MonetaryQuantity with invalid currency code
+#
+# MonetaryQuantity quan:unit MUST be 3-letter uppercase ISO 4217 code
+# Valid: USD, EUR, GBP, JPY, etc.
+################################################################################
+
+# WRONG - lowercase currency code
+ex:money_lowercase
+  a quan:MonetaryQuantity ;
+  rdf:value 100 ;
+  quan:unit "usd" .
+
+# WRONG - 4 letters instead of 3
+ex:money_long_code
+  a quan:MonetaryQuantity ;
+  rdf:value 50 ;
+  quan:unit "EURO" .
+
+# WRONG - currency symbol instead of code
+ex:money_symbol
+  a quan:MonetaryQuantity ;
+  rdf:value 25 ;
+  quan:unit "$" .

@@ -1,0 +1,41 @@
+# Test: Invalid ig:guaranteePeriod and ig:guaranteePeriodUpdateInterval datatype usage
+# This test validates that duration properties must be xsd:duration
+# Should FAIL with: "must be xsd:duration datatype"
+
+@prefix ex:  <http://example.org/> .
+@prefix ig:  <http://tio.models.tmforum.org/tio/v3.6.0/IntentGuaranteeOntology/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+################################################################################
+# VIOLATION: ig:guaranteePeriod with wrong datatype
+#
+# The ig:guaranteePeriod property MUST be xsd:duration (ISO 8601 format)
+# Examples: "P1D" (1 day), "PT1H" (1 hour), "P1M" (1 month)
+################################################################################
+
+# WRONG - using human-readable string instead of ISO 8601 duration
+ex:period_string
+  ig:guaranteePeriod "1 day" .
+
+# WRONG - using integer (seconds) instead of duration
+ex:period_integer
+  ig:guaranteePeriod 86400 .
+
+# WRONG - using xsd:date instead of xsd:duration
+ex:period_date
+  ig:guaranteePeriod "2024-01-01"^^xsd:date .
+
+################################################################################
+# VIOLATION: ig:guaranteePeriodUpdateInterval with wrong datatype
+#
+# The ig:guaranteePeriodUpdateInterval property MUST be xsd:duration
+################################################################################
+
+# WRONG - using untyped string for hours
+ex:interval_hours
+  ig:guaranteePeriodUpdateInterval "5" .
+
+# WRONG - using xsd:string instead of xsd:duration
+ex:interval_wrongtype
+  ig:guaranteePeriodUpdateInterval "PT5M"^^xsd:string .

@@ -1,0 +1,44 @@
+# Test: Valid usage of set operation functions
+# Concepts covered: union, intersection, difference, includedIn, intersectsWith, empty
+# This test validates that set operation functions can be used correctly.
+
+@prefix ex: <http://example.org/> .
+@prefix fun: <http://tio.models.tmforum.org/tio/v3.6.0/FunctionOntology/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix set: <http://tio.models.tmforum.org/tio/v3.6.0/SetOperators/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# === union function ===
+ex:test_union
+  a rdfs:Resource ;
+  set:union ( ex:container1 ex:container2 ) .
+
+# === intersection function ===
+ex:test_intersection
+  a rdfs:Resource ;
+  set:intersection ( ex:container1 ex:container2 ) .
+
+# === difference function ===
+ex:test_difference
+  a rdfs:Resource ;
+  set:difference ( ex:container1 ex:container2 ) .
+
+# === includedIn function ===
+ex:test_includedin
+  a rdfs:Resource ;
+  set:includedIn ( ex:container1 ex:container2 ) .
+
+# === intersectsWith function ===
+ex:test_intersectswith
+  a rdfs:Resource ;
+  set:intersectsWith ( ex:container1 ex:container2 ) .
+
+# === empty function ===
+ex:test_empty
+  a rdfs:Resource ;
+  set:empty ( ex:container1 ) .
+
+# Supporting instances
+ex:container1 a rdfs:Container .
+ex:container2 a rdfs:Container .

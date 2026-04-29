@@ -1,0 +1,33 @@
+# Test: Valid usage of observation functions
+# Concepts covered: lastObserved, lastValue, observedValue
+# This test validates that observation functions can be used correctly.
+
+@prefix ex: <http://example.org/> .
+@prefix met: <http://tio.models.tmforum.org/tio/v3.6.0/MetricsAndObservations/> .
+@prefix quan: <http://tio.models.tmforum.org/tio/v3.6.0/QuantityOntology/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# === lastObserved function: (Metric) ===
+ex:test_lastobserved
+  a rdfs:Resource ;
+  met:lastObserved ( ex:metric1 ) .
+
+# === lastValue function: (Metric) ===
+ex:test_lastvalue
+  a rdfs:Resource ;
+  met:lastValue ( ex:metric1 ) .
+
+# === observedValue function: (Observation) ===
+ex:test_observedvalue
+  a rdfs:Resource ;
+  met:observedValue ( ex:observation1 ) .
+
+# Supporting instances
+ex:metric1 a met:Metric ;
+    rdfs:label "Test Metric" ;
+    rdfs:range quan:Quantity .
+
+ex:observation1 a met:Observation ;
+    met:observedMetric ex:metric1 .

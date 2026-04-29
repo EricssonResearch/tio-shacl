@@ -1,0 +1,113 @@
+# Test: Valid usage of iv:sameValidityAs for validity inheritance
+# This test validates that multiple expectations can share the same validity context
+# Based on TR291A Intent Validity Extension Model example 2
+
+@prefix ex:   <http://example.org/> .
+@prefix icm:  <http://tio.models.tmforum.org/tio/v3.6.0/IntentCommonModel/> .
+@prefix iv:   <http://tio.models.tmforum.org/tio/v3.6.0/IntentValidityOntology/> .
+@prefix log:  <http://tio.models.tmforum.org/tio/v3.6.0/LogicalOperators/> .
+@prefix quan: <http://tio.models.tmforum.org/tio/v3.6.0/QuantityOntology/> .
+@prefix met:  <http://tio.models.tmforum.org/tio/v3.6.0/MetricsAndObservations/> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+################################################################################
+# Validity inheritance with iv:sameValidityAs
+#
+# This example shows how multiple expectations can share the same validity:
+# - E1 has its own validity (V1) via iv:validIf
+# - E2 inherits E1's validity via iv:sameValidityAs
+# - E3 also inherits E1's validity
+#
+# Key aspects tested:
+# - iv:sameValidityAs property
+# - Validity inheritance chain
+# - Integration with Intent and Expectations
+################################################################################
+
+# Metric definition
+ex:NumberOfUsers
+  a rdf:Property, met:Metric ;
+  rdfs:label "Number of Users"@en ;
+  rdfs:range quan:Quantity
+  .
+
+ex:NumberOfUsersQuantity
+  a quan:Quantity ;
+  rdf:value "500"^^xsd:decimal ;
+  quan:unit "users"
+  .
+
+# Validity V1: Users < 1000
+ex:V1
+  a iv:Validity ;
+  quan:smaller ( ex:NumberOfUsersQuantity
+                 [ a quan:Quantity ;
+                   rdf:value "1000"^^xsd:decimal ;
+                   quan:unit "users" ]
+  )
+  .
+
+# Intent with three expectations sharing validity
+ex:I1
+  a icm:Intent ;
+  log:allOf ( ex:E1 ex:E2 ex:E3 )
+  .
+
+# E1: Has direct validity assignment
+ex:E1
+  a icm:PropertyExpectation ;
+  icm:target ex:T1 ;
+  log:allOf ( ex:C1 ) ;
+  iv:validIf ex:V1
+  .
+
+# E2: Inherits validity from E1
+ex:E2
+  a icm:PropertyExpectation ;
+  icm:target ex:T1 ;
+  log:allOf ( ex:C2 ) ;
+  iv:sameValidityAs ex:E1
+  .
+
+# E3: Also inherits validity from E1
+ex:E3
+  a icm:PropertyExpectation ;
+  icm:target ex:T1 ;
+  log:allOf ( ex:C3 ) ;
+  iv:sameValidityAs ex:E1
+  .
+
+# Shared target
+ex:T1
+  a icm:Target ;
+  rdfs:member ex:Slice1
+  .
+
+# Conditions
+ex:C1
+  a log:Condition ;
+  log:allOf ( "true"^^xsd:boolean )
+  .
+
+ex:C2
+  a log:Condition ;
+  log:allOf ( "true"^^xsd:boolean )
+  .
+
+ex:C3
+  a log:Condition ;
+  log:allOf ( "true"^^xsd:boolean )
+  .
+
+# Target resource
+ex:Slice1
+  a ex:NetworkSlice ;
+  rdfs:label "Network Slice 1"@en
+  .
+
+ex:NetworkSlice
+  a rdfs:Class ;
+  rdfs:label "Network Slice"@en
+  .

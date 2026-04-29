@@ -1,0 +1,72 @@
+# Test: Valid usage of Time and State query functions
+# Concepts covered: timeOfLastEventFor, timeOfLastEventsFor, timeOfLastReportFor, handlingStateOf, updateStateOf
+# This test validates that time and state query functions can be used correctly.
+
+@prefix ex: <http://example.org/> .
+@prefix fun: <http://tio.models.tmforum.org/tio/v3.6.0/FunctionOntology/> .
+@prefix icm: <http://tio.models.tmforum.org/tio/v3.6.0/IntentCommonModel/> .
+@prefix imo: <http://tio.models.tmforum.org/tio/v3.6.0/IntentManagementOntology/> .
+@prefix log: <http://tio.models.tmforum.org/tio/v3.6.0/LogicalOperators/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# === timeOfLastEventFor function: (Event, Intent) ===
+# First arg should be an Event instance, second is the Intent
+ex:test_timeoflasteventfor_usage
+  a rdfs:Resource ;
+  imo:timeOfLastEventFor ( ex:event1 ex:intent1 ) .
+
+ex:event1 a imo:IntentAccepted .
+
+ex:intent1
+  a icm:Intent ;
+  rdfs:label "Test Intent for timeOfLastEventFor" ;
+  log:allOf ( "true"^^xsd:boolean ) .
+
+# === timeOfLastEventsFor function: (Container of Events, Intent) ===
+ex:test_timeoflasteventsfor_usage
+  a rdfs:Resource ;
+  imo:timeOfLastEventsFor ( ex:event_container ex:intent2 ) .
+
+ex:event_container a rdfs:Container ;
+  rdfs:member ex:event2 ;
+  rdfs:member ex:event3 .
+
+ex:event2 a imo:IntentAccepted .
+ex:event3 a imo:IntentRejected .
+
+ex:intent2
+  a icm:Intent ;
+  rdfs:label "Test Intent for timeOfLastEventsFor" ;
+  log:allOf ( "true"^^xsd:boolean ) .
+
+# === timeOfLastReportFor function: (Intent) ===
+ex:test_timeoflastreportfor_usage
+  a rdfs:Resource ;
+  imo:timeOfLastReportFor ( ex:intent3 ) .
+
+ex:intent3
+  a icm:Intent ;
+  rdfs:label "Test Intent for timeOfLastReportFor" ;
+  log:allOf ( "true"^^xsd:boolean ) .
+
+# === handlingStateOf function: (Intent) -> IntentHandlingState ===
+ex:test_handlingstateof_usage
+  a rdfs:Resource ;
+  imo:handlingStateOf ( ex:intent4 ) .
+
+ex:intent4
+  a icm:Intent ;
+  rdfs:label "Test Intent for handlingStateOf" ;
+  log:allOf ( "true"^^xsd:boolean ) .
+
+# === updateStateOf function: (Intent) -> IntentHandlingState ===
+ex:test_updatestateof_usage
+  a rdfs:Resource ;
+  imo:updateStateOf ( ex:intent5 ) .
+
+ex:intent5
+  a icm:Intent ;
+  rdfs:label "Test Intent for updateStateOf" ;
+  log:allOf ( "true"^^xsd:boolean ) .

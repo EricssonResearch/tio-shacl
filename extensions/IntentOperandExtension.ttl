@@ -1,0 +1,116 @@
+# ==============================================================================
+# TIO IntentOperand Extension
+# ==============================================================================
+#
+# Purpose:
+#   This file extends TM Forum Intent Ontology (TIO) v3.6.0 with semantic
+#   classification for valid Intent boolean function operands.
+#
+# Rationale:
+#   TIO 3.6.0 enforces a hierarchy: Intent -> Expectation -> Condition
+#   Intents can only directly reference Expectations in their boolean functions.
+#   Conditions must be wrapped in PropertyExpectation.
+#
+#   Currently this is validated by checking "NOT a Condition" using:
+#   ?argList rdf:rest*/rdf:first ?condition .
+#   ?condition a log:Condition .
+#
+#   This extension provides positive validation ("IS an IntentOperand") which:
+#   - Is more extensible as new Expectation types are added
+#   - Provides clearer semantic documentation of valid hierarchy
+#   - Enables consistent validation patterns across the ontology
+#
+# Design:
+#   These extensions are separated from the TIO baseline to:
+#   - Keep TIO 3.6.0 ontology files pristine and unchanged
+#   - Enable clean merging of future TIO updates
+#   - Simplify proposing these additions upstream to TM Forum
+#
+# Compatibility:
+#   - Backward compatible: All existing valid intents remain valid
+#   - Forward compatible: New Expectation subclasses automatically inherit
+#   - Zero breaking changes to TIO 3.6.0 semantics
+#
+# ==============================================================================
+
+@prefix icm:  <http://tio.models.tmforum.org/tio/v3.6.0/IntentCommonModel/> .
+@prefix log:  <http://tio.models.tmforum.org/tio/v3.6.0/LogicalOperators/> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+# ==============================================================================
+# SECTION 1: Core Class Definition
+# ==============================================================================
+#
+# The icm:IntentOperand mixin class identifies entities that can be directly
+# referenced as operands in Intent boolean functions (log:allOf, log:anyOf, etc).
+#
+# Intent hierarchy: Intent -> Expectation -> Condition
+# - Intents can ONLY reference Expectations (IntentOperand)
+# - Expectations can reference both Expectations AND Conditions (ExpectationOperand)
+# - Conditions must be wrapped in PropertyExpectation to be used in Intents
+#
+# ==============================================================================
+
+icm:IntentOperand
+  rdfs:label "Intent Operand Class"@en ;
+  rdfs:comment """Things that can be directly referenced as operands in Intent boolean functions.
+
+  Intents can only directly reference Expectations (not Conditions).
+  Conditions must be wrapped in PropertyExpectation.
+
+  Intent hierarchy: Intent -> Expectation -> Condition
+  - Intent log:allOf/anyOf can reference Expectations (IntentOperand)
+  - PropertyExpectation log:allOf/anyOf can reference Conditions
+
+  SHACL validation uses positive checking (IS IntentOperand) instead of
+  negative checking (NOT Condition) for clearer semantics and extensibility."""@en ;
+  rdf:type rdfs:Class
+.
+
+icm:ExpectationOperand
+  rdfs:label "Expectation Operand Class"@en ;
+  rdfs:comment """Things that can be referenced as operands in Expectation boolean functions.
+
+  PropertyExpectations can reference both Conditions and other Expectations.
+  This is a broader class than IntentOperand."""@en ;
+  rdf:type rdfs:Class
+.
+
+# ==============================================================================
+# SECTION 2: Intent Common Model Extensions
+# ==============================================================================
+#
+# Mark Expectation as IntentOperand (valid for Intent boolean functions).
+# Mark Condition as ExpectationOperand but NOT IntentOperand (enforces hierarchy).
+#
+# ==============================================================================
+
+# Expectations are valid operands for both Intent and Expectation boolean functions
+icm:Expectation
+  rdfs:subClassOf icm:IntentOperand ;
+  rdfs:subClassOf icm:ExpectationOperand .
+
+# Conditions are valid operands ONLY for Expectation boolean functions
+# NOTE: log:Condition is intentionally NOT marked as IntentOperand
+# This enforces the hierarchy: Conditions must be wrapped in PropertyExpectation
+log:Condition
+  rdfs:subClassOf icm:ExpectationOperand .
+
+# ==============================================================================
+# SECTION 3: Vocabulary Extension
+# ==============================================================================
+#
+# Adds extension terms to icm:Vocabulary so they are recognized by vocabulary
+# validation constraints.
+#
+# ==============================================================================
+
+icm:Vocabulary
+  rdfs:member icm:IntentOperand ,
+              icm:ExpectationOperand .
+
+# ==============================================================================
+# End of IntentOperandExtension.ttl
+# ==============================================================================

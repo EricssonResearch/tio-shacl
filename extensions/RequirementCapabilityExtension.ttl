@@ -1,0 +1,434 @@
+# ==============================================================================
+# TIO RequirementCapability Extension
+# ==============================================================================
+#
+# Namespace: http://tio.models.tmforum.org/tio/v3.6.0/RequirementCapability/
+# Prefix: req:
+#
+# Purpose:
+#   Provides a unified vocabulary for expressing service requirements (intents, CFSS)
+#   and capabilities (RFSS profiles). Enables feasibility validation by matching
+#   what services require against what resources can provide.
+#
+# Key Insight:
+#   Intent requirements and CFSS tier requirements use the same vocabulary:
+#   - Intents say "I need latency <= 30ms" via req:Requirement
+#   - CFSS profiles say "Gaming tier requires latency <= 30ms" via req:Requirement
+#   - RFSS profiles say "I can provide latency 10-50ms" via req:Capability
+#
+# Architecture:
+#
+#   Intent/CFSS                    RFSS Profile
+#   +-----------+                  +------------+
+#   | req:requires                 | req:provides
+#   | [Requirement]                | [Capability]
+#   |  - metric: dim:Latency       |  - metric: dim:Latency
+#   |  - operator: req:AtMost      |  - minValue: 10ms
+#   |  - value: 30ms               |  - maxValue: 50ms
+#   +-----------+                  +------------+
+#
+#   Feasibility: requirement.value within capability range
+#
+# Comparison to ConstraintModel:
+#   ConstraintModel:  Ephemeral, extraction-focused (cm:ExtractedIntent)
+#   RequirementCapability: Persistent, vocabulary-focused (req:Requirement)
+#
+#   This extension supersedes ConstraintModel for production use.
+#
+# ==============================================================================
+
+@prefix req:  <http://tio.models.tmforum.org/tio/v3.6.0/RequirementCapability/> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix met:  <http://tio.models.tmforum.org/tio/v3.6.0/MetricsAndObservations/> .
+@prefix quan: <http://tio.models.tmforum.org/tio/v3.6.0/QuantityOntology/> .
+
+# ==============================================================================
+# SECTION 1: Core Classes
+# ==============================================================================
+
+req:Requirement
+  a rdfs:Class ;
+  rdfs:label "Requirement"@en ;
+  rdfs:comment """A constraint on a shared metric expressing what a service needs.
+
+  Used by:
+  - Intents: "I need latency <= 30ms"
+  - CFSS profiles: "Gaming tier requires latency <= 30ms"
+
+  A Requirement specifies:
+  - metric: The dimension being constrained (e.g., dim:Latency)
+  - operator: The comparison operator (e.g., req:AtMost)
+  - value: The threshold value (e.g., "30ms")
+
+  Example:
+    ex:LatencyReq a req:Requirement ;
+      req:metric dim:Latency ;
+      req:operator req:AtMost ;
+      req:value "30"^^xsd:decimal ;
+      req:unit "ms" .
+  """@en .
+
+req:Capability
+  a rdfs:Class ;
+  rdfs:label "Capability"@en ;
+  rdfs:comment """A range on a shared metric expressing what a resource can provide.
+
+  Used by RFSS profiles to declare their supported ranges.
+
+  A Capability specifies:
+  - metric: The dimension (e.g., dim:Latency)
+  - minValue: Lower bound of capability range
+  - maxValue: Upper bound of capability range
+
+  Example:
+    ex:LatencyCap a req:Capability ;
+      req:metric dim:Latency ;
+      req:minValue "10"^^xsd:decimal ;
+      req:maxValue "50"^^xsd:decimal ;
+      req:unit "ms" .
+  """@en .
+
+req:ComparisonOperator
+  a rdfs:Class ;
+  rdfs:label "Comparison Operator"@en ;
+  rdfs:comment """Enumeration of comparison operators for requirements.
+
+  Instances: req:AtLeast, req:AtMost, req:Equals, req:In
+  """@en .
+
+# ==============================================================================
+# SECTION 2: Comparison Operator Instances
+# ==============================================================================
+
+req:AtLeast
+  a req:ComparisonOperator ;
+  rdfs:label "At Least"@en ;
+  rdfs:comment "Value must be greater than or equal to (>=) the requirement."@en .
+
+req:AtMost
+  a req:ComparisonOperator ;
+  rdfs:label "At Most"@en ;
+  rdfs:comment "Value must be less than or equal to (<=) the requirement."@en .
+
+req:Equals
+  a req:ComparisonOperator ;
+  rdfs:label "Equals"@en ;
+  rdfs:comment "Value must exactly equal the requirement."@en .
+
+req:In
+  a req:ComparisonOperator ;
+  rdfs:label "In Set"@en ;
+  rdfs:comment "Value must be a member of the allowed set (for enumerations)."@en .
+
+req:GreaterThan
+  a req:ComparisonOperator ;
+  rdfs:label "Greater Than"@en ;
+  rdfs:comment "Value must be strictly greater than (>) the requirement."@en .
+
+req:LessThan
+  a req:ComparisonOperator ;
+  rdfs:label "Less Than"@en ;
+  rdfs:comment "Value must be strictly less than (<) the requirement."@en .
+
+# ==============================================================================
+# SECTION 3: Linking Properties
+# ==============================================================================
+
+req:requires
+  a rdf:Property ;
+  rdfs:label "requires"@en ;
+  rdfs:comment """Links an entity (Intent, CFSS profile) to its requirements.
+
+  Usage:
+    ex:GamingIntent req:requires ex:LatencyRequirement .
+    cust:ProGaming req:requires ex:LatencyRequirement .
+  """@en ;
+  rdfs:range req:Requirement .
+
+req:provides
+  a rdf:Property ;
+  rdfs:label "provides"@en ;
+  rdfs:comment """Links an RFSS profile to the capabilities it provides.
+
+  Usage:
+    rfss:ProGamingProfile req:provides ex:LatencyCapability .
+  """@en ;
+  rdfs:range req:Capability .
+
+req:requiresFrom
+  a rdf:Property ;
+  rdfs:label "requires from"@en ;
+  rdfs:comment """Indicates that requirements should be derived from another property.
+
+  This property enables CFSS profiles to use req:provides for customer-facing KPIs
+  (what they promise to customers) while the matching system automatically derives
+  infrastructure requirements from those capabilities.
+
+  Usage:
+    cfss:StreamingHD req:requiresFrom req:provides .
+
+  This means: "derive my requirements from my provides declarations".
+
+  When a profile has req:requiresFrom req:provides, the matching system will:
+  1. Read the req:Capability values from req:provides
+  2. Convert each capability to a req:Requirement based on metric optimization direction
+     - Minimize metrics (latency, jitter): maxValue → AtMost requirement
+     - Maximize metrics (throughput): maxValue → AtLeast requirement
+
+  If a profile has explicit req:requires declarations, those take precedence over
+  derived requirements. This allows profiles to specify different infrastructure
+  requirements than their customer-facing KPIs when needed (e.g., adding headroom).
+  """@en ;
+  rdfs:domain rdfs:Class ;
+  rdfs:range rdf:Property .
+
+# ==============================================================================
+# SECTION 4: Requirement Properties
+# ==============================================================================
+
+req:metric
+  a rdf:Property ;
+  rdfs:label "metric"@en ;
+  rdfs:comment """The metric or dimension being constrained.
+
+  Should reference a shared metric from the dimensions vocabulary (dim:).
+  Examples: dim:Latency, dim:Throughput, dim:Availability
+  """@en ;
+  rdfs:domain [ a owl:Class ; owl:unionOf (req:Requirement req:Capability) ] ;
+  rdfs:range met:Metric .
+
+req:operator
+  a rdf:Property ;
+  rdfs:label "operator"@en ;
+  rdfs:comment """The comparison operator for numeric requirements.
+
+  Values: req:AtLeast, req:AtMost, req:Equals, req:GreaterThan, req:LessThan
+  """@en ;
+  rdfs:domain req:Requirement ;
+  rdfs:range req:ComparisonOperator .
+
+req:value
+  a rdf:Property ;
+  rdfs:label "value"@en ;
+  rdfs:comment """The threshold value for a requirement.
+
+  For numeric requirements, this is the comparison threshold.
+  Can be a literal value or a quan:Quantity for unit-aware comparisons.
+  """@en ;
+  rdfs:domain req:Requirement .
+
+# ==============================================================================
+# SECTION 5: Capability Range Properties
+# ==============================================================================
+
+req:minValue
+  a rdf:Property ;
+  rdfs:label "minimum value"@en ;
+  rdfs:comment """The minimum value a capability can provide (inclusive).
+
+  For RFSS profiles, this is the lower bound of the supported range.
+  """@en ;
+  rdfs:domain req:Capability .
+
+req:maxValue
+  a rdf:Property ;
+  rdfs:label "maximum value"@en ;
+  rdfs:comment """The maximum value a capability can provide (inclusive).
+
+  For RFSS profiles, this is the upper bound of the supported range.
+  """@en ;
+  rdfs:domain req:Capability .
+
+# ==============================================================================
+# SECTION 6: Enumeration Properties
+# ==============================================================================
+
+req:enumValue
+  a rdf:Property ;
+  rdfs:label "enum value"@en ;
+  rdfs:comment """A single enumeration value for enum-based matching.
+
+  Used for:
+  - Requirements: The specific enum value required (e.g., codec selection)
+  - Capabilities: The enum identity a capability provides
+
+  Example requirement (intent asking for specific codec):
+    [ req:metric rfss:codec ; req:enumValue rfss:H265 ]
+
+  Example capability (profile declaring its supported codec):
+    rfss:StreamingProfile req:provides [
+      a req:Capability ;
+      req:metric rfss:codec ;
+      req:enumValue rfss:H265
+    ] .
+
+  Note: Profile selection is now done via icm:deliveryType, not via req:enumValue.
+
+  Feasibility: requirement.enumValue == capability.enumValue
+  """@en ;
+  rdfs:domain [ a owl:Class ; owl:unionOf (req:Requirement req:Capability) ] .
+
+req:allowedValues
+  a rdf:Property ;
+  rdfs:label "allowed values"@en ;
+  rdfs:comment """Set of allowed values for enumeration requirements.
+
+  Used with req:In operator for non-numeric constraints.
+  Example: req:allowedValues (rfss:H264 rfss:H265) for codec requirements.
+  """@en ;
+  rdfs:domain req:Requirement .
+
+req:supportedValues
+  a rdf:Property ;
+  rdfs:label "supported values"@en ;
+  rdfs:comment """Set of values a capability supports for enumerations.
+
+  Example: req:supportedValues (rfss:H264 rfss:H265 rfss:VP9) for codec capability.
+  """@en ;
+  rdfs:domain req:Capability .
+
+# ==============================================================================
+# SECTION 7: Unit and Quality Properties
+# ==============================================================================
+
+req:unit
+  a rdf:Property ;
+  rdfs:label "unit"@en ;
+  rdfs:comment """Unit of measurement for the requirement or capability value.
+
+  Examples: "ms", "kbps", "Mbps", "%", "fps"
+  """@en ;
+  rdfs:range xsd:string .
+
+req:costTier
+  a rdf:Property ;
+  rdfs:label "cost tier"@en ;
+  rdfs:comment """Relative cost ranking for optimization (1 = cheapest).
+
+  Used for selecting the most cost-effective capability that meets requirements.
+  """@en ;
+  rdfs:range xsd:integer .
+
+req:qualityTier
+  a rdf:Property ;
+  rdfs:label "quality tier"@en ;
+  rdfs:comment """Relative quality ranking for optimization (1 = basic, higher = better).
+
+  Used for selecting the highest quality capability within budget.
+  """@en ;
+  rdfs:range xsd:integer .
+
+# ==============================================================================
+# SECTION 8: Extracted Intent (Bridge to ConstraintModel)
+# ==============================================================================
+
+req:ExtractedIntent
+  a rdfs:Class ;
+  rdfs:label "Extracted Intent"@en ;
+  rdfs:comment """Represents an intent with extracted requirements for validation.
+
+  Similar to cm:ExtractedIntent but uses req: vocabulary.
+  Links the original TIO Intent to its extracted requirements.
+  """@en .
+
+req:hasRequirement
+  a rdf:Property ;
+  rdfs:label "has requirement"@en ;
+  rdfs:comment "Links an ExtractedIntent to its requirements."@en ;
+  rdfs:domain req:ExtractedIntent ;
+  rdfs:range req:Requirement .
+
+req:sourceIntent
+  a rdf:Property ;
+  rdfs:label "source intent"@en ;
+  rdfs:comment "Links to the original icm:Intent URI."@en ;
+  rdfs:domain req:ExtractedIntent .
+
+req:targetType
+  a rdf:Property ;
+  rdfs:label "target type"@en ;
+  rdfs:comment "The target service type (e.g., cust:GamingCFSS)."@en ;
+  rdfs:domain req:ExtractedIntent .
+
+# ==============================================================================
+# Example Usage
+# ==============================================================================
+#
+# Intent Requirement:
+#   ex:GamingIntent req:requires [
+#     a req:Requirement ;
+#     req:metric dim:Latency ;
+#     req:operator req:AtMost ;
+#     req:value "30"^^xsd:decimal ;
+#     req:unit "ms"
+#   ] .
+#
+# CFSS Profile Requirement:
+#   cust:ProGaming req:requires [
+#     a req:Requirement ;
+#     req:metric dim:Latency ;
+#     req:operator req:AtMost ;
+#     req:value "10"^^xsd:decimal ;
+#     req:unit "ms"
+#   ] .
+#
+# RFSS Profile Capability:
+#   rfss:ProGamingProfile req:provides [
+#     a req:Capability ;
+#     req:metric dim:Latency ;
+#     req:minValue "5"^^xsd:decimal ;
+#     req:maxValue "10"^^xsd:decimal ;
+#     req:unit "ms"
+#   ] ;
+#   req:costTier 3 ;
+#   req:qualityTier 3 .
+#
+# Feasibility Check:
+#   Intent requires latency <= 30ms
+#   RFSS provides latency 5-10ms
+#   10ms <= 30ms => FEASIBLE
+#
+# ==============================================================================
+# SECTION 9: Vocabulary Container
+# ==============================================================================
+# Required for TIO vocabulary validation constraint.
+# All classes and properties must be listed as rdfs:member.
+
+req:Vocabulary
+  rdfs:label "RequirementCapability Vocabulary"@en ;
+  rdfs:comment "The object req:Vocabulary is a container of all model elements."@en ;
+  rdf:type rdfs:Container ;
+  rdfs:member req:Requirement ,
+              req:Capability ,
+              req:ComparisonOperator ,
+              req:ExtractedIntent ,
+              req:AtLeast ,
+              req:AtMost ,
+              req:Equals ,
+              req:In ,
+              req:GreaterThan ,
+              req:LessThan ,
+              req:requires ,
+              req:provides ,
+              req:requiresFrom ,
+              req:metric ,
+              req:operator ,
+              req:value ,
+              req:minValue ,
+              req:maxValue ,
+              req:enumValue ,
+              req:allowedValues ,
+              req:supportedValues ,
+              req:unit ,
+              req:costTier ,
+              req:qualityTier ,
+              req:hasRequirement ,
+              req:sourceIntent ,
+              req:targetType .
+
+# ==============================================================================
+# End of RequirementCapabilityExtension.ttl
+# ==============================================================================

@@ -1,0 +1,29 @@
+# Test: Invalid usage of arithmetic functions
+# Concepts covered: sum, difference, multiplication, division, sumOfSet, multiplicationOfSet
+# Constraints tested: Arity violations
+# This test validates that violations are caught for invalid arithmetic function usage.
+
+@prefix ex: <http://example.org/> .
+@prefix fun: <http://tio.models.tmforum.org/tio/v3.6.0/FunctionOntology/> .
+@prefix quan: <http://tio.models.tmforum.org/tio/v3.6.0/QuantityOntology/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# === sum violations (zero args) ===
+ex:invalid_sum quan:sum ( ) .
+
+# === difference violations (zero args) ===
+ex:invalid_difference quan:difference ( ) .
+
+# === multiplication violations (zero args) ===
+ex:invalid_multiplication quan:multiplication ( ) .
+
+# === division violations (zero args) ===
+ex:invalid_division quan:division ( ) .
+
+# === sumOfSet violations (zero args) ===
+ex:invalid_sumofset quan:sumOfSet ( ) .
+
+# === multiplicationOfSet violations (zero args) ===
+ex:invalid_multiplicationofset quan:multiplicationOfSet ( ) .

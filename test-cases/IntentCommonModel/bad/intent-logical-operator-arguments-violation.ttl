@@ -1,0 +1,46 @@
+# Test: IntentLogicalOperatorArgumentsShape violation
+# Tests: Intent's boolean functions must only reference IntentOperands (Expectations)
+# Should FAIL with: "Intent references non-IntentOperand...Wrap Conditions in PropertyExpectation"
+
+@prefix ex:   <http://example.org/> .
+@prefix icm:  <http://tio.models.tmforum.org/tio/v3.6.0/IntentCommonModel/> .
+@prefix log:  <http://tio.models.tmforum.org/tio/v3.6.0/LogicalOperators/> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+################################################################################
+# VIOLATION: Condition used directly in Intent
+#
+# Common mistake: Using a Condition directly in an Intent's log:allOf/log:anyOf
+# Intents can ONLY reference IntentOperands (Expectations), not Conditions directly
+# To use a Condition in an Intent, wrap it in a PropertyExpectation
+################################################################################
+
+# WRONG - Intent references Condition directly
+ex:intent_with_condition
+  a icm:Intent ;
+  rdfs:label "Invalid Intent"@en ;
+  log:allOf ( ex:myCondition )  # WRONG: Condition is not IntentOperand
+  .
+
+# This Condition is NOT an IntentOperand
+ex:myCondition
+  a log:Condition ;
+  rdfs:label "My Condition"@en ;
+  log:eq ( 1 1 )
+  .
+
+################################################################################
+# CORRECT way to use a Condition in an Intent:
+# Wrap it in a PropertyExpectation (which IS an IntentOperand)
+#
+# ex:correctIntent
+#   a icm:Intent ;
+#   log:allOf ( ex:myExpectation ) .
+#
+# ex:myExpectation
+#   a icm:PropertyExpectation ;
+#   icm:target ex:T1 ;
+#   log:allOf ( ex:myCondition ) .
+################################################################################

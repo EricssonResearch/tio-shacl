@@ -1,0 +1,66 @@
+# Test: Invalid event property ranges
+# This test validates that event properties reference correct types
+# Should FAIL with: must be IRI / must be IntentManager instance
+
+@prefix ex:  <http://example.org/> .
+@prefix imo: <http://tio.models.tmforum.org/tio/v3.6.0/IntentManagementOntology/> .
+@prefix icm: <http://tio.models.tmforum.org/tio/v3.6.0/IntentCommonModel/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+################################################################################
+# VIOLATION: imo:eventIssuedBy with literal value
+#
+# imo:eventIssuedBy MUST be an IRI referencing an IntentManager
+################################################################################
+
+# WRONG - using literal string instead of IntentManager IRI
+ex:event_issuer_literal
+  a imo:Event ;
+  imo:eventIssuedBy "manager1" .
+
+################################################################################
+# VIOLATION: imo:eventIssuedBy with wrong class
+################################################################################
+
+# WRONG - referencing an Event instead of IntentManager
+ex:event_issuer_wrong_type
+  a imo:Event ;
+  imo:eventIssuedBy ex:notManager .
+
+ex:notManager
+  a imo:Event .
+
+################################################################################
+# VIOLATION: imo:eventIssuedFor with literal value
+#
+# imo:eventIssuedFor MUST be an IRI reference
+################################################################################
+
+# WRONG - using literal string instead of IRI
+ex:event_for_literal
+  a imo:Event ;
+  imo:eventIssuedFor "intent123" .
+
+################################################################################
+# VIOLATION: imo:handler with literal value
+#
+# imo:handler MUST reference an IntentManager
+################################################################################
+
+# WRONG - using literal string instead of IntentManager
+ex:handling_wrong_handler
+  a imo:IntentHandlingEvent ;
+  imo:handler "mgr" .
+
+################################################################################
+# VIOLATION: imo:handler with wrong class
+################################################################################
+
+# WRONG - referencing an Event instead of IntentManager
+ex:handling_nonmanager
+  a imo:IntentHandlingEvent ;
+  imo:handler ex:wrongClass .
+
+ex:wrongClass
+  a imo:Event .

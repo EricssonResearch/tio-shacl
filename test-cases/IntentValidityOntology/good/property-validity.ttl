@@ -1,0 +1,29 @@
+# Test: Valid usage of validity properties
+# Concepts covered: isValid, sameValidityAs, validIf, valueIfNotValid
+# This test validates that validity properties can be used correctly.
+
+@prefix ex: <http://example.org/> .
+@prefix icm: <http://tio.models.tmforum.org/tio/v3.6.0/IntentCommonModel/> .
+@prefix ivo: <http://tio.models.tmforum.org/tio/v3.6.0/IntentValidityOntology/> .
+@prefix log: <http://tio.models.tmforum.org/tio/v3.6.0/LogicalOperators/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+ex:test_isvalid
+  a rdfs:Resource ;
+  ivo:isValid true .
+ex:test_samevalidityas
+  a rdfs:Resource ;
+  ivo:sameValidityAs ex:other_intent .
+ex:test_validif
+  a rdfs:Resource ;
+  ivo:validIf ex:validity1 .
+ex:test_valueifnotvalid
+  a rdfs:Resource ;
+  ivo:valueIfNotValid ex:fallback_value .
+
+# Supporting instances
+ex:other_intent a icm:Intent ; log:allOf ( "true"^^xsd:boolean ) .
+ex:validity1 a ivo:Validity .
+ex:fallback_value a rdfs:Resource .

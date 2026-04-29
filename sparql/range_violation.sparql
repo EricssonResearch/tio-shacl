@@ -1,0 +1,65 @@
+# Range Violation Check
+# Validates that intent requirements can be met by shape capabilities
+# Input: req:Requirement instances from extracted intent
+# Used in tio-validate/intent/feasibility.py
+PREFIX sh: <http://www.w3.org/ns/shacl#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX req: <http://tio.models.tmforum.org/tio/v3.6.0/RequirementCapability/>
+
+SELECT ?metric ?intentOperator ?intentValue ?shapeMin ?shapeMax ?violation
+WHERE {
+  # Get requirements from extracted intent
+  {
+    SELECT ?extractedIntent ?targetType ?metric ?intentOperator ?intentValue
+    WHERE {
+      ?extractedIntent a req:ExtractedIntent ;
+                       req:targetType ?targetType ;
+                       req:hasRequirement ?requirement .
+
+      ?requirement a req:Requirement ;
+                   req:metric ?metric ;
+                   req:operator ?intentOperator ;
+                   req:value ?intentValue .
+    }
+  }
+
+  # Shape ranges (from SHACL shapes)
+  ?targetType rdfs:subClassOf* ?class .
+  ?shape sh:targetClass ?class ;
+         sh:property ?propShape .
+  ?propShape sh:path ?metric .
+
+  # Get shape bounds (if defined)
+  OPTIONAL { ?propShape sh:minInclusive ?shapeMin }
+  OPTIONAL { ?propShape sh:maxInclusive ?shapeMax }
+
+  # Detect violations based on operator and value
+  # Key insight: Check if service CAN satisfy the requirement
+  # - AtLeast X: service needs value >= X, so shapeMax must be >= X
+  # - AtMost X: service needs value <= X, so shapeMin must be <= X
+  FILTER(
+    # AtLeast requirement: service max must be >= intent value
+    (?intentOperator = req:AtLeast && BOUND(?shapeMax) && ?shapeMax < ?intentValue) ||
+
+    # AtMost requirement: service min must be <= intent value
+    (?intentOperator = req:AtMost && BOUND(?shapeMin) && ?shapeMin > ?intentValue) ||
+
+    # Equals requirement: intent value must be within service range
+    (?intentOperator = req:Equals && BOUND(?shapeMin) && ?intentValue < ?shapeMin) ||
+    (?intentOperator = req:Equals && BOUND(?shapeMax) && ?intentValue > ?shapeMax) ||
+
+    # GreaterThan: service max must be > intent value
+    (?intentOperator = req:GreaterThan && BOUND(?shapeMax) && ?shapeMax <= ?intentValue) ||
+
+    # LessThan: service min must be < intent value
+    (?intentOperator = req:LessThan && BOUND(?shapeMin) && ?shapeMin >= ?intentValue)
+  )
+
+  BIND(
+    IF(?intentOperator = req:AtLeast && ?shapeMax < ?intentValue, "service_max_below_requirement",
+    IF(?intentOperator = req:AtMost && ?shapeMin > ?intentValue, "service_min_above_requirement",
+    IF(?intentOperator = req:Equals && ?intentValue < ?shapeMin, "exact_below_service_min",
+    IF(?intentOperator = req:Equals && ?intentValue > ?shapeMax, "exact_above_service_max",
+    "range_violation")))) AS ?violation
+  )
+}

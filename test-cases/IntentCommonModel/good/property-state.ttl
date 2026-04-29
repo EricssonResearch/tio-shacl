@@ -1,0 +1,36 @@
+# Test: Valid usage of State properties
+# Concepts covered: intentHandlingState, intentUpdateState, result, resultFrom
+# This test validates that state-related properties can be used correctly.
+
+@prefix ex: <http://example.org/> .
+@prefix fun: <http://tio.models.tmforum.org/tio/v3.6.0/FunctionOntology/> .
+@prefix icm: <http://tio.models.tmforum.org/tio/v3.6.0/IntentCommonModel/> .
+@prefix imo: <http://tio.models.tmforum.org/tio/v3.6.0/IntentManagementOntology/> .
+@prefix log: <http://tio.models.tmforum.org/tio/v3.6.0/LogicalOperators/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# === intentHandlingState property ===
+ex:test_intenthandlingstate
+  a icm:IntentReport ;
+  icm:intentHandlingState ex:state1 .
+
+# === intentUpdateState property ===
+ex:test_intentupdatestate
+  a icm:IntentReport ;
+  icm:intentUpdateState ex:state2 .
+
+# === result property ===
+ex:test_result
+  a icm:ConditionReport ;
+  icm:result true .
+
+# === resultFrom property ===
+ex:test_resultfrom
+  a icm:ConditionReport ;
+  icm:resultFrom ex:source1 .
+
+ex:state1 a imo:IntentHandlingState .
+ex:state2 a imo:IntentHandlingState .  # Fixed: must be IntentHandlingState, not rdfs:Resource
+ex:source1 a rdfs:Resource .

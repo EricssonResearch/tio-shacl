@@ -1,0 +1,45 @@
+# Test: Invalid Preference property ranges
+# This test validates that Preference properties reference correct class instances
+# Should FAIL with various range constraint messages
+
+@prefix ex:  <http://example.org/> .
+@prefix pre: <http://tio.models.tmforum.org/tio/v3.6.0/PreferenceOfHandlingOutcomes/> .
+@prefix icm: <http://tio.models.tmforum.org/tio/v3.6.0/IntentCommonModel/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+################################################################################
+# VIOLATION: pre:about with literal value
+#
+# pre:about MUST reference a pre:JudgementRequest instance
+################################################################################
+
+# WRONG - using literal string instead of JudgementRequest
+ex:pref_wrong_about
+  a pre:Preference ;
+  pre:about "request1" .
+
+################################################################################
+# VIOLATION: pre:preferred with wrong class
+#
+# pre:preferred MUST reference an icm:IntentReport instance
+################################################################################
+
+# WRONG - referencing an Intent instead of IntentReport
+ex:pref_wrong_preferred
+  a pre:Preference ;
+  pre:preferred ex:notReport .
+
+ex:notReport
+  a icm:Intent .
+
+################################################################################
+# VIOLATION: pre:score with literal value
+#
+# pre:score MUST be a pre:PreferenceScore instance
+################################################################################
+
+# WRONG - using literal number instead of PreferenceScore instance
+ex:pref_wrong_score
+  a pre:Preference ;
+  pre:score 85 .

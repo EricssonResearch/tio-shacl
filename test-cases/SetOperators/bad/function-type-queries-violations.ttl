@@ -1,0 +1,24 @@
+# Test: Invalid usage of type/property query functions
+# Concepts covered: resourcesOfType, resourcesWithProperty, resourcesWithPropertyObject, typesOfMembers, valuesOfObjectProperty
+# Constraints tested: Arity violations
+# This test validates that violations are caught for invalid type/property query function usage.
+
+@prefix ex: <http://example.org/> .
+@prefix set: <http://tio.models.tmforum.org/tio/v3.6.0/SetOperators/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+# === resourcesOfType violations (zero args) ===
+ex:invalid_resourcesoftype set:resourcesOfType ( ) .
+
+# === resourcesWithProperty violations (zero args) ===
+ex:invalid_resourceswithproperty set:resourcesWithProperty ( ) .
+
+# === resourcesWithPropertyObject violations (zero args) ===
+ex:invalid_resourceswithpropertyobject set:resourcesWithPropertyObject ( ) .
+
+# === typesOfMembers violations (zero args) ===
+ex:invalid_typesofmembers set:typesOfMembers ( ) .
+
+# === valuesOfObjectProperty violations (zero args) ===
+ex:invalid_valuesofobjectproperty set:valuesOfObjectProperty ( ) .

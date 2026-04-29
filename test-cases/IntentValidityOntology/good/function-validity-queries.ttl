@@ -1,0 +1,51 @@
+# Test: Valid usage of Validity query functions
+# Concepts covered: validityOf
+# This test validates that validity query functions can be used correctly.
+
+@prefix ex: <http://example.org/> .
+@prefix fun: <http://tio.models.tmforum.org/tio/v3.6.0/FunctionOntology/> .
+@prefix icm: <http://tio.models.tmforum.org/tio/v3.6.0/IntentCommonModel/> .
+@prefix iv: <http://tio.models.tmforum.org/tio/v3.6.0/IntentValidityOntology/> .
+@prefix log: <http://tio.models.tmforum.org/tio/v3.6.0/LogicalOperators/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# === validityOf function: (Resource...) -> Boolean ===
+# Returns true if all arguments are valid, false if any is not valid
+ex:test_validityof_usage
+  a rdfs:Resource ;
+  iv:validityOf ( ex:resource1 ) .
+
+ex:resource1 a rdfs:Resource .
+
+# Usage with multiple resources
+ex:test_validityof_multiple
+  a rdfs:Resource ;
+  iv:validityOf ( ex:resource1 ex:resource2 ) .
+
+ex:resource2 a rdfs:Resource .
+
+# Usage in a condition context - wrapped in a PropertyExpectation
+ex:validity_check
+  a rdfs:Resource ;
+  iv:validityOf ( ex:expectation_with_validity ) .
+
+ex:expectation_with_validity
+  a icm:PropertyExpectation ;
+  icm:target ex:target1 ;
+  log:allOf ( "true"^^xsd:boolean ) .
+
+ex:target1 a icm:Target .
+
+# Intent using the validity check wrapped in a PropertyExpectation
+ex:expectation_wrapping_validity_check
+  a icm:PropertyExpectation ;
+  icm:target ex:target2 ;
+  iv:validityOf ( ex:expectation_with_validity ) .
+
+ex:target2 a icm:Target .
+
+ex:intent_with_validity
+  a icm:Intent ;
+  log:allOf ( ex:expectation_wrapping_validity_check ) .

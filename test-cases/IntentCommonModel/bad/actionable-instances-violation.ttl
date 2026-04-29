@@ -1,0 +1,56 @@
+# Test: ActionableInstancesShape violation
+# Tests: Actionable instances (Intent, PropertyExpectation) must have BooleanFunction property
+# Should FAIL with: "Actionable instance...missing BooleanFunction property"
+
+@prefix ex:   <http://example.org/> .
+@prefix icm:  <http://tio.models.tmforum.org/tio/v3.6.0/IntentCommonModel/> .
+@prefix log:  <http://tio.models.tmforum.org/tio/v3.6.0/LogicalOperators/> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+################################################################################
+# VIOLATION: Intent without BooleanFunction property
+#
+# Common mistake: Creating an Intent without any boolean logic
+# All Actionable instances (Intent, PropertyExpectation, Condition) MUST have
+# at least one BooleanFunction property (log:allOf, log:anyOf, log:not, etc.)
+################################################################################
+
+# WRONG - Intent without BooleanFunction property
+ex:intent_no_function
+  a icm:Intent ;
+  rdfs:label "Invalid Intent"@en
+  # WRONG: Missing log:allOf, log:anyOf, or other BooleanFunction property
+  .
+
+################################################################################
+# VIOLATION: PropertyExpectation without BooleanFunction property
+#
+# PropertyExpectation is also an Actionable and requires boolean logic
+################################################################################
+
+# WRONG - PropertyExpectation without BooleanFunction property
+ex:expectation_no_function
+  a icm:PropertyExpectation ;
+  rdfs:label "Invalid Expectation"@en ;
+  icm:target ex:T1
+  # WRONG: Missing log:allOf, log:anyOf, or other BooleanFunction property
+  .
+
+ex:T1
+  a icm:Target
+  .
+
+################################################################################
+# CORRECT way to define Actionable instances:
+#
+# ex:validIntent
+#   a icm:Intent ;
+#   log:allOf ( ex:E1 ) .
+#
+# ex:validExpectation
+#   a icm:PropertyExpectation ;
+#   icm:target ex:T1 ;
+#   log:allOf ( ex:C1 ) .
+################################################################################

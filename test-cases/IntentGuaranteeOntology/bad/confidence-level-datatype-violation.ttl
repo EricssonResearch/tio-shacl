@@ -1,0 +1,27 @@
+# Test: Invalid ig:confidenceLevel datatype usage
+# This test validates that ig:confidenceLevel must be xsd:decimal
+# Should FAIL with: "ig:confidenceLevel must be xsd:decimal datatype"
+
+@prefix ex:  <http://example.org/> .
+@prefix ig:  <http://tio.models.tmforum.org/tio/v3.6.0/IntentGuaranteeOntology/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+################################################################################
+# VIOLATION: ig:confidenceLevel with wrong datatype
+#
+# The ig:confidenceLevel property MUST be xsd:decimal (typically 0.0 to 1.0)
+# Common mistakes: using strings, integers, or untyped literals
+################################################################################
+
+# WRONG - using plain string
+ex:wrong_confidence_string
+  ig:confidenceLevel "high" .
+
+# WRONG - using integer instead of decimal
+ex:wrong_confidence_int
+  ig:confidenceLevel 95 .
+
+# WRONG - using untyped string that looks like a decimal
+ex:wrong_confidence_untyped
+  ig:confidenceLevel "0.95" .

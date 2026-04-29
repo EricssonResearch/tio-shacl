@@ -1,0 +1,35 @@
+# Test: Invalid met:obtainedAt datatype
+# This test validates that met:obtainedAt must be xsd:dateTime
+# Should FAIL with: "met:obtainedAt must be xsd:dateTime"
+
+@prefix ex:  <http://example.org/> .
+@prefix met: <http://tio.models.tmforum.org/tio/v3.6.0/MetricsAndObservations/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+################################################################################
+# VIOLATION: met:obtainedAt with wrong datatype
+#
+# The met:obtainedAt property MUST be xsd:dateTime
+################################################################################
+
+# WRONG - using untyped string (not ISO dateTime)
+ex:obs_wrong_timestamp
+  a met:Observation ;
+  met:observedMetric ex:cpu ;
+  met:obtainedAt "2024-01-01" .
+
+# WRONG - using human-readable string
+ex:obs_string_timestamp
+  a met:Observation ;
+  met:observedMetric ex:cpu ;
+  met:obtainedAt "noon today" .
+
+# WRONG - using xsd:date instead of xsd:dateTime
+ex:obs_date_timestamp
+  a met:Observation ;
+  met:observedMetric ex:cpu ;
+  met:obtainedAt "2024-01-01"^^xsd:date .
+
+# Supporting instance
+ex:cpu a met:Metric .

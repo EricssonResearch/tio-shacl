@@ -1,0 +1,13 @@
+# Test: Invalid usage of match functions
+# Concepts covered: match, matchAll, matchAny, matchNone, matchOne, matchStatement
+# Constraints tested: Arity violations
+@prefix ex: <http://example.org/> .
+@prefix log: <http://tio.models.tmforum.org/tio/v3.6.0/LogicalOperators/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+ex:invalid_match log:match ( ) .
+ex:invalid_matchall log:matchAll ( ) .
+ex:invalid_matchany log:matchAny ( ) .
+ex:invalid_matchnone log:matchNone ( ) .
+ex:invalid_matchone log:matchOne ( ) .
+ex:invalid_matchstatement log:matchStatement ( ) .

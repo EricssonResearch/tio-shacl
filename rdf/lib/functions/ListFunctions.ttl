@@ -1,0 +1,182 @@
+# TMF SHACL Reusable SPARQL Functions
+#
+# This file defines SPARQL functions for common RDF list operations.
+# These can be reused across constraints to simplify list traversal patterns.
+#
+# Based on SHACL Advanced Features: https://www.w3.org/TR/shacl-af/#SPARQLFunction
+# NOTE: Requires advanced=True in pyshacl.validate() to support SPARQLFunction
+
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix tio-fn: <http://tio.models.tmforum.org/tio/v3.6.0/shapes/lib/functions/> .
+@prefix tio-lib: <http://tio.models.tmforum.org/tio/v3.6.0/shapes/lib/> .
+
+# =============================================================================
+# RDF LIST FUNCTIONS
+# =============================================================================
+# These functions provide reusable patterns for working with RDF lists (rdf:List)
+# which are commonly used for function arguments in TIO.
+
+# Count the number of items in an RDF list
+# Usage: Used in FunctionUsageArityConstraint to count arguments
+tio-fn:listLength
+    a sh:SPARQLFunction ;
+    rdfs:label "List Length" ;
+    rdfs:comment """
+        Counts the number of items in an RDF list.
+        Returns 0 for rdf:nil (empty list).
+        Returns the count of items for non-empty lists.
+
+        Example usage in SPARQL:
+        BIND(tio-fn:listLength(?argList) AS ?count)
+    """ ;
+    sh:parameter [
+        sh:path tio-fn:list ;
+        sh:description "The RDF list to count items in" ;
+        sh:name "list" ;
+        sh:order 1 ;
+    ] ;
+    sh:returnType xsd:integer ;
+    sh:select """
+        PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+        SELECT (COUNT(?item) AS ?result)
+        WHERE {
+            {
+                # Non-empty list: count items via rdf:rest* traversal
+                $list rdf:rest*/rdf:first ?item .
+            }
+            UNION
+            {
+                # Empty list (rdf:nil): bind 0
+                FILTER($list = rdf:nil)
+                BIND(0 AS ?item)
+                FILTER(false) # Ensure no rows, just to handle empty case
+            }
+        }
+    """ .
+
+# Check if a value exists at a specific position in an RDF list
+# Position is 0-indexed (first element is position 0)
+tio-fn:listContainsAtPosition
+    a sh:SPARQLFunction ;
+    rdfs:label "List Contains At Position" ;
+    rdfs:comment """
+        Checks if a specific value exists at a given position in an RDF list.
+        Position is 0-indexed.
+
+        Example usage in SPARQL:
+        FILTER(tio-fn:listContainsAtPosition(?argList, 0, ?expectedValue))
+    """ ;
+    sh:parameter [
+        sh:path tio-fn:list ;
+        sh:description "The RDF list to check" ;
+        sh:name "list" ;
+        sh:order 1 ;
+    ], [
+        sh:path tio-fn:position ;
+        sh:description "The 0-indexed position to check" ;
+        sh:name "position" ;
+        sh:datatype xsd:integer ;
+        sh:order 2 ;
+    ], [
+        sh:path tio-fn:value ;
+        sh:description "The value to look for" ;
+        sh:name "value" ;
+        sh:order 3 ;
+    ] ;
+    sh:returnType xsd:boolean ;
+    sh:ask """
+        PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+        ASK {
+            # Count how many rdf:rest steps to reach the node
+            $list rdf:rest* ?node .
+            ?node rdf:first $value .
+
+            # Verify position by counting steps
+            {
+                SELECT $list ?node (COUNT(?step) AS ?pos)
+                WHERE {
+                    $list rdf:rest* ?step .
+                    ?step rdf:rest* ?node .
+                }
+                GROUP BY $list ?node
+            }
+            FILTER(?pos = $position)
+        }
+    """ .
+
+# =============================================================================
+# LIST ITEM EXTRACTION PATTERNS
+# =============================================================================
+# Note: Due to SPARQL limitations, these are defined as reusable query patterns
+# rather than true functions. Use them as inline subqueries in constraints.
+
+# Pattern for extracting (item, position) pairs from an RDF list
+# This is a query pattern to be used inline, not a callable function
+tio-fn:ListPositionPattern
+    a rdfs:Resource ;
+    rdfs:label "List Position Extraction Pattern" ;
+    rdfs:comment """
+        SPARQL pattern for extracting items with their positions from an RDF list.
+
+        Use this pattern inline in your constraint queries:
+
+        {
+            SELECT ?list ?item ?position
+            WHERE {
+                ?list rdf:rest* ?node .
+                ?node rdf:first ?item .
+                {
+                    SELECT ?list ?node (COUNT(?step) - 1 AS ?position)
+                    WHERE {
+                        ?list rdf:rest* ?step .
+                        ?step rdf:rest* ?node .
+                    }
+                    GROUP BY ?list ?node
+                }
+            }
+        }
+
+        This avoids the 6-position UNION pattern by using rdf:rest* traversal
+        with position counting via subquery.
+    """ .
+
+# =============================================================================
+# TYPE CHECKING HELPERS
+# =============================================================================
+# These document common type checking patterns used in constraints
+
+tio-fn:IsBooleanCompatiblePattern
+    a rdfs:Resource ;
+    rdfs:label "Boolean Compatibility Check Pattern" ;
+    rdfs:comment """
+        A value is boolean-compatible if ANY of these conditions hold:
+        1. Literal with xsd:boolean datatype
+        2. Instance of class with fun:resultType xsd:boolean in hierarchy
+        3. Instance of fun:Evaluable subclass (has implicit boolean result)
+        4. fun:Function with resultType xsd:boolean
+
+        SPARQL Pattern (check if ?arg is boolean-compatible):
+
+        FILTER(
+            # Case 1: Literal boolean
+            (isLiteral(?arg) && SAMETERM(datatype(?arg), xsd:boolean)) ||
+            # Case 2: Class with boolean resultType
+            EXISTS {
+                ?arg a ?argClass .
+                ?argClass rdfs:subClassOf*/fun:resultType xsd:boolean .
+            } ||
+            # Case 3: Evaluable subclass
+            EXISTS {
+                ?arg a ?argClass .
+                ?argClass rdfs:subClassOf* fun:Evaluable .
+            } ||
+            # Case 4: Function with boolean result
+            EXISTS {
+                ?arg a fun:Function .
+                ?arg fun:resultType xsd:boolean .
+            }
+        )
+    """ .

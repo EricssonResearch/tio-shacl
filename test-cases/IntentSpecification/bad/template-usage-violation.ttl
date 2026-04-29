@@ -1,0 +1,29 @@
+# Test: Template and VocabularyTemplate usage violations
+
+@prefix ex:   <http://example.org/> .
+@prefix insp: <http://tio.models.tmforum.org/tio/v3.6.0/IntentSpecification/> .
+@prefix icm:  <http://tio.models.tmforum.org/tio/v3.6.0/IntentCommonModel/> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+################################################################################
+# VIOLATION: VocabularyTemplate used where Intent expected
+################################################################################
+
+ex:spec_wrong_mandatory
+  a insp:IntentSpecification ;
+  insp:mandatoryIntent ex:vocabTemplate .  # WRONG: VocabularyTemplate, not Intent
+
+ex:vocabTemplate
+  a insp:VocabularyTemplate .
+
+################################################################################
+# VIOLATION: Template base class used where specific template expected
+################################################################################
+
+ex:content_wrong_using
+  a insp:ContentTemplate ;
+  insp:contentUsing ex:baseTemplate .  # WRONG: Template, not VocabularyTemplate
+
+ex:baseTemplate
+  a insp:Template .

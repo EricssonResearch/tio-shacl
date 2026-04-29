@@ -1,0 +1,39 @@
+# Test: ContentTemplate with wrong contentUsing class
+# This test validates that insp:contentUsing must reference an insp:VocabularyTemplate
+# Should FAIL with: "insp:contentUsing must be an insp:VocabularyTemplate instance"
+
+@prefix ex:   <http://example.org/> .
+@prefix insp: <http://tio.models.tmforum.org/tio/v3.6.0/IntentSpecification/> .
+@prefix icm:  <http://tio.models.tmforum.org/tio/v3.6.0/IntentCommonModel/> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+################################################################################
+# VIOLATION 1: contentUsing references wrong class
+#
+# Common mistake: Using an arbitrary resource instead of VocabularyTemplate
+# The insp:contentUsing property MUST reference an insp:VocabularyTemplate
+################################################################################
+
+# WRONG - contentUsing references a non-VocabularyTemplate resource
+ex:wrong_content_using
+  a insp:ContentTemplate ;
+  insp:contentUsing ex:notAVocabularyTemplate .
+
+ex:notAVocabularyTemplate
+  a rdfs:Resource .
+
+################################################################################
+# VIOLATION 2: contentUsing references an Intent instead of VocabularyTemplate
+#
+# Common mistake: Confusing VocabularyTemplate with Intent content
+################################################################################
+
+# WRONG - contentUsing references an Intent
+ex:wrong_content_using_intent
+  a insp:ContentTemplate ;
+  insp:contentUsing ex:someIntent .
+
+ex:someIntent
+  a icm:Intent .

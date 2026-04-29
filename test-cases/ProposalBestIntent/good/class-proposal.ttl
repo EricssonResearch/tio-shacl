@@ -1,0 +1,29 @@
+# Test: Valid instances of proposal classes
+# Concepts covered: BestProposalExpectation, BestProposalReport, Proposal
+# This test validates that valid instances of proposal classes can be created.
+
+@prefix ex: <http://example.org/> .
+@prefix icm: <http://tio.models.tmforum.org/tio/v3.6.0/IntentCommonModel/> .
+@prefix log: <http://tio.models.tmforum.org/tio/v3.6.0/LogicalOperators/> .
+@prefix pbi: <http://tio.models.tmforum.org/tio/v3.6.0/ProposalBestIntent/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# Intent referencing the expectation to avoid unreferenced warning
+ex:test_intent a icm:Intent ;
+  log:allOf ( ex:test_bestproposalexpectation ) .
+
+# === BestProposalExpectation class ===
+ex:test_bestproposalexpectation a pbi:BestProposalExpectation ;
+    icm:target ex:target1 ;
+    log:allOf ( "true"^^xsd:boolean ) .
+
+# === BestProposalReport class ===
+ex:test_bestproposalreport a pbi:BestProposalReport .
+
+# === Proposal class ===
+ex:test_proposal a pbi:Proposal .
+
+# Supporting instances
+ex:target1 a icm:Target .

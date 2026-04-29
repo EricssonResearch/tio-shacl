@@ -1,0 +1,10 @@
+# Test: Invalid usage of observation functions
+# Concepts covered: lastObserved, lastValue, observedValue
+# Constraints tested: Arity violations
+@prefix ex: <http://example.org/> .
+@prefix met: <http://tio.models.tmforum.org/tio/v3.6.0/MetricsAndObservations/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+ex:invalid_lastobserved met:lastObserved ( ) .
+ex:invalid_lastvalue met:lastValue ( ) .
+ex:invalid_observedvalue met:observedValue ( ) .

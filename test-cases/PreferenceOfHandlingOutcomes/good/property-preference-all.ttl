@@ -1,0 +1,62 @@
+# Test: Valid usage of preference properties
+# Concepts covered: about, aboutOption, judgementRequest, maxScore, minScore, neutral, objected, objectedThreshold, preference, preferenceDeadline, preferred, preferredThreshold, score, scoreInterpretation, scoreValue
+# This test validates that preference properties can be used correctly.
+
+@prefix ex: <http://example.org/> .
+@prefix pho: <http://tio.models.tmforum.org/tio/v3.6.0/PreferenceOfHandlingOutcomes/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+ex:test_about
+  a rdfs:Resource ;
+  pho:about ex:resource1 .
+ex:test_aboutoption
+  a rdfs:Resource ;
+  pho:aboutOption ex:option1 .
+ex:test_judgementrequest
+  a rdfs:Resource ;
+  pho:judgementRequest ex:request1 .
+ex:test_maxscore
+  a rdfs:Resource ;
+  pho:maxScore "100"^^xsd:decimal .
+ex:test_minscore
+  a rdfs:Resource ;
+  pho:minScore "0"^^xsd:decimal .
+ex:test_neutral
+  a rdfs:Resource ;
+  pho:neutral "50"^^xsd:decimal .
+ex:test_objected
+  a rdfs:Resource ;
+  pho:objected true .
+ex:test_objectedthreshold
+  a rdfs:Resource ;
+  pho:objectedThreshold "25"^^xsd:decimal .
+ex:test_preference
+  a rdfs:Resource ;
+  pho:preference ex:pref1 .
+ex:test_preferencedeadline
+  a rdfs:Resource ;
+  pho:preferenceDeadline "2024-12-31"^^xsd:date .
+ex:test_preferred
+  a rdfs:Resource ;
+  pho:preferred true .
+ex:test_preferredthreshold
+  a rdfs:Resource ;
+  pho:preferredThreshold "75"^^xsd:decimal .
+ex:test_score
+  a rdfs:Resource ;
+  pho:score ex:score1 .
+ex:test_scoreinterpretation
+  a rdfs:Resource ;
+  pho:scoreInterpretation ex:interp1 .
+ex:test_scorevalue
+  a rdfs:Resource ;
+  pho:scoreValue "85"^^xsd:decimal .
+
+ex:resource1 a rdfs:Resource .
+ex:option1 a rdfs:Resource .
+ex:request1 a pho:JudgementRequest .
+ex:pref1 a pho:Preference .
+ex:score1 a pho:PreferenceScore .
+ex:interp1 a pho:ScoreInterpretation .

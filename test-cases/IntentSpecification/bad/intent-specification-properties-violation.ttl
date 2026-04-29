@@ -1,0 +1,34 @@
+# Test: Invalid IntentSpecification property values
+# This test validates that mandatoryIntent/optionalIntent reference icm:Intent
+# Should FAIL with: "must be an icm:Intent instance"
+
+@prefix ex:   <http://example.org/> .
+@prefix insp: <http://tio.models.tmforum.org/tio/v3.6.0/IntentSpecification/> .
+@prefix icm:  <http://tio.models.tmforum.org/tio/v3.6.0/IntentCommonModel/> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+################################################################################
+# VIOLATION: insp:mandatoryIntent with wrong class
+#
+# insp:mandatoryIntent MUST reference an icm:Intent instance
+################################################################################
+
+# WRONG - referencing a Target instead of Intent
+ex:spec_wrong_mandatory
+  a insp:IntentSpecification ;
+  insp:mandatoryIntent ex:notIntent .
+
+ex:notIntent
+  a icm:Target .
+
+################################################################################
+# VIOLATION: insp:optionalIntent with literal value
+#
+# insp:optionalIntent MUST be an icm:Intent instance
+################################################################################
+
+# WRONG - using literal string instead of Intent
+ex:spec_literal_optional
+  a insp:IntentSpecification ;
+  insp:optionalIntent "intent1" .

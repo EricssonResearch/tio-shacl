@@ -1,0 +1,148 @@
+# TMF Function Ontology SHACL Shapes
+#
+# Domain-specific validation for Function Ontology.
+# Global validation (function usage, vocabulary) handled by lib/GlobalShapes.ttl
+#
+# Ontology URI: http://tio.models.tmforum.org/tio/v3.6.0/FunctionOntology/
+
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# TMF namespaces
+@prefix fun: <http://tio.models.tmforum.org/tio/v3.6.0/FunctionOntology/> .
+@prefix imo: <http://tio.models.tmforum.org/tio/v3.6.0/IntentManagementOntology/> .
+
+# Shape namespaces  
+@prefix fun-shapes: <http://tio.models.tmforum.org/tio/v3.6.0/shapes/FunctionOntology/> .
+@prefix tio-lib: <http://tio.models.tmforum.org/tio/v3.6.0/shapes/lib/> .
+@prefix tio-targets: <http://tio.models.tmforum.org/tio/v3.6.0/shapes/lib/targets/> .
+@prefix tio-constraints: <http://tio.models.tmforum.org/tio/v3.6.0/shapes/lib/constraints/> .
+
+# =============================================================================
+# FUNCTION DEFINITION VALIDATION
+# =============================================================================
+# Note: Global function definition validation is handled by tio-lib:FunctionDefinitionShape
+# in GlobalShapes.ttl, which validates ALL fun:Function instances across all ontologies.
+
+# =============================================================================
+# BOOLEAN FUNCTION VALIDATION
+# =============================================================================
+
+# Validates that BooleanFunction definitions return boolean type
+fun-shapes:BooleanFunctionResultTypeShape
+    a sh:NodeShape ;
+    rdfs:label "Boolean Function Result Type Validation" ;
+    rdfs:comment "Validates fun:BooleanFunction instances have xsd:boolean as resultType. Type consistency check." ;
+    sh:message """[domain/boolean_function_resulttype] BooleanFunction must have fun:resultType xsd:boolean. Found: {$value}. Example: log:and a fun:BooleanFunction ; fun:resultType xsd:boolean .""" ;
+    sh:target [
+        a tio-targets:OntologyClassTargetType ;
+        tio-lib:ontologyNamespace "http://tio.models.tmforum.org/tio/v3.6.0/FunctionOntology/" ;
+        tio-lib:targetClass fun:BooleanFunction ;
+    ] ;
+    
+    sh:property [
+        sh:path fun:resultType ;
+        sh:hasValue xsd:boolean ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+    ] ;
+    
+    sh:severity sh:Violation .
+
+# =============================================================================
+# PROPERTY DOMAIN VALIDATION
+# =============================================================================
+
+# Validates that function properties are only used on fun:Function instances
+fun-shapes:DomainOfFunctionPropertiesShape
+    a sh:NodeShape ;
+    rdfs:label "Domain Validation for Function Properties" ;
+    rdfs:comment "Validates function-specific properties are only used on fun:Function instances. Enforces rdfs:domain constraints." ;
+    sh:message """[domain/function_domain] Function property (fun:arityMin, fun:arityMax, fun:resultType, etc.) used on non-Function resource. Add 'a fun:Function' or remove the function properties. Bad: ex:myIntent a icm:Intent ; fun:arityMin 2 . Good: math:add a fun:Function ; fun:arityMin 2 .""" ;
+    sh:target [
+        a tio-targets:SubjectsOfPropertyTargetType ;
+        tio-lib:property fun:arityMin ;
+    ], [
+        a tio-targets:SubjectsOfPropertyTargetType ;
+        tio-lib:property fun:arityMax ;
+    ], [
+        a tio-targets:SubjectsOfPropertyTargetType ;
+        tio-lib:property fun:argumentNames ;
+    ], [
+        a tio-targets:SubjectsOfPropertyTargetType ;
+        tio-lib:property fun:argumentTypes ;
+    ], [
+        a tio-targets:SubjectsOfPropertyTargetType ;
+        tio-lib:property fun:resultType ;
+    ], [
+        a tio-targets:SubjectsOfPropertyTargetType ;
+        tio-lib:property fun:resultIfInvalid ;
+    ] ;
+    
+    sh:class fun:Function ;
+    sh:severity sh:Violation .
+
+# =============================================================================
+# PROPERTY RANGE VALIDATION
+# =============================================================================
+
+# Validates that fun:resultType values are IRIs (type references), not literals
+fun-shapes:FunctionResultTypeRangeShape
+    a sh:NodeShape ;
+    rdfs:label "Range Validation for fun:resultType" ;
+    rdfs:comment "Validates fun:resultType values are IRI references to types, not literal values. Enforces proper type system usage." ;
+    sh:target [
+        a tio-targets:SubjectsOfPropertyTargetType ;
+        tio-lib:property fun:resultType ;
+    ] ;
+
+    sh:property [
+        sh:path fun:resultType ;
+        sh:nodeKind sh:IRI ;
+        sh:message """[function/resulttype_must_be_iri] fun:resultType must be an IRI (e.g., xsd:decimal), not a literal string. Found: {$value}. Bad: fun:resultType "decimal" . Good: fun:resultType xsd:decimal .""" ;
+    ] ;
+
+    sh:severity sh:Violation .
+
+# =============================================================================
+# ERROR/WARNING HIERARCHY VALIDATION
+# =============================================================================
+
+# Validates that fun:Error is properly integrated with imo:Error hierarchy
+fun-shapes:ErrorSubclassRelationshipShape
+    a sh:NodeShape ;
+    rdfs:label "Error Subclass Relationship Validation" ;
+    rdfs:comment "Validates fun:Error is a subclass of imo:Error. Ensures cross-ontology consistency." ;
+    sh:message "[domain/function_subclass] fun:Error must be rdfs:subClassOf imo:Error. Required: fun:Error rdfs:subClassOf imo:Error ." ;
+    sh:target [
+        a tio-targets:OntologyClassTargetType ;
+        tio-lib:ontologyNamespace "http://tio.models.tmforum.org/tio/v3.6.0/FunctionOntology/" ;
+        tio-lib:targetClass fun:Error ;
+    ] ;
+    
+    sh:sparql tio-constraints:ErrorSubclassConstraint ;
+    sh:severity sh:Violation .
+
+# Validates that fun:Warning is properly integrated with imo:Warning hierarchy
+fun-shapes:WarningSubclassRelationshipShape
+    a sh:NodeShape ;
+    rdfs:label "Warning Subclass Relationship Validation" ;
+    rdfs:comment "Validates fun:Warning is a subclass of imo:Warning. Ensures cross-ontology consistency." ;
+    sh:message "[domain/function_subclass] fun:Warning must be rdfs:subClassOf imo:Warning. Required: fun:Warning rdfs:subClassOf imo:Warning ." ;
+    sh:target [
+        a tio-targets:OntologyClassTargetType ;
+        tio-lib:ontologyNamespace "http://tio.models.tmforum.org/tio/v3.6.0/FunctionOntology/" ;
+        tio-lib:targetClass fun:Warning ;
+    ] ;
+    
+    sh:sparql tio-constraints:WarningSubclassConstraint ;
+    sh:severity sh:Violation .
+
+# =============================================================================
+# NOTES
+# =============================================================================
+# Universal validation (applies to all ontologies):
+# - Vocabulary: tio-lib:VocabularyUsageShape
+# - Function usage: tio-lib:FunctionUsageShape

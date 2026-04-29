@@ -1,0 +1,26 @@
+# Test: Valid usage of function properties and classes
+# Concepts covered: Function, Error, Warning, argumentNames, argumentTypes, arityMax, arityMin, resultIfInvalid, resultType
+# This test validates that function properties and classes can be used correctly.
+
+@prefix ex: <http://example.org/> .
+@prefix fun: <http://tio.models.tmforum.org/tio/v3.6.0/FunctionOntology/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# Function properties MUST be used on instances declared as fun:Function
+ex:test_function a fun:Function ;
+    fun:argumentNames ( "arg1" "arg2" ) ;
+    fun:argumentTypes ( xsd:string xsd:integer ) ;
+    fun:arityMax "3"^^xsd:nonNegativeInteger ;
+    fun:arityMin "1"^^xsd:nonNegativeInteger ;
+    fun:resultIfInvalid ex:fallback ;
+    fun:resultType xsd:decimal .
+
+# Supporting instances
+ex:fallback a rdfs:Resource .
+
+# Error and Warning instances (meta-level shapes validate class hierarchy, not instances)
+# These shapes ensure fun:Error rdfs:subClassOf imo:Error (and similarly for Warning)
+ex:sample_error a fun:Error .
+ex:sample_warning a fun:Warning .

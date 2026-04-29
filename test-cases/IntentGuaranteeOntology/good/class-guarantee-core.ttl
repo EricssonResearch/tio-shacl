@@ -1,0 +1,182 @@
+# Test: Valid instances and property usage of core guarantee classes
+# Concepts covered: Guarantee, ConflictingGuarantees, GuaranteeReportingExpectation, GuaranteeReport,
+#                   State, GuaranteeStateCompliant, GuaranteeStateDegraded,
+#                   ig:confidenceLevel, ig:guaranteePeriod, ig:guaranteePeriodUpdateInterval
+# This test validates that guarantee classes and properties can be used correctly.
+
+@prefix ex: <http://example.org/> .
+@prefix ig: <http://tio.models.tmforum.org/tio/v3.6.0/IntentGuaranteeOntology/> .
+@prefix icm: <http://tio.models.tmforum.org/tio/v3.6.0/IntentCommonModel/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix log: <http://tio.models.tmforum.org/tio/v3.6.0/LogicalOperators/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+################################################################################
+# Intent referencing the expectation to avoid unreferenced warning
+################################################################################
+
+ex:test_intent a icm:Intent ;
+  log:allOf ( ex:test_reporting ex:guarantee_one_day ex:guarantee_one_hour ex:guarantee_30_minutes ex:guarantee_one_month ex:guarantee_one_year ex:guarantee_complex_period ex:guarantee_fast_updates ex:guarantee_hourly_updates ex:guarantee_daily_updates ex:sla_uptime_guarantee ex:performance_guarantee ex:data_integrity_guarantee ) .
+
+################################################################################
+# Supporting instances
+################################################################################
+
+ex:guarantee_target a icm:Target ;
+    rdfs:label "Guarantee Target" .
+
+################################################################################
+# Basic class instances
+################################################################################
+
+# === Guarantee class ===
+ex:test_guarantee a ig:Guarantee .
+
+# === ConflictingGuarantees class ===
+ex:test_conflicting a ig:ConflictingGuarantees .
+
+# === GuaranteeReportingExpectation class (subclass of Expectation, requires target) ===
+ex:test_reporting a ig:GuaranteeReportingExpectation ;
+    icm:target ex:guarantee_target ;
+    icm:target ex:guarantee_target .
+
+# === State class ===
+ex:test_state a ig:State .
+
+# === GuaranteeStateCompliant class ===
+ex:test_compliant a ig:GuaranteeStateCompliant .
+
+# === GuaranteeStateDegraded class ===
+ex:test_degraded a ig:GuaranteeStateDegraded .
+
+# === GuaranteeReport class ===
+ex:test_guarantee_report a ig:GuaranteeReport .
+
+################################################################################
+# ig:confidenceLevel property - xsd:decimal (0.0 to 1.0)
+################################################################################
+
+# Basic confidence level usage
+ex:guarantee_with_confidence a ig:Guarantee ;
+    ig:confidenceLevel "0.95"^^xsd:decimal .
+
+# High confidence (99.9%)
+ex:high_confidence_guarantee a ig:Guarantee ;
+    ig:confidenceLevel "0.999"^^xsd:decimal .
+
+# Standard confidence (95%)
+ex:standard_confidence_guarantee a ig:Guarantee ;
+    ig:confidenceLevel "0.95"^^xsd:decimal .
+
+# Lower confidence (90%)
+ex:lower_confidence_guarantee a ig:Guarantee ;
+    ig:confidenceLevel "0.90"^^xsd:decimal .
+
+################################################################################
+# ig:guaranteePeriod property - xsd:duration (ISO 8601)
+################################################################################
+
+# One day guarantee period
+ex:guarantee_one_day a ig:GuaranteeReportingExpectation ;
+    icm:target ex:guarantee_target ;
+    ig:guaranteePeriod "P1D"^^xsd:duration .
+
+# One hour guarantee period
+ex:guarantee_one_hour a ig:GuaranteeReportingExpectation ;
+    icm:target ex:guarantee_target ;
+    ig:guaranteePeriod "PT1H"^^xsd:duration .
+
+# 30 minutes guarantee period
+ex:guarantee_30_minutes a ig:GuaranteeReportingExpectation ;
+    icm:target ex:guarantee_target ;
+    ig:guaranteePeriod "PT30M"^^xsd:duration .
+
+# One month guarantee period
+ex:guarantee_one_month a ig:GuaranteeReportingExpectation ;
+    icm:target ex:guarantee_target ;
+    ig:guaranteePeriod "P1M"^^xsd:duration .
+
+# One year guarantee period
+ex:guarantee_one_year a ig:GuaranteeReportingExpectation ;
+    icm:target ex:guarantee_target ;
+    ig:guaranteePeriod "P1Y"^^xsd:duration .
+
+# Combined duration (1 day, 2 hours, 30 minutes)
+ex:guarantee_complex_period a ig:GuaranteeReportingExpectation ;
+    icm:target ex:guarantee_target ;
+    ig:guaranteePeriod "P1DT2H30M"^^xsd:duration .
+
+################################################################################
+# ig:guaranteePeriodUpdateInterval property - xsd:duration
+################################################################################
+
+# 5 minute update interval
+ex:guarantee_fast_updates a ig:GuaranteeReportingExpectation ;
+    icm:target ex:guarantee_target ;
+    ig:guaranteePeriod "P1D"^^xsd:duration ;
+    ig:guaranteePeriodUpdateInterval "PT5M"^^xsd:duration .
+
+# 1 hour update interval
+ex:guarantee_hourly_updates a ig:GuaranteeReportingExpectation ;
+    icm:target ex:guarantee_target ;
+    ig:guaranteePeriod "P1M"^^xsd:duration ;
+    ig:guaranteePeriodUpdateInterval "PT1H"^^xsd:duration .
+
+# Daily update interval
+ex:guarantee_daily_updates a ig:GuaranteeReportingExpectation ;
+    icm:target ex:guarantee_target ;
+    ig:guaranteePeriod "P1Y"^^xsd:duration ;
+    ig:guaranteePeriodUpdateInterval "P1D"^^xsd:duration .
+
+################################################################################
+# Complete guarantee examples with all properties
+################################################################################
+
+# SLA Guarantee: 99.9% uptime over 1 month, checked every 5 minutes
+ex:sla_uptime_guarantee a ig:GuaranteeReportingExpectation ;
+    icm:target ex:guarantee_target ;
+    rdfs:label "99.9% Monthly Uptime Guarantee"@en ;
+    ig:confidenceLevel "0.999"^^xsd:decimal ;
+    ig:guaranteePeriod "P1M"^^xsd:duration ;
+    ig:guaranteePeriodUpdateInterval "PT5M"^^xsd:duration .
+
+# Performance Guarantee: 95% response time compliance, checked hourly
+ex:performance_guarantee a ig:GuaranteeReportingExpectation ;
+    icm:target ex:guarantee_target ;
+    rdfs:label "Response Time Performance Guarantee"@en ;
+    ig:confidenceLevel "0.95"^^xsd:decimal ;
+    ig:guaranteePeriod "P7D"^^xsd:duration ;
+    ig:guaranteePeriodUpdateInterval "PT1H"^^xsd:duration .
+
+# Data Integrity Guarantee: 99.99% data consistency, daily verification
+ex:data_integrity_guarantee a ig:GuaranteeReportingExpectation ;
+    icm:target ex:guarantee_target ;
+    rdfs:label "Data Integrity Guarantee"@en ;
+    ig:confidenceLevel "0.9999"^^xsd:decimal ;
+    ig:guaranteePeriod "P1Y"^^xsd:duration ;
+    ig:guaranteePeriodUpdateInterval "P1D"^^xsd:duration .
+
+################################################################################
+# Guarantee states with context
+################################################################################
+
+ex:network_compliant_state a ig:GuaranteeStateCompliant ;
+    rdfs:label "Network SLA Compliant" .
+
+ex:network_degraded_state a ig:GuaranteeStateDegraded ;
+    rdfs:label "Network SLA Degraded" .
+
+################################################################################
+# GuaranteeReport example
+################################################################################
+
+ex:monthly_guarantee_report a ig:GuaranteeReport ;
+    rdfs:label "Monthly Guarantee Compliance Report" .
+
+################################################################################
+# ConflictingGuarantees example
+################################################################################
+
+ex:conflicting_performance_guarantees a ig:ConflictingGuarantees ;
+    rdfs:label "Conflicting Latency vs Throughput Guarantees" .

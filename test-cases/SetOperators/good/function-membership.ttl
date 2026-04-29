@@ -1,0 +1,32 @@
+# Test: Valid usage of set membership functions
+# Concepts covered: elementOf, isMember, forAll
+# This test validates that set membership functions can be used correctly.
+
+@prefix ex: <http://example.org/> .
+@prefix fun: <http://tio.models.tmforum.org/tio/v3.6.0/FunctionOntology/> .
+@prefix log: <http://tio.models.tmforum.org/tio/v3.6.0/LogicalOperators/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix set: <http://tio.models.tmforum.org/tio/v3.6.0/SetOperators/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# === elementOf function ===
+ex:test_elementof
+  a rdfs:Resource ;
+  set:elementOf ( ex:resource1 ex:container1 ) .
+
+# === isMember function ===
+ex:test_ismember
+  a rdfs:Resource ;
+  set:isMember ( ex:resource1 ex:container1 ) .
+
+# === forAll function: (variable, Container, BooleanCondition) ===
+ex:test_forall
+  a rdfs:Resource ;
+  set:forAll ( ex:member_var ex:container1 ex:condition1 ) .
+
+# Supporting instances
+ex:resource1 a rdfs:Resource .
+ex:container1 a rdfs:Container .
+ex:member_var a rdfs:Resource .
+ex:condition1 a log:Condition ; log:allOf ( "true"^^xsd:boolean ) .

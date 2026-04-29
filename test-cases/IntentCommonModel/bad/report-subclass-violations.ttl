@@ -1,0 +1,53 @@
+# Test: Report subclass violations
+# Tests ConditionReport, ContextReport, PropertyExpectationReport, DeliveryExpectationReport
+
+@prefix ex:  <http://example.org/> .
+@prefix icm: <http://tio.models.tmforum.org/tio/v3.6.0/IntentCommonModel/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+################################################################################
+# VIOLATION: ConditionReport with literal about (should be IRI)
+################################################################################
+
+ex:condition_report_literal_about
+  a icm:ConditionReport ;
+  icm:about "some condition" ;  # WRONG: literal not IRI
+  icm:result true .
+
+################################################################################
+# VIOLATION: ContextReport with literal about
+################################################################################
+
+ex:context_report_literal_about
+  a icm:ContextReport ;
+  icm:about "some context" ;  # WRONG: literal not IRI
+  icm:result true .
+
+################################################################################
+# VIOLATION: PropertyExpectationReport with literal about
+################################################################################
+
+ex:property_expectation_report_literal_about
+  a icm:PropertyExpectationReport ;
+  icm:about "some expectation" ;  # WRONG: literal not IRI
+  icm:result true .
+
+################################################################################
+# VIOLATION: DeliveryExpectationReport with literal about
+################################################################################
+
+ex:delivery_expectation_report_literal_about
+  a icm:DeliveryExpectationReport ;
+  icm:about "some delivery expectation" ;  # WRONG: literal not IRI
+  icm:result true .
+
+################################################################################
+# VIOLATION: ReportingExpectationReport with literal about
+################################################################################
+
+ex:reporting_expectation_report_literal_about
+  a icm:ReportingExpectationReport ;
+  icm:about "some reporting expectation" ;  # WRONG: literal not IRI
+  icm:result true .

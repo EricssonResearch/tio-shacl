@@ -1,0 +1,142 @@
+# TMF QuantityOntology SHACL Shapes
+#
+# Domain-specific validation for QuantityOntology.
+# Global validation (function usage, vocabulary) handled by lib/GlobalShapes.ttl
+#
+# Ontology URI: http://tio.models.tmforum.org/tio/v3.6.0/QuantityOntology/
+
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# TMF namespaces
+@prefix quan: <http://tio.models.tmforum.org/tio/v3.6.0/QuantityOntology/> .
+@prefix fun: <http://tio.models.tmforum.org/tio/v3.6.0/FunctionOntology/> .
+@prefix imo: <http://tio.models.tmforum.org/tio/v3.6.0/IntentManagementOntology/> .
+
+# Shape namespaces  
+@prefix quan-shapes: <http://tio.models.tmforum.org/tio/v3.6.0/shapes/QuantityOntology/> .
+@prefix tio-lib: <http://tio.models.tmforum.org/tio/v3.6.0/shapes/lib/> .
+@prefix tio-targets: <http://tio.models.tmforum.org/tio/v3.6.0/shapes/lib/targets/> .
+@prefix tio-constraints: <http://tio.models.tmforum.org/tio/v3.6.0/shapes/lib/constraints/> .
+
+# =============================================================================
+# QUANTITY CLASS VALIDATION
+# =============================================================================
+
+# Validates Quantity instances have value and unit
+quan-shapes:QuantityValueUnitShape
+    a sh:NodeShape ;
+    rdfs:label "Quantity Value and Unit Validation" ;
+    rdfs:comment "Validates Quantity instances have rdf:value and quan:unit (unless computed by function)." ;
+    sh:targetClass quan:Quantity ;
+    sh:sparql tio-constraints:QuantityMissingValueConstraint ;
+    sh:property [
+        sh:path rdf:value ;
+        sh:maxCount 1 ;
+        sh:or (
+            [ sh:datatype xsd:decimal ]
+            [ sh:datatype xsd:integer ]
+            [ sh:datatype xsd:float ]
+            [ sh:datatype xsd:double ]
+        ) ;
+        sh:message "[quan/value_not_numeric] Quantity must have exactly one numeric rdf:value (decimal, integer, float, or double). Use quan:quantity datatype literals for inline quantities: \"320kbps\"^^quan:quantity. For comparisons, use quantity functions like quan:atLeast, quan:atMost with met:lastValue for metrics." ;
+    ] ;
+    sh:property [
+        sh:path quan:unit ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:string ;
+        sh:message "[quan/unit_type] Quantity unit must be a string and appear at most once" ;
+    ] ;
+    sh:severity sh:Violation .
+
+# Validates Quantity values are non-negative
+# Simplified: Using SHACL core sh:minInclusive instead of SPARQL
+quan-shapes:QuantityNonNegativeValueShape
+    a sh:NodeShape ;
+    rdfs:label "Quantity Non-Negative Value Validation" ;
+    rdfs:comment "Validates Quantity instances have non-negative rdf:value." ;
+    sh:targetClass quan:Quantity ;
+    sh:property [
+        sh:path rdf:value ;
+        sh:minInclusive 0 ;
+        sh:message "[quan/negative_value] Quantity value must be non-negative (>= 0). Got: {$value}" ;
+    ] ;
+    sh:severity sh:Violation .
+
+# Validates MonetaryQuantity has valid currency code
+quan-shapes:MonetaryCurrencyCodeShape
+    a sh:NodeShape ;
+    rdfs:label "Monetary Currency Code Validation" ;
+    rdfs:comment "Validates MonetaryQuantity instances have ISO 4217 currency code as unit." ;
+    sh:targetClass quan:MonetaryQuantity ;
+    sh:property [
+        sh:path quan:unit ;
+        sh:pattern "^[A-Z]{3}$" ;
+        sh:message "[quan/currency_code_invalid] MonetaryQuantity unit must be 3-letter ISO 4217 currency code (e.g., USD, EUR, GBP). Got: {$value}" ;
+    ] ;
+    sh:severity sh:Violation .
+
+# =============================================================================
+# QUANTITY COMPARISON FUNCTION RESULT TYPE VALIDATION
+# =============================================================================
+
+# Validates quantity comparison functions return boolean
+quan-shapes:QuantityComparisonFunctionResultTypeShape
+    a sh:NodeShape ;
+    rdfs:label "Quantity Comparison Function Result Type Validation" ;
+    rdfs:comment "Validates quantity comparison functions (atLeast, atMost, equals, etc.) have xsd:boolean as resultType." ;
+    sh:target [
+        a tio-targets:OntologyClassTargetType ;
+        tio-lib:ontologyNamespace "http://tio.models.tmforum.org/tio/v3.6.0/QuantityOntology/" ;
+        tio-lib:targetClass fun:Function ;
+    ] ;
+    
+    sh:sparql tio-constraints:QuantityComparisonFunctionBooleanResultTypeConstraint ;
+    sh:severity sh:Violation .
+
+# =============================================================================
+# PROPERTY DOMAIN VALIDATION
+# =============================================================================
+
+# Validates quan:unit property is only used on Quantity instances
+quan-shapes:DomainOfQuantityPropertiesShape
+    a sh:NodeShape ;
+    rdfs:label "Domain Validation for quan:unit Property" ;
+    rdfs:comment "Validates quan:unit is only used on quan:Quantity instances." ;
+    sh:target [
+        a tio-targets:SubjectsOfPropertyTargetType ;
+        tio-lib:property quan:unit ;
+    ] ;
+
+    sh:class quan:Quantity ;
+    sh:message "[quan/unit_domain] quan:unit property may only be used on quan:Quantity instances" ;
+    sh:severity sh:Violation .
+
+# Validates rdfs:label has correct datatype
+quan-shapes:LabelDatatypeShape
+    a sh:NodeShape ;
+    rdfs:label "Label Datatype Validation" ;
+    rdfs:comment "Validates rdfs:label has xsd:string or rdf:langString datatype." ;
+    sh:target [
+        a tio-targets:SubjectsOfPropertyTargetType ;
+        tio-lib:property rdfs:label ;
+    ] ;
+
+    sh:property [
+        sh:path rdfs:label ;
+        sh:or (
+            [ sh:datatype xsd:string ]
+            [ sh:datatype rdf:langString ]
+        ) ;
+        sh:message "[domain/label_type] rdfs:label must be xsd:string or rdf:langString. Got: {$value}" ;
+    ] ;
+    sh:severity sh:Violation .
+
+# =============================================================================
+# NOTES
+# =============================================================================
+# Universal validation (applies to all ontologies):
+# - Vocabulary: tio-lib:VocabularyUsageShape
+# - Function usage: tio-lib:FunctionUsageShape

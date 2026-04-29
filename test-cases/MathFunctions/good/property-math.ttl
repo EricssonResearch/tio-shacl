@@ -1,0 +1,34 @@
+# Test: Valid usage of math properties
+# Concepts covered: c, coefficients, input, k, l, map, x0
+# This test validates that math properties can be used correctly.
+
+@prefix ex: <http://example.org/> .
+@prefix mth: <http://tio.models.tmforum.org/tio/v3.6.0/MathFunctions/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+ex:test_c
+  a rdfs:Resource ;
+  mth:c "1.0"^^xsd:decimal .
+ex:test_coefficients
+  a rdfs:Resource ;
+  mth:coefficients ( "1.0"^^xsd:decimal "2.0"^^xsd:decimal ) .
+ex:test_input
+  a rdfs:Resource ;
+  mth:input ex:input1 .
+ex:test_k
+  a rdfs:Resource ;
+  mth:k "0.5"^^xsd:decimal .
+ex:test_l
+  a rdfs:Resource ;
+  mth:l "1.0"^^xsd:decimal .
+ex:test_map
+  a rdfs:Resource ;
+  mth:map ex:map1 .
+ex:test_x0
+  a rdfs:Resource ;
+  mth:x0 "0.0"^^xsd:decimal .
+
+ex:input1 a rdfs:Resource .
+ex:map1 a rdfs:Resource .

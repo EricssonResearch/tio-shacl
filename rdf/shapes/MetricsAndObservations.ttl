@@ -1,0 +1,53 @@
+# TMF MetricsAndObservations SHACL Shapes
+#
+# Domain-specific validation for MetricsAndObservations.
+# Global validation (function usage, vocabulary) handled by lib/GlobalShapes.ttl
+#
+# Ontology URI: http://tio.models.tmforum.org/tio/v3.6.0/MetricsAndObservations/
+
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# TMF namespaces
+@prefix met: <http://tio.models.tmforum.org/tio/v3.6.0/MetricsAndObservations/> .
+@prefix fun: <http://tio.models.tmforum.org/tio/v3.6.0/FunctionOntology/> .
+@prefix imo: <http://tio.models.tmforum.org/tio/v3.6.0/IntentManagementOntology/> .
+
+# Shape namespaces  
+@prefix met-shapes: <http://tio.models.tmforum.org/tio/v3.6.0/shapes/MetricsAndObservations/> .
+@prefix tio-lib: <http://tio.models.tmforum.org/tio/v3.6.0/shapes/lib/> .
+@prefix tio-targets: <http://tio.models.tmforum.org/tio/v3.6.0/shapes/lib/targets/> .
+@prefix tio-constraints: <http://tio.models.tmforum.org/tio/v3.6.0/shapes/lib/constraints/> .
+
+# Note: Function definition validation handled globally by tio-lib:FunctionDefinitionShape in GlobalShapes.ttl
+
+# =============================================================================
+# OBSERVATION CLASS VALIDATION
+# =============================================================================
+
+# Validates Observation instances have required properties
+met-shapes:ObservationPropertiesShape
+    a sh:NodeShape ;
+    rdfs:label "Observation Properties Validation" ;
+    rdfs:comment "Validates Observation instances have required properties with correct types." ;
+    sh:targetClass met:Observation ;
+    sh:property [
+        sh:path met:observedMetric ;
+        sh:minCount 1 ;
+        sh:message "[met/missing_observed_metric] Observation missing required met:observedMetric. Every met:Observation in TIO v3.6.0 must reference the metric being observed. Add: met:observedMetric <yourMetric>. Example: [ a met:Observation ; met:observedMetric ex:cpuUsage ; met:obtainedAt \"2024-01-01T12:00:00Z\"^^xsd:dateTime ; met:value \"75%\"^^quan:quantity ]" ;
+    ] ;
+    sh:property [
+        sh:path met:obtainedAt ;
+        sh:datatype xsd:dateTime ;
+        sh:message "[met/obtained_at_type] met:obtainedAt must be xsd:dateTime. Got: {$value}. In TIO v3.6.0, observation timestamps must use proper XSD dateTime format. Fix: met:obtainedAt \"2024-01-01T12:00:00Z\"^^xsd:dateTime or \"2024-01-01T12:00:00-05:00\"^^xsd:dateTime with timezone." ;
+    ] ;
+    sh:severity sh:Violation .
+
+# =============================================================================
+# NOTES
+# =============================================================================
+# Universal validation (applies to all ontologies):
+# - Vocabulary: tio-lib:VocabularyUsageShape
+# - Function usage: tio-lib:FunctionUsageShape

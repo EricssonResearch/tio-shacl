@@ -1,0 +1,32 @@
+# Test: Valid usage of state assignment properties
+# Concepts covered: handlingState, updateState
+# This test validates that handlingState and updateState can be used to assign states.
+
+@prefix ex: <http://example.org/> .
+@prefix icm: <http://tio.models.tmforum.org/tio/v3.6.0/IntentCommonModel/> .
+@prefix imo: <http://tio.models.tmforum.org/tio/v3.6.0/IntentManagementOntology/> .
+@prefix log: <http://tio.models.tmforum.org/tio/v3.6.0/LogicalOperators/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# === Intent for state assignment ===
+ex:test_intent
+  a icm:Intent ;
+  log:allOf ( "true"^^xsd:boolean ) .
+
+# === Intent report with handlingState ===
+ex:test_intent_report
+  a icm:IntentReport ;
+  imo:handlingState imo:StateCompliant .
+
+# === Another report with updateState ===
+ex:test_update_report
+  a icm:IntentReport ;
+  imo:updateState imo:StateIntentReceived .
+
+# === Combined usage of both state properties ===
+ex:test_combined_report
+  a icm:IntentReport ;
+  imo:handlingState imo:StateDegraded ;
+  imo:updateState imo:StateFinalizing .

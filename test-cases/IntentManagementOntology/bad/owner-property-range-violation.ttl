@@ -1,0 +1,35 @@
+# Test: Invalid imo:owner property range
+# This test validates that imo:owner must reference an IntentManager
+# Should FAIL with: "imo:owner must reference an imo:IntentManager instance"
+
+@prefix ex:  <http://example.org/> .
+@prefix imo: <http://tio.models.tmforum.org/tio/v3.6.0/IntentManagementOntology/> .
+@prefix icm: <http://tio.models.tmforum.org/tio/v3.6.0/IntentCommonModel/> .
+@prefix log: <http://tio.models.tmforum.org/tio/v3.6.0/LogicalOperators/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+################################################################################
+# VIOLATION: imo:owner with literal value
+#
+# imo:owner MUST reference an imo:IntentManager instance
+################################################################################
+
+# WRONG - using literal string instead of IntentManager
+ex:intent_literal_owner
+  a icm:Intent ;
+  log:allOf ( "true"^^xsd:boolean ) ;
+  imo:owner "manager" .
+
+################################################################################
+# VIOLATION: imo:owner with wrong class
+################################################################################
+
+# WRONG - referencing an Event instead of IntentManager
+ex:intent_wrong_owner_type
+  a icm:Intent ;
+  log:allOf ( "true"^^xsd:boolean ) ;
+  imo:owner ex:someEvent .
+
+ex:someEvent
+  a imo:Event .

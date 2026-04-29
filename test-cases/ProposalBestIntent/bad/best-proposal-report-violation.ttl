@@ -1,0 +1,32 @@
+# Test: Invalid pbi:proposed range on BestProposalReport
+# This test validates that pbi:proposed must be a pbi:Proposal instance
+# Should FAIL with: "pbi:proposed must be a pbi:Proposal instance"
+
+@prefix ex:  <http://example.org/> .
+@prefix pbi: <http://tio.models.tmforum.org/tio/v3.6.0/ProposalBestIntent/> .
+@prefix icm: <http://tio.models.tmforum.org/tio/v3.6.0/IntentCommonModel/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+################################################################################
+# VIOLATION: pbi:proposed with literal value
+#
+# pbi:proposed MUST reference a pbi:Proposal instance
+################################################################################
+
+# WRONG - using literal string instead of Proposal instance
+ex:report_wrong_proposed
+  a pbi:BestProposalReport ;
+  pbi:proposed "proposal1" .
+
+################################################################################
+# VIOLATION: pbi:proposed with wrong class
+################################################################################
+
+# WRONG - referencing an IntentReport instead of Proposal
+ex:report_wrong_class
+  a pbi:BestProposalReport ;
+  pbi:proposed ex:notProposal .
+
+ex:notProposal
+  a icm:IntentReport .

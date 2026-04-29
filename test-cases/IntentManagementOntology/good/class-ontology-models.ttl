@@ -1,0 +1,42 @@
+# Test: Valid instances of TIO ontology model classes
+# Concepts covered: TIOmodel, BaseOntologyModel, IntentCommonModel, IntentExtensionModel
+# This test validates that ontology model instances can be created with proper metadata.
+
+@prefix ex: <http://example.org/> .
+@prefix imo: <http://tio.models.tmforum.org/tio/v3.6.0/IntentManagementOntology/> .
+@prefix dct: <http://purl.org/dc/terms/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# === TIOmodel (base class for all TIO models) ===
+ex:TestTIOModel
+  a imo:TIOmodel ;
+  dct:title "Test TIO Model"@en ;
+  dct:description "A test TIO model for validation"@en ;
+  dct:created "2024-01-01"^^xsd:date ;
+  dct:creator "Test Author"@en .
+
+# === BaseOntologyModel (base ontology models) ===
+ex:TestBaseOntologyModel
+  a imo:BaseOntologyModel ;
+  dct:title "Test Base Ontology Model"@en ;
+  dct:description "A test base ontology model"@en ;
+  dct:created "2024-01-01"^^xsd:date ;
+  dct:creator "Test Author"@en .
+
+# === IntentCommonModel (intent common models) ===
+ex:TestIntentCommonModel
+  a imo:IntentCommonModel ;
+  dct:title "Test Intent Common Model"@en ;
+  dct:description "A test intent common model"@en ;
+  dct:created "2024-01-01"^^xsd:date ;
+  dct:creator "Test Author"@en .
+
+# === IntentExtensionModel (intent extension models) ===
+ex:TestIntentExtensionModel
+  a imo:IntentExtensionModel ;
+  dct:title "Test Intent Extension Model"@en ;
+  dct:description "A test intent extension model"@en ;
+  dct:created "2024-01-01"^^xsd:date ;
+  dct:creator "Test Author"@en .

@@ -1,0 +1,65 @@
+# TMF MathFunctions SHACL Shapes
+#
+# Domain-specific validation for MathFunctions.
+# Global validation (function usage, vocabulary) handled by lib/GlobalShapes.ttl
+#
+# Ontology URI: http://tio.models.tmforum.org/tio/v3.6.0/MathFunctions/
+
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# TMF namespaces
+@prefix mf: <http://tio.models.tmforum.org/tio/v3.6.0/MathFunctions/> .
+@prefix fun: <http://tio.models.tmforum.org/tio/v3.6.0/FunctionOntology/> .
+@prefix imo: <http://tio.models.tmforum.org/tio/v3.6.0/IntentManagementOntology/> .
+
+# Shape namespaces  
+@prefix mf-shapes: <http://tio.models.tmforum.org/tio/v3.6.0/shapes/MathFunctions/> .
+@prefix tio-lib: <http://tio.models.tmforum.org/tio/v3.6.0/shapes/lib/> .
+@prefix tio-targets: <http://tio.models.tmforum.org/tio/v3.6.0/shapes/lib/targets/> .
+@prefix tio-constraints: <http://tio.models.tmforum.org/tio/v3.6.0/shapes/lib/constraints/> .
+
+# =============================================================================
+# LOGISTIC FUNCTION INSTANCE VALIDATION
+# =============================================================================
+
+# Validates logistic function instances have required parameters
+mf-shapes:LogisticFunctionParametersShape
+    a sh:NodeShape ;
+    rdfs:label "Logistic Function Parameters Validation" ;
+    rdfs:comment "Validates logistic function instances have required k parameter." ;
+    sh:targetClass mf:logistic ;
+
+    sh:property [
+        sh:path mf:k ;
+        sh:minCount 1 ;
+        sh:message "[mf/logistic_missing_k] Logistic function missing required mf:k parameter. In TIO v3.6.0, mf:logistic instances must define the steepness parameter k. Add: mf:k \"2.5\"^^xsd:decimal. The logistic function maps inputs using the formula: 1 / (1 + e^(-k*x))." ;
+    ] ;
+    sh:severity sh:Violation .
+
+# =============================================================================
+# MAPPING FUNCTION INSTANCE VALIDATION
+# =============================================================================
+
+# Validates mapping function instances have required parameters
+mf-shapes:MappingFunctionParametersShape
+    a sh:NodeShape ;
+    rdfs:label "Mapping Function Parameters Validation" ;
+    rdfs:comment "Validates mapping function instances have required map parameter." ;
+    sh:targetClass mf:mapping ;
+
+    sh:property [
+        sh:path mf:map ;
+        sh:minCount 1 ;
+        sh:message "[mf/mapping_missing_map] Mapping function missing required mf:map parameter. In TIO v3.6.0, mf:mapping instances must define the mapping table. Add: mf:map ( (input1 output1) (input2 output2) ... ). Example: [ a mf:mapping ; mf:map ( (\"low\" 1) (\"medium\" 5) (\"high\" 10) ) ]" ;
+    ] ;
+    sh:severity sh:Violation .
+
+# =============================================================================
+# NOTES
+# =============================================================================
+# Universal validation (applies to all ontologies):
+# - Vocabulary: tio-lib:VocabularyUsageShape
+# - Function usage: tio-lib:FunctionUsageShape

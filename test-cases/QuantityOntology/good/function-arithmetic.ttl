@@ -1,0 +1,45 @@
+# Test: Valid usage of arithmetic functions
+# Concepts covered: sum, difference, multiplication, division, sumOfSet, multiplicationOfSet
+# This test validates that arithmetic functions can be used correctly.
+
+@prefix ex: <http://example.org/> .
+@prefix fun: <http://tio.models.tmforum.org/tio/v3.6.0/FunctionOntology/> .
+@prefix quan: <http://tio.models.tmforum.org/tio/v3.6.0/QuantityOntology/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# === sum function ===
+ex:test_sum
+  a rdfs:Resource ;
+  quan:sum ( ex:q1 ex:q2 ) .
+
+# === difference function ===
+ex:test_difference
+  a rdfs:Resource ;
+  quan:difference ( ex:q1 ex:q2 ) .
+
+# === multiplication function ===
+ex:test_multiplication
+  a rdfs:Resource ;
+  quan:multiplication ( ex:q1 ex:q2 ) .
+
+# === division function ===
+ex:test_division
+  a rdfs:Resource ;
+  quan:division ( ex:q1 ex:q2 ) .
+
+# === sumOfSet function ===
+ex:test_sumofset
+  a rdfs:Resource ;
+  quan:sumOfSet ( ex:set1 ) .
+
+# === multiplicationOfSet function ===
+ex:test_multiplicationofset
+  a rdfs:Resource ;
+  quan:multiplicationOfSet ( ex:set1 ) .
+
+# Supporting quantity instances
+ex:q1 a quan:Quantity ; rdf:value "100"^^xsd:decimal ; quan:unit "ms"^^xsd:string .
+ex:q2 a quan:Quantity ; rdf:value "110"^^xsd:decimal ; quan:unit "ms"^^xsd:string .
+ex:set1 a rdfs:Container .

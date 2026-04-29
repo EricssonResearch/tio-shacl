@@ -1,0 +1,33 @@
+# Test: Valid usage of logical operator functions
+# Concepts covered: allOf, anyOf, noneOf, oneOf
+# This test validates that logical operator functions can be used correctly.
+
+@prefix ex: <http://example.org/> .
+@prefix log: <http://tio.models.tmforum.org/tio/v3.6.0/LogicalOperators/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# === allOf function ===
+ex:test_allof
+  a rdfs:Resource ;
+  log:allOf ( ex:cond1 ex:cond2 ) .
+
+# === anyOf function ===
+ex:test_anyof
+  a rdfs:Resource ;
+  log:anyOf ( ex:cond1 ex:cond2 ) .
+
+# === noneOf function ===
+ex:test_noneof
+  a rdfs:Resource ;
+  log:noneOf ( ex:cond1 ex:cond2 ) .
+
+# === oneOf function ===
+ex:test_oneof
+  a rdfs:Resource ;
+  log:oneOf ( ex:cond1 ex:cond2 ) .
+
+# Supporting instances - Conditions need BooleanFunction property
+ex:cond1 a log:Condition ; log:allOf ( "true"^^xsd:boolean ) .
+ex:cond2 a log:Condition ; log:allOf ( "true"^^xsd:boolean ) .

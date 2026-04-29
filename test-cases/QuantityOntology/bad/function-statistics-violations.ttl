@@ -1,0 +1,23 @@
+# Test: Invalid usage of statistical functions
+# Concepts covered: mean, median, meanOfSet, medianOfSet
+# Constraints tested: Arity violations
+# This test validates that violations are caught for invalid statistical function usage.
+
+@prefix ex: <http://example.org/> .
+@prefix fun: <http://tio.models.tmforum.org/tio/v3.6.0/FunctionOntology/> .
+@prefix quan: <http://tio.models.tmforum.org/tio/v3.6.0/QuantityOntology/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# === mean violations (zero args) ===
+ex:invalid_mean quan:mean ( ) .
+
+# === median violations (zero args) ===
+ex:invalid_median quan:median ( ) .
+
+# === meanOfSet violations (zero args) ===
+ex:invalid_meanofset quan:meanOfSet ( ) .
+
+# === medianOfSet violations (zero args) ===
+ex:invalid_medianofset quan:medianOfSet ( ) .

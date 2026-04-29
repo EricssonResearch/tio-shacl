@@ -1,0 +1,23 @@
+# Test: Valid usage of Association properties
+# Concepts covered: handler, owner
+# This test validates that association properties can be used correctly.
+
+@prefix ex: <http://example.org/> .
+@prefix fun: <http://tio.models.tmforum.org/tio/v3.6.0/FunctionOntology/> .
+@prefix imo: <http://tio.models.tmforum.org/tio/v3.6.0/IntentManagementOntology/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# === handler property (must reference imo:IntentManager) ===
+ex:test_handler_subject
+  a rdfs:Resource ;
+  imo:handler ex:manager1 .
+
+# === owner property (must reference imo:IntentManager) ===
+ex:test_owner_subject
+  a rdfs:Resource ;
+  imo:owner ex:manager1 .
+
+# Supporting instances
+ex:manager1 a imo:IntentManager .

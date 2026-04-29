@@ -1,0 +1,129 @@
+# TMF Utility SHACL Shapes
+#
+# Domain-specific validation for Utility.
+# Global validation (function usage, vocabulary) handled by lib/GlobalShapes.ttl
+#
+# Ontology URI: http://tio.models.tmforum.org/tio/v3.6.0/Utility/
+
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# TMF namespaces
+@prefix ut: <http://tio.models.tmforum.org/tio/v3.6.0/Utility/> .
+@prefix icm: <http://tio.models.tmforum.org/tio/v3.6.0/IntentCommonModel/> .
+@prefix fun: <http://tio.models.tmforum.org/tio/v3.6.0/FunctionOntology/> .
+@prefix imo: <http://tio.models.tmforum.org/tio/v3.6.0/IntentManagementOntology/> .
+
+# Shape namespaces
+@prefix ut-shapes: <http://tio.models.tmforum.org/tio/v3.6.0/shapes/Utility/> .
+@prefix tio-lib: <http://tio.models.tmforum.org/tio/v3.6.0/shapes/lib/> .
+@prefix tio-targets: <http://tio.models.tmforum.org/tio/v3.6.0/shapes/lib/targets/> .
+@prefix tio-constraints: <http://tio.models.tmforum.org/tio/v3.6.0/shapes/lib/constraints/> .
+
+# =============================================================================
+# UTILITY INFORMATION VALIDATION
+# =============================================================================
+
+ut-shapes:UtilityInformationShape
+    a sh:NodeShape ;
+    rdfs:label "Utility Information Shape" ;
+    rdfs:comment "Validates UtilityInformation class instances. Utility information specifies utility functions and their arguments for calculating utility scores that quantify business value." ;
+    sh:targetClass ut:UtilityInformation ;
+
+    # forMetric: maps function arguments to metrics
+    sh:property [
+        sh:path ut:forMetric ;
+        sh:nodeKind sh:BlankNodeOrIRI ;
+        sh:name "forMetric" ;
+        sh:description "Value pair mapping argument B-node to metric (specifies metrics for utility function)" ;
+        sh:message "[ut/for_metric_literal] ut:forMetric must be an RDF list containing [argument, metric] pairs. In TIO v3.6.0, use Turtle list syntax: ut:forMetric ( [blank-node-arg] <metric-uri> ). This maps utility function arguments to metrics for data binding." ;
+    ] ;
+
+    # function: the utility function to calculate scores
+    sh:property [
+        sh:path ut:function ;
+        sh:nodeKind sh:IRI ;
+        sh:message "[ut/function_literal] ut:function must be an IRI, not a literal." ;
+    ] ;
+    sh:property [
+        sh:path ut:function ;
+        sh:class fun:Function ;
+        sh:message "[ut/function_not_function] ut:function must reference a fun:Function instance." ;
+    ] ;
+
+    # withArgument: single argument value assignment
+    sh:property [
+        sh:path ut:withArgument ;
+        sh:nodeKind sh:BlankNodeOrIRI ;
+        sh:name "withArgument" ;
+        sh:description "Value pair [named-argument, value] for single argument assignment" ;
+        sh:message "[domain/utility_with_argument] ut:withArgument must be a list (use Turtle () syntax) containing [argument-name, value] when present" ;
+    ] ;
+
+    # withArguments: complete argument list
+    sh:property [
+        sh:path ut:withArguments ;
+        sh:nodeKind sh:BlankNodeOrIRI ;
+        sh:name "withArguments" ;
+        sh:description "Complete argument list matching function's argument specification" ;
+        sh:message "[domain/utility_with_arguments] ut:withArguments must be an RDF list of values. In TIO v3.6.0, use Turtle list syntax to provide all function arguments: ut:withArguments ( value1 value2 value3 ). The list length must match the function's arity." ;
+    ] ;
+
+    sh:severity sh:Violation ;
+    sh:message "[domain/utility_information] UtilityInformation validation failed: ensure function is fun:Function, forMetric/withArgument/withArguments are rdf:List instances with correct structure" .
+
+# Note: Vocabulary validation handled globally by tio-lib:VocabularyUsageShape in GlobalShapes.ttl
+
+# =============================================================================
+# PROPERTY RANGE VALIDATION
+# =============================================================================
+
+# Validate ut:function property range
+ut-shapes:FunctionPropertyShape
+    a sh:NodeShape ;
+    rdfs:label "Function Property Range Validation" ;
+    rdfs:comment "Validates that ut:function points to fun:Function" ;
+    sh:target [
+        a tio-targets:SubjectsOfPropertyTargetType ;
+        tio-lib:property ut:function ;
+    ] ;
+
+    sh:property [
+        sh:path ut:function ;
+        sh:description "function must point to fun:Function" ;
+        sh:class fun:Function ;
+        sh:name "function" ;
+        sh:message "[ut/function_literal, ut/function_not_function] ut:function must reference a fun:Function instance. In TIO v3.6.0, utility calculations use functions from FunctionOntology or MathFunctions. Ensure the referenced URI has rdf:type fun:Function." ;
+    ] ;
+
+    sh:severity sh:Violation .
+
+# Validate ut:utility property range
+ut-shapes:UtilityPropertyShape
+    a sh:NodeShape ;
+    rdfs:label "Utility Property Range Validation" ;
+    rdfs:comment "Validates that ut:utility points to UtilityInformation" ;
+    sh:target [
+        a tio-targets:SubjectsOfPropertyTargetType ;
+        tio-lib:property ut:utility ;
+    ] ;
+
+    sh:property [
+        sh:path ut:utility ;
+        sh:description "utility must point to ut:UtilityInformation" ;
+        sh:class ut:UtilityInformation ;
+        sh:name "utility" ;
+        sh:nodeKind sh:IRI ;
+        sh:message "[ut/utility_literal] ut:utility must be an IRI, not a literal." ;
+    ] ;
+    sh:property [
+        sh:path ut:utility ;
+        sh:class ut:UtilityInformation ;
+        sh:message "[ut/utility_not_info] ut:utility must reference a ut:UtilityInformation instance." ;
+    ] ;
+
+    sh:severity sh:Violation .
+
+# Note: Function definition validation handled globally by tio-lib:FunctionDefinitionShape in GlobalShapes.ttl

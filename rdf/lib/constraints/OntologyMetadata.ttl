@@ -1,0 +1,94 @@
+# TMF SHACL Reusable Constraint Library
+#
+# This file is part of the modular constraint library.
+# Based on SHACL Advanced Features constraint patterns
+
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix fun: <http://tio.models.tmforum.org/tio/v3.6.0/FunctionOntology/> .
+@prefix tio-constraints: <http://tio.models.tmforum.org/tio/v3.6.0/shapes/lib/constraints/> .
+@prefix tio-lib: <http://tio.models.tmforum.org/tio/v3.6.0/shapes/lib/> .
+
+# =============================================================================
+# UNIVERSAL TMF ONTOLOGY VALIDATION CONSTRAINTS
+# =============================================================================
+# Usage: "Give me all the things that are imo:BaseOntologyModel instances, but only if they don't have a dct:title."
+tio-constraints:OntologyTitleRequiredConstraint
+    a sh:SPARQLConstraint ;
+    rdfs:label "Ontology Title Required Constraint" ;
+    rdfs:comment "Validates that ontology models have dct:title" ;
+    sh:message "[domain/ontology_metadata] Ontology missing required dct:title property. Add metadata: dct:title \"Your Ontology Name\"@en" ;
+    sh:select """
+        PREFIX dct: <http://purl.org/dc/terms/>
+        PREFIX imo: <http://tio.models.tmforum.org/tio/v3.6.0/IntentManagementOntology/>
+        SELECT $this
+        WHERE {
+            $this a imo:BaseOntologyModel .
+            FILTER NOT EXISTS { $this dct:title ?value }
+        }
+    """ .
+
+# Validate that ontology models have required Dublin Core description
+# Usage: "Give me all the things that are imo:BaseOntologyModel instances, but only if they don't have a dct:description."
+tio-constraints:OntologyDescriptionRequiredConstraint
+    a sh:SPARQLConstraint ;
+    rdfs:label "Ontology Description Required Constraint" ;
+    rdfs:comment "Validates that ontology models have dct:description" ;
+    sh:message "[domain/ontology_metadata] Ontology missing required dct:description property. Add metadata: dct:description \"Brief description of the ontology\"@en" ;
+    sh:select """
+        PREFIX dct: <http://purl.org/dc/terms/>
+        PREFIX imo: <http://tio.models.tmforum.org/tio/v3.6.0/IntentManagementOntology/>
+        SELECT $this
+        WHERE {
+            $this a imo:BaseOntologyModel .
+            FILTER NOT EXISTS { $this dct:description ?value }
+        }
+    """ .
+
+# =============================================================================
+# FUNCTION CONSTRAINTS (NON-PARAMETERIZED)
+# =============================================================================
+# These constraints are used with parameterized target types (tio-constraints:FunctionTargetType, tio-constraints:OntologyClassTargetType)
+# The target type scopes which functions are validated, so these constraints don't need namespace filtering
+
+# Constraint for class documentation
+# Used with parameterized target types (tio-constraints:OntologyClassTargetType) to scope validation
+# Usage: "Give me all the things that are classes, but only if they don't have both rdfs:label and rdfs:comment."
+tio-constraints:ClassDocumentationConstraint
+    a sh:SPARQLConstraint ;
+    rdfs:label "Class Documentation Constraint" ;
+    rdfs:comment "Validates that classes have proper documentation. Used with parameterized target types." ;
+    sh:message "[domain/class_documentation] Class {?this} should have both rdfs:label and rdfs:comment for documentation. Add: rdfs:label \"Class Name\"@en ; rdfs:comment \"Description of what this class represents\"@en" ;
+    sh:select """
+        PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+        SELECT $this
+        WHERE {
+            $this a rdfs:Class .
+            FILTER NOT EXISTS { 
+                $this rdfs:label ?label .
+                $this rdfs:comment ?comment .
+            }
+        }
+    """ .
+
+# Validate that IntentHandlingEvent is a subclass of Event
+# Usage: "Give me all the things that are imo:IntentHandlingEvent instances, but only if imo:IntentHandlingEvent is not a subclass of imo:Event."
+tio-constraints:IntentHandlingEventSubclassConstraint
+    a sh:SPARQLConstraint ;
+    rdfs:label "Intent Handling Event Subclass Constraint" ;
+    rdfs:comment "Validates that imo:IntentHandlingEvent is a subclass of imo:Event. Used with parameterized target types." ;
+    sh:message "[domain/event_subclass] imo:IntentHandlingEvent should be a subclass of imo:Event" ;
+    sh:select """
+        PREFIX imo: <http://tio.models.tmforum.org/tio/v3.6.0/IntentManagementOntology/>
+        PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+        SELECT $this
+        WHERE {
+            $this a imo:IntentHandlingEvent .
+            FILTER NOT EXISTS { 
+                imo:IntentHandlingEvent rdfs:subClassOf* imo:Event 
+            }
+        }
+    """ .
+

@@ -1,0 +1,183 @@
+# TMF Global SHACL Shapes
+#
+# Global validation shapes that apply across ALL TMF ontologies.
+# These shapes use SPARQL targets to automatically find and validate instances
+# across any ontology without requiring explicit composition.
+#
+
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# TMF namespaces
+@prefix fun: <http://tio.models.tmforum.org/tio/v3.6.0/FunctionOntology/> .
+
+# Shape namespaces
+@prefix tio-lib: <http://tio.models.tmforum.org/tio/v3.6.0/shapes/lib/> .
+@prefix tio-constraints: <http://tio.models.tmforum.org/tio/v3.6.0/shapes/lib/constraints/> .
+
+# Note: Shared components are loaded by Python code, not via owl:imports
+
+# =============================================================================
+# FUNCTION DEFINITION VALIDATION (Global)
+# =============================================================================
+
+# Validates ALL fun:Function definitions across all ontologies
+# Applies to SetOperators, LogicalOperators, MathFunctions, etc.
+tio-lib:FunctionDefinitionShape
+    a sh:NodeShape ;
+    rdfs:label "Function Definition Validation" ;
+    rdfs:comment "Validates fun:Function instances have required properties across all ontologies." ;
+    sh:order 2 ;  # Validate after vocabulary
+    sh:target [
+        a sh:SPARQLTarget ;
+        sh:select """
+            PREFIX fun: <http://tio.models.tmforum.org/tio/v3.6.0/FunctionOntology/>
+            SELECT ?this
+            WHERE {
+                ?this a fun:Function .
+            }
+        """ ;
+    ] ;
+
+    # Apply function constraints
+    sh:sparql tio-constraints:FunctionArityConsistencyConstraint ,
+              tio-constraints:ArgumentTypeCountConstraint ;
+
+    # Function property validation
+    sh:property [
+        sh:path fun:arityMin ;
+        sh:datatype xsd:nonNegativeInteger ;
+        sh:maxCount 1 ;
+        sh:message "fun:arityMin must be a non-negative integer (0, 1, 2, ...). Got: {$value}" ;
+    ], [
+        sh:path fun:arityMax ;
+        sh:datatype xsd:nonNegativeInteger ;
+        sh:maxCount 1 ;
+        sh:message "fun:arityMax must be a non-negative integer (0, 1, 2, ...). Got: {$value}" ;
+    ], [
+        sh:path fun:argumentNames ;
+        sh:or (
+            [ sh:class rdfs:List ]
+            [ sh:hasValue rdf:nil ]
+            [ sh:nodeKind sh:BlankNode ]
+        ) ;
+        sh:maxCount 1 ;
+        sh:message "fun:argumentNames must be an RDF list. Use: fun:argumentNames ( \"name1\" \"name2\" )" ;
+    ], [
+        sh:path fun:argumentTypes ;
+        sh:or (
+            [ sh:class rdfs:List ]
+            [ sh:hasValue rdf:nil ]
+            [ sh:nodeKind sh:BlankNode ]
+        ) ;
+        sh:maxCount 1 ;
+        sh:message "fun:argumentTypes must be an RDF list. Use: fun:argumentTypes ( xsd:boolean xsd:decimal )" ;
+    ], [
+        sh:path fun:resultType ;
+        sh:maxCount 1 ;
+        sh:minCount 1 ;
+        sh:message "Function must have exactly one fun:resultType (e.g., xsd:boolean, xsd:decimal)" ;
+    ], [
+        sh:path fun:resultIfInvalid ;
+        sh:maxCount 1 ;
+        sh:message "fun:resultIfInvalid can only appear once. Remove duplicate declarations" ;
+    ] ;
+
+    sh:severity sh:Violation .
+
+# =============================================================================
+# VOCABULARY USAGE VALIDATION (Global)
+# =============================================================================
+
+tio-lib:VocabularyUsageShape
+    a sh:NodeShape ;
+    rdfs:label "Vocabulary Usage Validation" ;
+    rdfs:comment "Validates TIO vocabulary usage: properties must be defined, types must exist." ;
+    sh:order 1 ;  # Validate vocabulary first - these are root cause errors
+    sh:target [
+        a sh:SPARQLTarget ;
+        sh:select """
+            SELECT DISTINCT ?this
+            WHERE {
+                {
+                    # Subjects using TIO properties (for VocabularyConstraint)
+                    ?this ?p ?o .
+                    FILTER(STRSTARTS(STR(?p), "http://tio.models.tmforum.org/tio/v3.6.0/"))
+                }
+                UNION
+                {
+                    # TIO types used in rdf:type (for UndefinedTypeConstraint)
+                    ?s a ?this .
+                    FILTER(isIRI(?this))
+                    FILTER(STRSTARTS(STR(?this), "http://tio.models.tmforum.org/tio/v3.6.0/"))
+                }
+            }
+        """ ;
+    ] ;
+    sh:sparql tio-constraints:VocabularyConstraint ,
+              tio-constraints:UndefinedTypeConstraint ,
+              tio-constraints:UndefinedResourceConstraint ,
+              tio-constraints:DomainMismatchConstraint ,
+              tio-constraints:RangeMismatchConstraint ;
+    sh:severity sh:Violation .
+
+# Separate shape for blank node vocabulary validation.
+# Kept separate because blank nodes only need VocabularyConstraint (not UndefinedTypeConstraint),
+# and running all constraints on blank nodes is significantly slower.
+tio-lib:BlankNodeVocabularyShape
+    a sh:NodeShape ;
+    rdfs:label "Blank Node Vocabulary Validation" ;
+    rdfs:comment "Validates TIO properties used by blank nodes are defined. Catches typos in function calls like set:resourcesOfTypes." ;
+    sh:order 1 ;
+    sh:target [
+        a sh:SPARQLTarget ;
+        sh:select """
+            SELECT DISTINCT ?this
+            WHERE {
+                ?this ?p ?o .
+                FILTER(isBlank(?this))
+                FILTER(STRSTARTS(STR(?p), "http://tio.models.tmforum.org/tio/v3.6.0/"))
+            }
+        """ ;
+    ] ;
+    sh:sparql tio-constraints:VocabularyConstraint ;
+    sh:severity sh:Violation .
+
+# =============================================================================
+# FUNCTION USAGE VALIDATION (Global)
+# =============================================================================
+
+# Validates function calls are correct (list arguments, arity, types)
+# Applies to ALL function usage across all ontologies
+tio-lib:FunctionUsageShape
+    a sh:NodeShape ;
+    rdfs:label "Function Usage Validation" ;
+    rdfs:comment "Validates function calls have correct arguments (lists, arity, types). Applies to all function usage across all ontologies." ;
+    sh:order 3 ;  # Validate after vocabulary and function definitions
+    sh:target [
+        a sh:SPARQLTarget ;
+        sh:select """
+            PREFIX fun: <http://tio.models.tmforum.org/tio/v3.6.0/FunctionOntology/>
+            SELECT ?this
+            WHERE {
+                ?this ?func ?args .
+                ?func a fun:Function .
+            }
+        """ ;
+    ] ;
+
+    # Apply standard function usage constraints
+    sh:sparql tio-constraints:FunctionArgumentMustBeListConstraint ,
+              tio-constraints:FunctionUsageArityMinConstraint ,
+              tio-constraints:FunctionUsageArityMaxConstraint ,
+              # Reject ambiguous unwrapped function syntax (func args instead of [ func args ])
+              tio-constraints:UnwrappedFunctionSyntaxConstraint ,
+              # Argument type validation split into focused constraints:
+              tio-constraints:FunctionUsageArgumentTypeBooleanConstraint ,
+              tio-constraints:FunctionUsageArgumentTypeObjectConstraint ,
+              tio-constraints:FunctionUsageArgumentTypePolymorphicConstraint ,
+              tio-constraints:FunctionUsageArgumentLiteralWhereResourceConstraint ;
+
+    sh:severity sh:Violation .

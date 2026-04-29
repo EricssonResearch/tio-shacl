@@ -1,0 +1,47 @@
+# Test: Validity with W3C time properties in log:match
+# This should be valid but may fail if vocabulary validation is too strict
+
+@prefix ex:   <http://example.org/> .
+@prefix icm:  <http://tio.models.tmforum.org/tio/v3.6.0/IntentCommonModel/> .
+@prefix iv:   <http://tio.models.tmforum.org/tio/v3.6.0/IntentValidityOntology/> .
+@prefix log:  <http://tio.models.tmforum.org/tio/v3.6.0/LogicalOperators/> .
+@prefix imo:  <http://tio.models.tmforum.org/tio/v3.6.0/IntentManagementOntology/> .
+@prefix t:    <http://www.w3.org/2006/time#> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+# Validity with temporal constraint using W3C Time ontology and log:match
+# Based on TR292C Function Definition example
+# This tests whether W3C time properties (t:inside, t:hasBeginning, etc.)
+# can be used within a log:match condition in an iv:Validity context
+
+ex:TimeInterval
+  a rdfs:Resource ;
+  t:hasBeginning [ t:inXSDDateTimeStamp "2024-07-05T17:00+01:00"^^xsd:dateTimeStamp ] ;
+  t:hasXSDDuration "PT1H"^^xsd:duration
+  .
+
+ex:V1
+  a iv:Validity ;
+  log:match ( imo:Now
+              t:inside
+              ex:TimeInterval
+  )
+  .
+
+ex:I1
+  a icm:Intent ;
+  log:allOf ( ex:E1 ) ;
+  iv:validIf ex:V1
+  .
+
+ex:E1
+  a icm:PropertyExpectation ;
+  icm:target ex:T1 ;
+  log:allOf ( "true"^^xsd:boolean )
+  .
+
+ex:T1
+  a icm:Target
+  .

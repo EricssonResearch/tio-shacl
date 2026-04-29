@@ -1,0 +1,78 @@
+# TMF ProposalBestIntent SHACL Shapes
+#
+# Domain-specific validation for ProposalBestIntent.
+# Global validation (function usage, vocabulary) handled by lib/GlobalShapes.ttl
+#
+# Ontology URI: http://tio.models.tmforum.org/tio/v3.6.0/ProposalBestIntent/
+
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# TMF namespaces
+@prefix pbi: <http://tio.models.tmforum.org/tio/v3.6.0/ProposalBestIntent/> .
+@prefix icm: <http://tio.models.tmforum.org/tio/v3.6.0/IntentCommonModel/> .
+@prefix fun: <http://tio.models.tmforum.org/tio/v3.6.0/FunctionOntology/> .
+@prefix imo: <http://tio.models.tmforum.org/tio/v3.6.0/IntentManagementOntology/> .
+
+# Shape namespaces
+@prefix pbi-shapes: <http://tio.models.tmforum.org/tio/v3.6.0/shapes/ProposalBestIntent/> .
+@prefix tio-lib: <http://tio.models.tmforum.org/tio/v3.6.0/shapes/lib/> .
+@prefix tio-targets: <http://tio.models.tmforum.org/tio/v3.6.0/shapes/lib/targets/> .
+@prefix tio-constraints: <http://tio.models.tmforum.org/tio/v3.6.0/shapes/lib/constraints/> .
+
+# =============================================================================
+# BEST PROPOSAL REPORT VALIDATION
+# =============================================================================
+
+pbi-shapes:BestProposalReportShape
+    a sh:NodeShape ;
+    rdfs:label "Best Proposal Report Shape" ;
+    rdfs:comment "Validates BestProposalReport class instances. Best proposal reports contain individual proposals responding to best proposal expectations in intents." ;
+    sh:targetClass pbi:BestProposalReport ;
+
+    # proposed: individual proposals in the report
+    sh:property [
+        sh:path pbi:proposed ;
+        sh:class pbi:Proposal ;
+        sh:name "proposed" ;
+        sh:description "Individual proposals contained in this report" ;
+        sh:message "[pbi/proposed_literal] pbi:proposed must be a pbi:Proposal instance. In TIO v3.6.0, best proposal reports contain individual proposals for each requirement. Ensure: pbi:proposed <proposal-uri> where the URI has rdf:type pbi:Proposal" ;
+    ] ;
+
+    sh:severity sh:Violation ;
+    sh:message "[domain/best_proposal_report] BestProposalReport validation failed: ensure all proposed entries are pbi:Proposal instances" .
+
+# =============================================================================
+# PROPOSAL VALIDATION
+# =============================================================================
+
+pbi-shapes:ProposalShape
+    a sh:NodeShape ;
+    rdfs:label "Proposal Shape" ;
+    rdfs:comment "Validates Proposal class instances. Proposals provide suggested values for specific intent requirements, typically one proposal per requirement within the scope." ;
+    sh:targetClass pbi:Proposal ;
+
+    # proposedFor: which requirement this proposal addresses
+    sh:property [
+        sh:path pbi:proposedFor ;
+        sh:nodeKind sh:BlankNodeOrIRI ;
+        sh:name "proposedFor" ;
+        sh:description "The intent requirement object this proposal addresses" ;
+        sh:message "[pbi/proposed_for_literal] pbi:proposedFor must be a resource (blank node or IRI) referencing an intent requirement when present" ;
+    ] ;
+
+    # proposedBest: the proposed values
+    sh:property [
+        sh:path pbi:proposedBest ;
+        sh:nodeKind sh:BlankNodeOrIRI ;
+        sh:name "proposedBest" ;
+        sh:description "Object containing the proposed values" ;
+        sh:message "[pbi/proposed_best_literal] pbi:proposedBest must be a resource (blank node or IRI), not a literal. In TIO v3.6.0, this contains structured proposal values. Use blank nodes [ ... ] or named URIs for complex objects, not strings or numbers directly." ;
+    ] ;
+
+    sh:severity sh:Violation ;
+    sh:message "[domain/proposal_properties] Proposal validation failed: ensure proposedFor references an intent requirement and proposedBest contains the proposal values" .
+
+# Note: Vocabulary validation handled globally by tio-lib:VocabularyUsageShape in GlobalShapes.ttl

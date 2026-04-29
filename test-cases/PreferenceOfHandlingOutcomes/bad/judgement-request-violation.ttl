@@ -1,0 +1,32 @@
+# Test: Invalid pre:preferenceDeadline range on JudgementRequest
+# This test validates that pre:preferenceDeadline must be time:Instant
+# Should FAIL with: "pre:preferenceDeadline must be a time:Instant"
+
+@prefix ex:   <http://example.org/> .
+@prefix pre:  <http://tio.models.tmforum.org/tio/v3.6.0/PreferenceOfHandlingOutcomes/> .
+@prefix time: <http://www.w3.org/2006/time#> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+################################################################################
+# VIOLATION: pre:preferenceDeadline with literal value
+#
+# pre:preferenceDeadline MUST be a time:Instant instance
+################################################################################
+
+# WRONG - using literal string instead of time:Instant
+ex:request_literal_deadline
+  a pre:JudgementRequest ;
+  pre:preferenceDeadline "2024-12-31" .
+
+################################################################################
+# VIOLATION: pre:preferenceDeadline with wrong class
+################################################################################
+
+# WRONG - referencing xsd:date instead of time:Instant
+ex:request_wrong_class
+  a pre:JudgementRequest ;
+  pre:preferenceDeadline ex:notInstant .
+
+ex:notInstant
+  a xsd:date .

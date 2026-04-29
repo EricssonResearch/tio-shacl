@@ -1,0 +1,43 @@
+# Test: Valid usage of guarantee properties
+# Concepts covered: confidenceLevel, guaranteePeriod, guaranteePeriodUpdateInterval, hasGuarantee, state, until
+# This test validates that guarantee properties can be used correctly.
+
+@prefix ex: <http://example.org/> .
+@prefix igo: <http://tio.models.tmforum.org/tio/v3.6.0/IntentGuaranteeOntology/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# === confidenceLevel property ===
+ex:test_confidencelevel
+  a rdfs:Resource ;
+  igo:confidenceLevel "0.95"^^xsd:decimal .
+
+# === guaranteePeriod property (must be xsd:duration) ===
+ex:test_guaranteeperiod
+  a rdfs:Resource ;
+  igo:guaranteePeriod "P1D"^^xsd:duration .
+
+# === guaranteePeriodUpdateInterval property (must be xsd:duration) ===
+ex:test_updateinterval
+  a rdfs:Resource ;
+  igo:guaranteePeriodUpdateInterval "PT5M"^^xsd:duration .
+
+# === hasGuarantee property ===
+ex:test_hasguarantee
+  a rdfs:Resource ;
+  igo:hasGuarantee ex:guarantee1 .
+
+# === state property ===
+ex:test_state
+  a rdfs:Resource ;
+  igo:state ex:state1 .
+
+# === until property ===
+ex:test_until
+  a rdfs:Resource ;
+  igo:until "2024-12-31T23:59:59"^^xsd:dateTime .
+
+# Supporting instances
+ex:guarantee1 a igo:Guarantee .
+ex:state1 a igo:State .

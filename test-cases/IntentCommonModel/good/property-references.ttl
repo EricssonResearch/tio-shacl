@@ -1,0 +1,62 @@
+# Test: Valid usage of Reference properties
+# Concepts covered: about, context, contextReport, information, reason, target, targetReport
+# This test validates that reference properties can be used correctly.
+
+@prefix ex: <http://example.org/> .
+@prefix fun: <http://tio.models.tmforum.org/tio/v3.6.0/FunctionOntology/> .
+@prefix icm: <http://tio.models.tmforum.org/tio/v3.6.0/IntentCommonModel/> .
+@prefix log: <http://tio.models.tmforum.org/tio/v3.6.0/LogicalOperators/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# Intent referencing all expectations to avoid unreferenced warnings
+ex:test_intent a icm:Intent ;
+  log:allOf ( ex:test_about ex:test_target_prop ) .
+
+# === about property ===
+ex:test_about
+  a icm:Expectation ;
+  icm:target ex:target1 ;
+  icm:about ex:some_resource .
+
+# === context property ===
+ex:test_context_prop
+  a icm:Intent ;
+  log:allOf ( "true"^^xsd:boolean ) ;
+  icm:context ex:context1 .
+
+# === contextReport property ===
+ex:test_contextreport_prop
+  a icm:IntentReport ;
+  icm:contextReport ex:contextreport1 .
+
+# === information property ===
+ex:test_information_prop
+  a icm:Intent ;
+  log:allOf ( "true"^^xsd:boolean ) ;
+  icm:information ex:info1 .
+
+# === reason property ===
+ex:test_reason_prop
+  a icm:ExpectationReport ;
+  icm:reason ex:reason1 .
+
+# === target property ===
+ex:test_target_prop
+  a icm:Expectation ;
+  icm:target ex:target1 .
+
+# === targetReport property ===
+ex:test_targetreport_prop
+  a icm:ExpectationReport ;
+  icm:targetReport ex:targetreport1 .
+
+# Supporting instances
+ex:target1 a icm:Target .
+ex:context1 a icm:Context .
+ex:contextreport1 a icm:ContextReport .
+ex:info1 a icm:Information .
+ex:reason1 a icm:Reason .
+ex:targetreport1 a icm:TargetReport .
+ex:some_resource a rdfs:Resource .

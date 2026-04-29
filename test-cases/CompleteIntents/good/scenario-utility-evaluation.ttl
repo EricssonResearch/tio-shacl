@@ -1,0 +1,230 @@
+# Test: Cross-ontology integration - Utility Evaluation Workflow
+# Concepts covered: UtilityInformation, UtilityProfile, Metrics, Observations,
+#                   Function composition, business value calculation
+# This test validates utility-based decision making.
+
+@prefix ex: <http://example.org/> .
+@prefix fun: <http://tio.models.tmforum.org/tio/v3.6.0/FunctionOntology/> .
+@prefix icm: <http://tio.models.tmforum.org/tio/v3.6.0/IntentCommonModel/> .
+@prefix log: <http://tio.models.tmforum.org/tio/v3.6.0/LogicalOperators/> .
+@prefix met: <http://tio.models.tmforum.org/tio/v3.6.0/MetricsAndObservations/> .
+@prefix mf: <http://tio.models.tmforum.org/tio/v3.6.0/MathFunctions/> .
+@prefix quan: <http://tio.models.tmforum.org/tio/v3.6.0/QuantityOntology/> .
+@prefix ut: <http://tio.models.tmforum.org/tio/v3.6.0/Utility/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+################################################################################
+# Scenario: Multi-objective Network Optimization with Utility Functions
+#
+# Business Context:
+# - Optimize network for multiple objectives (cost, performance, reliability)
+# - Each objective has a utility function that scores metric values
+# - Combined utility determines overall business value
+################################################################################
+
+# =============================================================================
+# STEP 1: DEFINE METRICS TO BE OPTIMIZED
+# =============================================================================
+
+ex:cost_metric a met:Metric ;
+    rdfs:label "Monthly Cost"@en ;
+    rdfs:comment "Monthly operational cost in USD"@en ;
+    rdfs:range quan:MonetaryQuantity .
+
+ex:bandwidth_metric a met:Metric ;
+    rdfs:label "Available Bandwidth"@en ;
+    rdfs:comment "Network bandwidth in Gbps"@en ;
+    rdfs:range quan:Quantity .
+
+ex:latency_metric a met:Metric ;
+    rdfs:label "Network Latency"@en ;
+    rdfs:comment "Round-trip latency in milliseconds"@en ;
+    rdfs:range quan:Quantity .
+
+ex:uptime_metric a met:Metric ;
+    rdfs:label "Service Uptime"@en ;
+    rdfs:comment "Uptime percentage"@en ;
+    rdfs:range quan:Quantity .
+
+# =============================================================================
+# STEP 2: SAMPLE OBSERVATIONS
+# =============================================================================
+
+ex:current_cost_observation a met:Observation ;
+    met:observedMetric ex:cost_metric ;
+    met:obtainedAt "2024-01-15T10:30:00Z"^^xsd:dateTime .
+
+ex:current_bandwidth_observation a met:Observation ;
+    met:observedMetric ex:bandwidth_metric ;
+    met:obtainedAt "2024-01-15T10:30:00Z"^^xsd:dateTime .
+
+ex:current_latency_observation a met:Observation ;
+    met:observedMetric ex:latency_metric ;
+    met:obtainedAt "2024-01-15T10:30:00Z"^^xsd:dateTime .
+
+ex:current_uptime_observation a met:Observation ;
+    met:observedMetric ex:uptime_metric ;
+    met:obtainedAt "2024-01-15T10:30:00Z"^^xsd:dateTime .
+
+# =============================================================================
+# STEP 3: DEFINE UTILITY FUNCTIONS
+# =============================================================================
+
+# Linear utility function for bandwidth (more is better)
+ex:bandwidth_utility_function a fun:Function ;
+    rdfs:label "Bandwidth Utility Function"@en ;
+    fun:resultType xsd:decimal ;
+    fun:arityMin "1"^^xsd:nonNegativeInteger ;
+    fun:arityMax "1"^^xsd:nonNegativeInteger ;
+    fun:argumentNames ( "bandwidth_gbps" ) ;
+    fun:argumentTypes ( xsd:decimal ) .
+
+# Inverse utility function for latency (less is better)
+ex:latency_utility_function a fun:Function ;
+    rdfs:label "Latency Utility Function"@en ;
+    fun:resultType xsd:decimal ;
+    fun:arityMin "1"^^xsd:nonNegativeInteger ;
+    fun:arityMax "1"^^xsd:nonNegativeInteger ;
+    fun:argumentNames ( "latency_ms" ) ;
+    fun:argumentTypes ( xsd:decimal ) .
+
+# Inverse utility for cost (less is better)
+ex:cost_utility_function a fun:Function ;
+    rdfs:label "Cost Utility Function"@en ;
+    fun:resultType xsd:decimal ;
+    fun:arityMin "1"^^xsd:nonNegativeInteger ;
+    fun:arityMax "1"^^xsd:nonNegativeInteger ;
+    fun:argumentNames ( "cost_usd" ) ;
+    fun:argumentTypes ( xsd:decimal ) .
+
+# Logistic utility for uptime (threshold-based satisfaction)
+ex:uptime_utility_function a mf:logistic, fun:Function ;
+    rdfs:label "Uptime Utility Function"@en ;
+    fun:resultType xsd:decimal ;
+    mf:k "0.5"^^xsd:decimal .
+
+# =============================================================================
+# STEP 4: CREATE UTILITY INFORMATION BINDINGS
+# =============================================================================
+
+# Bandwidth utility - map metric to function
+ex:bandwidth_utility a ut:UtilityInformation ;
+    rdfs:label "Bandwidth Utility Calculation"@en ;
+    ut:function ex:bandwidth_utility_function ;
+    ut:forMetric ( [ ] ex:bandwidth_metric ) .
+
+# Latency utility - map metric to function with weight
+ex:latency_utility a ut:UtilityInformation ;
+    rdfs:label "Latency Utility Calculation"@en ;
+    ut:function ex:latency_utility_function ;
+    ut:forMetric ( [ ] ex:latency_metric ) ;
+    ut:withArgument ( "weight" "0.8"^^xsd:decimal ) .
+
+# Cost utility - map metric to function
+ex:cost_utility a ut:UtilityInformation ;
+    rdfs:label "Cost Utility Calculation"@en ;
+    ut:function ex:cost_utility_function ;
+    ut:forMetric ( [ ] ex:cost_metric ) ;
+    ut:withArgument ( "weight" "0.6"^^xsd:decimal ) .
+
+# Uptime utility - logistic function with threshold
+ex:uptime_utility a ut:UtilityInformation ;
+    rdfs:label "Uptime Utility Calculation"@en ;
+    ut:function ex:uptime_utility_function ;
+    ut:forMetric ( [ ] ex:uptime_metric ) ;
+    ut:withArguments ( "99.0"^^xsd:decimal "0.5"^^xsd:decimal ) .
+
+# =============================================================================
+# STEP 5: CREATE UTILITY PROFILES FOR DIFFERENT USE CASES
+# =============================================================================
+
+# Performance-focused profile (prioritizes bandwidth and latency)
+ex:performance_profile a ut:UtilityProfile ;
+    rdfs:label "Performance-Focused Profile"@en ;
+    ut:utility ex:bandwidth_utility ,
+               ex:latency_utility .
+
+# Cost-focused profile (prioritizes cost over performance)
+ex:cost_profile a ut:UtilityProfile ;
+    rdfs:label "Cost-Focused Profile"@en ;
+    ut:utility ex:cost_utility .
+
+# Balanced profile (all metrics with weights)
+ex:balanced_profile a ut:UtilityProfile ;
+    rdfs:label "Balanced Optimization Profile"@en ;
+    ut:utility ex:bandwidth_utility ,
+               ex:latency_utility ,
+               ex:cost_utility ,
+               ex:uptime_utility .
+
+# =============================================================================
+# STEP 6: LINK UTILITY TO INTENTS
+# =============================================================================
+
+ex:network_target a icm:Target ;
+    rdfs:label "Network Service"@en .
+
+# Expectation using utility function output
+ex:performance_expectation a icm:PropertyExpectation ;
+    icm:target ex:network_target ;
+    log:allOf ( "true"^^xsd:boolean ) ;
+    ut:utility ex:bandwidth_utility .
+
+# Intent with utility-based optimization
+ex:optimized_network_intent a icm:Intent ;
+    rdfs:label "Utility-Optimized Network Intent"@en ;
+    log:allOf ( ex:performance_expectation ) .
+
+# =============================================================================
+# STEP 7: ENTITY WITH UTILITY REFERENCE
+# =============================================================================
+
+# Service option with utility information reference (ut:utility must be UtilityInformation)
+ex:premium_service_option
+    a rdfs:Resource ;
+    rdfs:label "Premium Service Option"@en ;
+    ut:utility ex:bandwidth_utility .
+
+ex:economy_service_option
+    a rdfs:Resource ;
+    rdfs:label "Economy Service Option"@en ;
+    ut:utility ex:cost_utility .
+
+ex:balanced_service_option
+    a rdfs:Resource ;
+    rdfs:label "Balanced Service Option"@en ;
+    ut:utility ex:composite_utility .
+
+# =============================================================================
+# STEP 8: COMPLEX UTILITY WITH NESTED FUNCTIONS
+# =============================================================================
+
+# Weighted aggregation function
+ex:weighted_sum_function a fun:Function ;
+    rdfs:label "Weighted Sum Aggregation"@en ;
+    fun:resultType xsd:decimal ;
+    fun:arityMin "4"^^xsd:nonNegativeInteger ;
+    fun:arityMax "4"^^xsd:nonNegativeInteger ;
+    fun:argumentNames ( "util1" "weight1" "util2" "weight2" ) .
+
+# Composite utility combining multiple sub-utilities
+ex:composite_utility a ut:UtilityInformation ;
+    rdfs:label "Composite Network Utility"@en ;
+    ut:function ex:weighted_sum_function ;
+    ut:withArguments (
+        "0.4"^^xsd:decimal   # bandwidth weight
+        "0.3"^^xsd:decimal   # latency weight
+        "0.2"^^xsd:decimal   # cost weight
+        "0.1"^^xsd:decimal   # uptime weight
+    ) .
+
+# Master profile with composite utility
+ex:master_optimization_profile a ut:UtilityProfile ;
+    rdfs:label "Master Network Optimization Profile"@en ;
+    ut:utility ex:composite_utility ,
+               ex:bandwidth_utility ,
+               ex:latency_utility ,
+               ex:cost_utility ,
+               ex:uptime_utility .

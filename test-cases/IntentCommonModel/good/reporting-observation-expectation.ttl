@@ -1,0 +1,110 @@
+# Test: ObservationReportingExpectation with metric observations
+# This test validates ObservationReportingExpectation and Observation integration
+# Based on TR290B example 4
+
+@prefix ex:   <http://example.org/> .
+@prefix icm:  <http://tio.models.tmforum.org/tio/v3.6.0/IntentCommonModel/> .
+@prefix log:  <http://tio.models.tmforum.org/tio/v3.6.0/LogicalOperators/> .
+@prefix met:  <http://tio.models.tmforum.org/tio/v3.6.0/MetricsAndObservations/> .
+@prefix quan: <http://tio.models.tmforum.org/tio/v3.6.0/QuantityOntology/> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+################################################################################
+# ObservationReportingExpectation Example
+#
+# This example shows how observations are reported:
+# - ObservationReportingExpectation extends ReportingExpectation
+# - ConditionReport includes met:observed with Observation instances
+# - Observations reference metrics via met:observedMetric
+# - Observations use rdf:value for the observed metric value
+#
+# Key aspects tested:
+# - icm:ObservationReportingExpectation class usage
+# - met:Observation in ConditionReport
+# - met:observedMetric property
+# - rdf:value on Observation (not Quantity)
+# - Integration with MetricsAndObservations ontology
+################################################################################
+
+# Intent Definition
+ex:Intent1
+  a icm:Intent ;
+  rdfs:label "Latency Monitoring Intent"@en ;
+  log:allOf ( ex:E1 )
+  .
+
+# ObservationReportingExpectation
+ex:E1
+  a icm:ObservationReportingExpectation ;
+  rdfs:label "Latency Observation Expectation"@en ;
+  icm:target ex:T1 ;
+  log:allOf ( ex:C1 )
+  .
+
+ex:T1
+  a icm:Target ;
+  rdfs:member ex:Slice1
+  .
+
+ex:Slice1
+  a ex:NetworkSlice ;
+  rdfs:label "Network Slice 1"@en
+  .
+
+ex:NetworkSlice
+  a rdfs:Class ;
+  rdfs:label "Network Slice"@en
+  .
+
+# Condition
+ex:C1
+  a log:Condition ;
+  rdfs:label "Latency Threshold Condition"@en ;
+  log:allOf ( "true"^^xsd:boolean )
+  .
+
+# Metric Definition
+ex:latency
+  a rdf:Property, met:Metric ;
+  rdfs:label "Latency Metric"@en ;
+  rdfs:range quan:Quantity
+  .
+
+################################################################################
+# Reporting with Observations
+################################################################################
+
+# IntentReport
+ex:IR1
+  a icm:IntentReport ;
+  rdfs:label "Intent Report with Observation"@en ;
+  icm:about ex:Intent1 ;
+  icm:result true ;
+  icm:resultFrom ex:ER1
+  .
+
+# PropertyExpectationReport
+ex:ER1
+  a icm:PropertyExpectationReport ;
+  rdfs:label "Expectation Report with Observation"@en ;
+  icm:about ex:E1 ;
+  icm:result true ;
+  icm:resultFrom ex:CR1
+  .
+
+# ConditionReport with Observation
+ex:CR1
+  a icm:ConditionReport ;
+  rdfs:label "Condition Report with Observation"@en ;
+  icm:about ex:C1 ;
+  icm:result true ;
+  # Observation with metric value (as per TR290B)
+  met:observed [
+    a met:Observation ;
+    rdfs:label "Latency Observation 1"@en ;
+    met:observedMetric ex:latency ;
+    rdf:value "8ms"^^xsd:string
+  ]
+  .

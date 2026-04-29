@@ -1,0 +1,50 @@
+# Test: DeliveryExpectationPropertiesShape violations
+# Tests: deliveryType must be IRI, chooseFrom must be Container
+# Should FAIL with: "icm:deliveryType must be an IRI" and
+#                   "icm:chooseFrom must be ContainerTyped"
+
+@prefix ex:   <http://example.org/> .
+@prefix icm:  <http://tio.models.tmforum.org/tio/v3.6.0/IntentCommonModel/> .
+@prefix log:  <http://tio.models.tmforum.org/tio/v3.6.0/LogicalOperators/> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+################################################################################
+# VIOLATION 1: deliveryType must be IRI
+#
+# Common mistake: Using a literal string instead of an IRI for deliveryType
+# The icm:deliveryType property MUST be an IRI (class reference)
+################################################################################
+
+# WRONG - deliveryType as literal
+ex:wrong_delivery_type
+  a icm:DeliveryExpectation ;
+  icm:target ex:T1 ;
+  icm:deliveryType "NetworkSlice" ;  # WRONG: literal, not IRI
+  log:allOf ( "true"^^xsd:boolean )
+  .
+
+################################################################################
+# VIOLATION 2: chooseFrom must be Container
+#
+# Common mistake: Using a resource that is not typed as rdfs:Container
+# The icm:chooseFrom property MUST point to a Container instance
+################################################################################
+
+# WRONG - chooseFrom not a Container
+ex:wrong_choosefrom
+  a icm:DeliveryExpectation ;
+  icm:target ex:T1 ;
+  icm:chooseFrom ex:notAContainer ;  # WRONG: not typed as Container
+  log:allOf ( "true"^^xsd:boolean )
+  .
+
+ex:T1
+  a icm:Target
+  .
+
+# This resource is NOT a Container
+ex:notAContainer
+  a rdfs:Resource
+  .

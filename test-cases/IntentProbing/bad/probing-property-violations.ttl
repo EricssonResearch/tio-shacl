@@ -1,0 +1,44 @@
+# Test: Invalid usage of Intent Probing properties
+# This test validates that probing property constraints are enforced.
+# Should FAIL with datatype and class violations.
+
+@prefix ex: <http://example.org/> .
+@prefix pro: <http://tio.models.tmforum.org/tio/v3.6.0/IntentProbing/> .
+@prefix met: <http://tio.models.tmforum.org/tio/v3.6.0/MetricsAndObservations/> .
+@prefix icm: <http://tio.models.tmforum.org/tio/v3.6.0/IntentCommonModel/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+################################################################################
+# VIOLATION: pro:expectedResult with wrong datatype
+#
+# pro:expectedResult MUST be xsd:boolean
+################################################################################
+
+# WRONG - string instead of boolean
+ex:result_string
+  pro:expectedResult "yes" .
+
+# WRONG - integer instead of boolean
+ex:result_integer
+  pro:expectedResult 1 .
+
+# WRONG - untyped literal (should be "true"^^xsd:boolean)
+ex:result_untyped
+  pro:expectedResult "true" .
+
+################################################################################
+# VIOLATION: pro:expectedObservation with wrong type
+#
+# pro:expectedObservation MUST reference a met:Observation instance
+################################################################################
+
+# WRONG - literal value instead of Observation
+ex:obs_literal
+  pro:expectedObservation "latency=50ms" .
+
+# WRONG - referencing wrong class (Target instead of Observation)
+ex:obs_wrong_class
+  pro:expectedObservation ex:notObservation .
+
+ex:notObservation a icm:Target .

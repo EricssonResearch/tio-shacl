@@ -1,0 +1,37 @@
+# Test: Valid usage of Intent query functions
+# Concepts covered: intentElements, valuesOfTargetProperty
+# This test validates that intent query functions can be used correctly.
+
+@prefix ex: <http://example.org/> .
+@prefix fun: <http://tio.models.tmforum.org/tio/v3.6.0/FunctionOntology/> .
+@prefix icm: <http://tio.models.tmforum.org/tio/v3.6.0/IntentCommonModel/> .
+@prefix log: <http://tio.models.tmforum.org/tio/v3.6.0/LogicalOperators/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# === intentElements function: (IntentElement) -> Container ===
+# Returns a container of all intent elements in the subtree containing the argument
+ex:test_intentelements_usage
+  a rdfs:Resource ;
+  icm:intentElements ( ex:expectation1 ) .
+
+ex:expectation1
+  a icm:PropertyExpectation ;
+  icm:target ex:target1 ;
+  log:allOf ( "true"^^xsd:boolean ) .
+
+ex:target1 a icm:Target .
+
+# Intent referencing the expectation
+ex:intent1
+  a icm:Intent ;
+  log:allOf ( ex:expectation1 ) .
+
+# === valuesOfTargetProperty function: (Property...) -> Container ===
+# Returns container of all values assigned to target members with specified properties
+ex:test_valuesoftargetproperty_usage
+  a rdfs:Resource ;
+  icm:valuesOfTargetProperty ( ex:someProperty ) .
+
+ex:someProperty a rdf:Property .

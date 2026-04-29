@@ -1,0 +1,40 @@
+# Test: BestProposalExpectation missing required target
+# This test validates that BestProposalExpectation (as subclass of Expectation) requires icm:target
+# Should FAIL with: "Expectation missing required icm:target"
+
+@prefix ex:  <http://example.org/> .
+@prefix icm: <http://tio.models.tmforum.org/tio/v3.6.0/IntentCommonModel/> .
+@prefix log: <http://tio.models.tmforum.org/tio/v3.6.0/LogicalOperators/> .
+@prefix pbi: <http://tio.models.tmforum.org/tio/v3.6.0/ProposalBestIntent/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+################################################################################
+# VIOLATION 1: BestProposalExpectation without target
+#
+# Common mistake: Creating a BestProposalExpectation without specifying what it
+# applies to. As a subclass of Expectation, it MUST have at least one icm:target.
+################################################################################
+
+# WRONG - BestProposalExpectation missing required target
+ex:BE1
+  a pbi:BestProposalExpectation ;
+  log:allOf ( "true"^^xsd:boolean ) .
+  # WRONG: Missing "icm:target ex:T1 ;"
+
+################################################################################
+# VIOLATION 2: BestProposalExpectation with wrong target class
+#
+# Common mistake: Using a non-Target resource as the target
+# The icm:target property MUST reference an icm:Target instance
+################################################################################
+
+# WRONG - target is not an icm:Target
+ex:BE2
+  a pbi:BestProposalExpectation ;
+  icm:target ex:notATarget ;  # WRONG: ex:notATarget is not a icm:Target
+  log:allOf ( "true"^^xsd:boolean ) .
+
+ex:notATarget
+  a rdfs:Resource .

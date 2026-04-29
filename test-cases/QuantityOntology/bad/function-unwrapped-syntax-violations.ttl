@@ -1,0 +1,54 @@
+# Test: Invalid unwrapped function syntax - should fail validation
+# This test validates that unwrapped function syntax (func args instead of [ func args ])
+# is rejected with a helpful error message.
+#
+# RDF parses `met:lastValue ( ex:bitrate )` inside a list as TWO separate elements:
+# 1. The IRI met:lastValue
+# 2. The list ( ex:bitrate )
+# This is NOT a function invocation. The correct syntax is: [ met:lastValue ( ex:bitrate ) ]
+
+@prefix ex:   <http://example.org/> .
+@prefix quan: <http://tio.models.tmforum.org/tio/v3.6.0/QuantityOntology/> .
+@prefix met:  <http://tio.models.tmforum.org/tio/v3.6.0/MetricsAndObservations/> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+# Define metric
+ex:bitrate a met:Metric ;
+    rdfs:label "Bitrate Metric" ;
+    rdfs:range quan:Quantity .
+
+################################################################################
+# VIOLATION 1: Unwrapped function syntax
+# Expected error: Invalid unwrapped function syntax: 'met:lastValue' followed by
+# argument list. Fix: wrap in blank node as [ met:lastValue ( ... ) ]
+################################################################################
+
+ex:violation_unwrapped_basic
+  quan:atLeast (
+    met:lastValue ( ex:bitrate )
+    "320kbps"^^quan:quantity
+  ) .
+
+################################################################################
+# VIOLATION 2: Another unwrapped function syntax example
+# Same issue - met:lastValue not wrapped in blank node
+################################################################################
+
+ex:violation_unwrapped_atmost
+  quan:atMost (
+    met:lastValue ( ex:bitrate )
+    "1000kbps"^^quan:quantity
+  ) .
+
+################################################################################
+# VIOLATION 3: Unwrapped function with wrong argument type
+# Two violations: unwrapped syntax AND wrong type for met:lastValue argument
+################################################################################
+
+ex:violation_unwrapped_wrong_type
+  quan:atLeast (
+    met:lastValue ( "not-a-metric" )
+    "320kbps"^^quan:quantity
+  ) .

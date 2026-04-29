@@ -1,0 +1,139 @@
+# Test: Quantity comparison functions with explicit Quantity instances
+# This test validates various quantity comparison patterns:
+# - Named quantity instances
+# - Blank node quantities with inline type declarations
+# - Nested function invocations using correct blank node syntax
+
+@prefix ex:   <http://example.org/> .
+@prefix quan: <http://tio.models.tmforum.org/tio/v3.6.0/QuantityOntology/> .
+@prefix met:  <http://tio.models.tmforum.org/tio/v3.6.0/MetricsAndObservations/> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+################################################################################
+# Metric definitions (for use in nested function examples)
+################################################################################
+
+ex:bitrate a met:Metric ;
+    rdfs:label "Bitrate Metric" ;
+    rdfs:range quan:Quantity .
+
+ex:latencyMetric a met:Metric ;
+    rdfs:label "Latency Metric" ;
+    rdfs:range quan:Quantity .
+
+################################################################################
+# PATTERN 1: Named quantity instances in comparisons
+################################################################################
+
+ex:threshold_bitrate a quan:Quantity ;
+    rdf:value "320"^^xsd:decimal ;
+    quan:unit "kbps" .
+
+ex:test_atleast_quantities
+  a rdfs:Resource ;
+  quan:atLeast (
+    [ a quan:Quantity ; rdf:value "500"^^xsd:decimal ; quan:unit "kbps" ]
+    ex:threshold_bitrate
+  ) .
+
+################################################################################
+# PATTERN 2: Explicit quantities - atMost
+################################################################################
+
+ex:latency_threshold a quan:Quantity ;
+    rdf:value "50"^^xsd:decimal ;
+    quan:unit "ms" .
+
+ex:test_atmost_quantities
+  a rdfs:Resource ;
+  quan:atMost (
+    [ a quan:Quantity ; rdf:value "30"^^xsd:decimal ; quan:unit "ms" ]
+    ex:latency_threshold
+  ) .
+
+################################################################################
+# PATTERN 3: Explicit quantities - exactly
+################################################################################
+
+ex:bandwidth_target a quan:Quantity ;
+    rdf:value "100"^^xsd:decimal ;
+    quan:unit "Mbps" .
+
+ex:test_exactly_quantities
+  a rdfs:Resource ;
+  quan:exactly (
+    [ a quan:Quantity ; rdf:value "100"^^xsd:decimal ; quan:unit "Mbps" ]
+    ex:bandwidth_target
+  ) .
+
+################################################################################
+# PATTERN 4: Explicit quantities - greater
+################################################################################
+
+ex:throughput_min a quan:Quantity ;
+    rdf:value "1"^^xsd:decimal ;
+    quan:unit "Gbps" .
+
+ex:test_greater_quantities
+  a rdfs:Resource ;
+  quan:greater (
+    [ a quan:Quantity ; rdf:value "2"^^xsd:decimal ; quan:unit "Gbps" ]
+    ex:throughput_min
+  ) .
+
+################################################################################
+# PATTERN 5: Explicit quantities - smaller
+################################################################################
+
+ex:jitter_max a quan:Quantity ;
+    rdf:value "10"^^xsd:decimal ;
+    quan:unit "ms" .
+
+ex:test_smaller_quantities
+  a rdfs:Resource ;
+  quan:smaller (
+    [ a quan:Quantity ; rdf:value "5"^^xsd:decimal ; quan:unit "ms" ]
+    ex:jitter_max
+  ) .
+
+################################################################################
+# PATTERN 6: Explicit quantities in inRange
+################################################################################
+
+ex:packetloss_min a quan:Quantity ;
+    rdf:value "0"^^xsd:decimal ;
+    quan:unit "%" .
+
+ex:packetloss_max a quan:Quantity ;
+    rdf:value "5"^^xsd:decimal ;
+    quan:unit "%" .
+
+ex:test_inrange_quantities
+  a rdfs:Resource ;
+  quan:inRange (
+    ex:packetloss_min
+    ex:packetloss_max
+    [ a quan:Quantity ; rdf:value "1"^^xsd:decimal ; quan:unit "%" ]
+  ) .
+
+################################################################################
+# PATTERN 7: Nested function invocation using CORRECT blank node syntax
+# The blank node [ met:lastValue ( metric ) ] creates a proper subject
+# with the function property, rather than inserting two separate list elements.
+################################################################################
+
+ex:test_nested_function_blanknode
+  a rdfs:Resource ;
+  quan:atLeast (
+    [ met:lastValue ( ex:latencyMetric ) ]
+    "100ms"^^quan:quantity
+  ) .
+
+ex:test_nested_function_atmost
+  a rdfs:Resource ;
+  quan:atMost (
+    [ met:lastValue ( ex:bitrate ) ]
+    "1000kbps"^^quan:quantity
+  ) .

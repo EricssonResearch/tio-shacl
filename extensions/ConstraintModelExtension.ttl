@@ -1,0 +1,217 @@
+# ==============================================================================
+# TIO ConstraintModel Extension
+# ==============================================================================
+#
+# Namespace: http://tio.models.tmforum.org/tio/v3.6.0/experimental/ConstraintModel/
+# Prefix: cm:
+#
+# Purpose:
+#   Defines an intermediate representation vocabulary for intent constraints,
+#   bridging complex TIO Intent expressions and SPARQL-based validation.
+#
+# Rationale:
+#   TIO Intents encode constraints using nested RDF lists and complex structures
+#   (quan:atLeast, log:allOf, met:lastValue). While semantically rich, these
+#   structures are difficult to query directly in SPARQL. ConstraintModel provides
+#   a simplified, flat representation optimized for validation queries.
+#
+# Architecture:
+#   
+#   TIO Intent (complex) → [Python Parser] → ConstraintModel (simple) → [SPARQL] → Validation
+#   
+#   1. Python extracts constraints from nested TIO structures
+#   2. Materializes as flat ConstraintModel RDF (ephemeral, in-memory)
+#   3. SPARQL queries validate against SHACL service capability shapes
+#
+# Characteristics:
+#   - Declarative: Represents "what" constraints exist, not "how" to validate
+#   - Ephemeral: Exists only during validation, never persisted
+#   - Property-agnostic: Works for any property without hardcoding
+#   - Semantically precise: Explicit inclusive/exclusive bound operators
+#   - Extensible: Easy to add new constraint types
+#
+# Design Decisions:
+#   - Flat structure: No nested lists, easy to query
+#   - Explicit operators: minInclusive vs minExclusive (not implicit)
+#   - Intent-scoped: Constraints linked to ExtractedIntent via cm:hasConstraint
+#   - Traceability: cm:sourceIntent links back to original TIO Intent
+#
+# Comparison to TIO:
+#   TIO Intent:           Expressive, nested, complex to query
+#   ConstraintModel:      Simple, flat, optimized for validation
+#   
+#   Both are declarative, but ConstraintModel trades expressiveness for queryability.
+#
+# ==============================================================================
+
+@prefix cm: <http://tio.models.tmforum.org/tio/v3.6.0/experimental/ConstraintModel/> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+# ==============================================================================
+# SECTION 1: Core Classes
+# ==============================================================================
+
+cm:ExtractedIntent
+  a rdfs:Class ;
+  rdfs:label "Extracted Intent"@en ;
+  rdfs:comment """Represents an intent with extracted constraints for validation.
+  
+  Links the original TIO Intent to its extracted constraints and target type.
+  """@en .
+
+cm:Constraint
+  a rdfs:Class ;
+  rdfs:label "Constraint"@en ;
+  rdfs:comment """Abstract base class for extracted constraints.
+  
+  All constraints specify a property and its required value or range.
+  """@en .
+
+cm:RangeConstraint
+  a rdfs:Class ;
+  rdfs:subClassOf cm:Constraint ;
+  rdfs:label "Range Constraint"@en ;
+  rdfs:comment """Numeric range constraint extracted from quan:atLeast/atMost.
+  
+  Example:
+    ex:Intent1 cm:hasConstraint _:range1 .
+    _:range1 a cm:RangeConstraint ;
+      cm:property cust:numberOfParticipants ;
+      cm:minInclusive 150 ;  # ≥ 150
+      cm:maxInclusive 500 .  # ≤ 500
+  """@en .
+
+cm:ExactConstraint
+  a rdfs:Class ;
+  rdfs:subClassOf cm:Constraint ;
+  rdfs:label "Exact Value Constraint"@en ;
+  rdfs:comment """Exact value constraint extracted from log:match.
+  
+  Example:
+    ex:Intent1 cm:hasConstraint _:exact1 .
+    _:exact1 a cm:ExactConstraint ;
+      cm:property cust:serviceQuality ;
+      cm:value cust:HD .
+  """@en .
+
+# ==============================================================================
+# SECTION 2: Intent-Constraint Relationships
+# ==============================================================================
+
+cm:hasConstraint
+  a rdf:Property ;
+  rdfs:label "has constraint"@en ;
+  rdfs:comment "Links an ExtractedIntent to its constraints."@en ;
+  rdfs:domain cm:ExtractedIntent ;
+  rdfs:range cm:Constraint .
+
+cm:targetType
+  a rdf:Property ;
+  rdfs:label "target service type"@en ;
+  rdfs:comment "The service type from icm:deliveryType (e.g., cust:VideoCFS)."@en ;
+  rdfs:domain cm:ExtractedIntent .
+
+cm:sourceIntent
+  a rdf:Property ;
+  rdfs:label "source intent"@en ;
+  rdfs:comment "Links to the original icm:Intent URI."@en ;
+  rdfs:domain cm:ExtractedIntent .
+
+# ==============================================================================
+# SECTION 3: Constraint Properties
+# ==============================================================================
+
+cm:property
+  a rdf:Property ;
+  rdfs:label "constraint property"@en ;
+  rdfs:comment "The property being constrained (e.g., cust:numberOfParticipants)."@en ;
+  rdfs:domain cm:Constraint .
+
+cm:minInclusive
+  a rdf:Property ;
+  rdfs:label "minimum inclusive"@en ;
+  rdfs:comment "Minimum value (inclusive, ≥) from quan:atLeast."@en ;
+  rdfs:domain cm:RangeConstraint ;
+  rdfs:range xsd:decimal .
+
+cm:minExclusive
+  a rdf:Property ;
+  rdfs:label "minimum exclusive"@en ;
+  rdfs:comment "Minimum value (exclusive, >) from quan:greater."@en ;
+  rdfs:domain cm:RangeConstraint ;
+  rdfs:range xsd:decimal .
+
+cm:maxInclusive
+  a rdf:Property ;
+  rdfs:label "maximum inclusive"@en ;
+  rdfs:comment "Maximum value (inclusive, ≤) from quan:atMost."@en ;
+  rdfs:domain cm:RangeConstraint ;
+  rdfs:range xsd:decimal .
+
+cm:maxExclusive
+  a rdf:Property ;
+  rdfs:label "maximum exclusive"@en ;
+  rdfs:comment "Maximum value (exclusive, <) from quan:smaller."@en ;
+  rdfs:domain cm:RangeConstraint ;
+  rdfs:range xsd:decimal .
+
+cm:value
+  a rdf:Property ;
+  rdfs:label "exact value"@en ;
+  rdfs:comment "Exact value for a constraint (from log:match)."@en ;
+  rdfs:domain cm:ExactConstraint .
+
+cm:unit
+  a rdf:Property ;
+  rdfs:label "constraint unit"@en ;
+  rdfs:comment """Unit for quantity constraints (e.g., 'kbps', 'ms', 'Mbps').
+
+  Extracted from quan:Quantity values in the intent:
+  - Verbose: [ rdf:value "500"^^xsd:decimal ; quan:unit "kbps" ]
+  - Shorthand: "500kbps"^^quan:quantity
+
+  Used when synthesizing intent output to produce proper quantity literals.
+  """@en ;
+  rdfs:domain cm:RangeConstraint ;
+  rdfs:range xsd:string .
+
+# ==============================================================================
+# Example Usage
+# ==============================================================================
+#
+# TIO Intent (input):
+#   ex:VideoIntent a icm:Intent ;
+#     log:allOf ( ex:DeliveryExp ex:ParticipantsExp ) .
+#   
+#   ex:ParticipantsExp a icm:PropertyExpectation ;
+#     log:allOf ( ex:MinCondition ) .
+#   
+#   ex:MinCondition a log:Condition ;
+#     quan:atLeast (
+#       [ met:lastValue ( cust:numberOfParticipants ) ]
+#       [ rdf:value "150"^^xsd:decimal ]
+#     ) .
+#
+# ConstraintModel (materialized):
+#   _:intent1 a cm:ExtractedIntent ;
+#     cm:sourceIntent ex:VideoIntent ;
+#     cm:targetType cust:VideoCFS ;
+#     cm:hasConstraint _:c1 .
+#   
+#   _:c1 a cm:RangeConstraint ;
+#     cm:property cust:numberOfParticipants ;
+#     cm:minInclusive 150 .  # Simplified from quan:atLeast
+#
+# SPARQL Validation:
+#   SELECT ?violation WHERE {
+#     ?intent cm:hasConstraint ?c .
+#     ?c cm:minInclusive ?intentMin .
+#     ?shape sh:path ?property ; sh:minInclusive ?shapeMin .
+#     FILTER(?intentMin < ?shapeMin)
+#   }
+#
+# ==============================================================================
+# End of ConstraintModelExtension.ttl
+# ==============================================================================

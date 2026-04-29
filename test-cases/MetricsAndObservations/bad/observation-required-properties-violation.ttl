@@ -1,0 +1,19 @@
+# Test: Missing required met:observedMetric property on Observation
+# This test validates that met:Observation must have met:observedMetric
+# Should FAIL with: "Observation missing required met:observedMetric"
+
+@prefix ex:  <http://example.org/> .
+@prefix met: <http://tio.models.tmforum.org/tio/v3.6.0/MetricsAndObservations/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+################################################################################
+# VIOLATION: Observation missing required met:observedMetric
+#
+# Every met:Observation MUST have a met:observedMetric property
+################################################################################
+
+# WRONG - Observation without observedMetric
+ex:obs_no_metric
+  a met:Observation ;
+  met:obtainedAt "2024-01-01T12:00:00Z"^^xsd:dateTime .

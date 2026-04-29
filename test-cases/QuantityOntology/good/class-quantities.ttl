@@ -1,0 +1,20 @@
+# Test: Valid instances of Quantity classes
+# Concepts covered: Quantity, MonetaryQuantity
+# This test validates that valid instances of quantity classes can be created.
+
+@prefix ex: <http://example.org/> .
+@prefix fun: <http://tio.models.tmforum.org/tio/v3.6.0/FunctionOntology/> .
+@prefix quan: <http://tio.models.tmforum.org/tio/v3.6.0/QuantityOntology/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# === Quantity class ===
+ex:test_quantity a quan:Quantity ;
+    rdf:value "100"^^xsd:decimal ;
+    quan:unit "ms"^^xsd:string .
+
+# === MonetaryQuantity class ===
+ex:test_monetary_quantity a quan:MonetaryQuantity ;
+    rdf:value "50.00"^^xsd:decimal ;
+    quan:unit "USD"^^xsd:string .

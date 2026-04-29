@@ -1,0 +1,340 @@
+# TMF IntentCommonModel SHACL Shapes
+#
+# Domain-specific validation for IntentCommonModel.
+# Global validation (function usage, vocabulary) handled by lib/GlobalShapes.ttl
+#
+# Ontology URI: http://tio.models.tmforum.org/tio/v3.6.0/IntentCommonModel/
+
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix t: <http://www.w3.org/2006/time#> .
+
+# TMF namespaces
+@prefix icm: <http://tio.models.tmforum.org/tio/v3.6.0/IntentCommonModel/> .
+@prefix fun: <http://tio.models.tmforum.org/tio/v3.6.0/FunctionOntology/> .
+@prefix imo: <http://tio.models.tmforum.org/tio/v3.6.0/IntentManagementOntology/> .
+
+# Shape namespaces  
+@prefix icm-shapes: <http://tio.models.tmforum.org/tio/v3.6.0/shapes/IntentCommonModel/> .
+@prefix tio-lib: <http://tio.models.tmforum.org/tio/v3.6.0/shapes/lib/> .
+@prefix tio-targets: <http://tio.models.tmforum.org/tio/v3.6.0/shapes/lib/targets/> .
+@prefix tio-constraints: <http://tio.models.tmforum.org/tio/v3.6.0/shapes/lib/constraints/> .
+
+# Note: Function definition validation handled by tio-lib:FunctionDefinitionMixin
+
+# =============================================================================
+# PROPERTY VALUE TYPE VALIDATION
+# =============================================================================
+
+# Validates icm:about property values are IRIs
+# Note: Uses inline SPARQL target instead of SubjectsOfPropertyTargetType due to pyshacl timing bug
+# (pyshacl registers SPARQLTargetType after shapes are loaded)
+icm-shapes:AboutPropertyRangeShape
+    a sh:NodeShape ;
+    rdfs:label "Range Validation for icm:about" ;
+    rdfs:comment "Validates icm:about values are IRI references, not literals." ;
+    sh:target [
+        a sh:SPARQLTarget ;
+        sh:select """
+            PREFIX icm: <http://tio.models.tmforum.org/tio/v3.6.0/IntentCommonModel/>
+            SELECT ?this
+            WHERE {
+                ?this icm:about ?value .
+            }
+        """ ;
+    ] ;
+    sh:property [
+        sh:path icm:about ;
+        sh:nodeKind sh:IRI ;
+        sh:message "[icm/about_must_be_iri] icm:about must be an IRI (resource reference), not a literal. Got: {$value}" ;
+    ] ;
+    sh:severity sh:Violation .
+
+# =============================================================================
+# PROPERTY DOMAIN AND RANGE VALIDATION
+# =============================================================================
+
+# Validates icm:target is only used on Expectation instances
+# Note: Uses inline SPARQL target instead of SubjectsOfPropertyTargetType due to pyshacl timing bug
+# (pyshacl registers SPARQLTargetType after shapes are loaded)
+icm-shapes:DomainOfTargetPropertyShape
+    a sh:NodeShape ;
+    rdfs:label "Domain Validation for icm:target" ;
+    rdfs:comment "Validates icm:target is only used on icm:Expectation instances." ;
+    sh:target [
+        a sh:SPARQLTarget ;
+        sh:select """
+            PREFIX icm: <http://tio.models.tmforum.org/tio/v3.6.0/IntentCommonModel/>
+            SELECT ?this
+            WHERE {
+                ?this icm:target ?value .
+            }
+        """ ;
+    ] ;
+    sh:class icm:Expectation ;
+    sh:message "[icm/target_domain] icm:target may only be used on icm:Expectation instances (DeliveryExpectation, PropertyExpectation, ReportingExpectation, etc.). If you need temporal constraints, create a Validity instance separately and link it with iv:validIf on the Intent, NOT using icm:target on the Validity. Classes like icm:TemporalExpectation and icm:TimeWindow do NOT exist in TIO v3.6.0." ;
+    sh:severity sh:Violation .
+
+# Validates Expectation instances have required target
+icm-shapes:ExpectationTargetShape
+    a sh:NodeShape ;
+    rdfs:label "Expectation Target Validation" ;
+    rdfs:comment "Validates Expectation instances have at least one icm:target of type icm:Target." ;
+    sh:targetClass icm:Expectation ;
+    sh:property [
+        sh:path icm:target ;
+        sh:class icm:Target ;
+        sh:minCount 1 ;
+        sh:message "[icm/missing_target] Expectation missing required icm:target. Add: icm:target <target-resource> where <target-resource> is an instance of icm:Target (e.g., ex:customTarget a icm:Target)" ;
+    ] ;
+    sh:severity sh:Violation .
+
+# Validates DeliveryExpectation properties
+icm-shapes:DeliveryExpectationPropertiesShape
+    a sh:NodeShape ;
+    rdfs:label "DeliveryExpectation Properties Validation" ;
+    rdfs:comment "Validates DeliveryExpectation instances have correct property types." ;
+    sh:targetClass icm:DeliveryExpectation ;
+    sh:property [
+        sh:path icm:deliveryType ;
+        sh:nodeKind sh:IRI ;
+        sh:message "[icm/delivery_type_must_be_iri] icm:deliveryType must be an IRI (class reference). Got: {$value}" ;
+    ] ;
+    sh:property [
+        sh:path icm:deliveryDescription ;
+        sh:class rdfs:Resource ;
+        sh:message "[icm/delivery_description_must_be_iri] icm:deliveryDescription must be a Resource" ;
+    ] ;
+    
+    # chooseFrom validation: Uses ContainerTyped extension
+    # Works with or without RDFS inference by checking both fun:ContainerTyped and rdfs:Container
+    sh:property [
+        sh:path icm:chooseFrom ;
+        sh:sparql [
+            sh:message "[icm/choosefrom_not_container] icm:chooseFrom must be ContainerTyped (rdfs:Container instance or container-returning function)" ;
+            sh:select """
+                PREFIX icm: <http://tio.models.tmforum.org/tio/v3.6.0/IntentCommonModel/>
+                PREFIX fun: <http://tio.models.tmforum.org/tio/v3.6.0/FunctionOntology/>
+                PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+                SELECT $this
+                WHERE {
+                    $this icm:chooseFrom ?value .
+                    # Value must be Container: direct type, ContainerTyped via inference, or function returning Container
+                    FILTER NOT EXISTS {
+                        { ?value a rdfs:Container . }
+                        UNION
+                        { ?value a fun:ContainerTyped . }
+                        UNION
+                        { ?value ?func ?args . ?func a fun:ContainerTyped . }
+                    }
+                }
+            """ ;
+        ] ;
+    ] ;
+    sh:severity sh:Violation .
+
+# Validates ReportingExpectation properties
+icm-shapes:ReportingExpectationPropertiesShape
+    a sh:NodeShape ;
+    rdfs:label "ReportingExpectation Properties Validation" ;
+    rdfs:comment "Validates ReportingExpectation instances have Container-typed properties." ;
+    sh:targetClass icm:ReportingExpectation ;
+    sh:property [
+        sh:path icm:reportDestinations ;
+        sh:class rdfs:Container ;
+        sh:message "[icm/not_container] icm:reportDestinations must be an rdfs:Container (use: [ a rdfs:Container ; rdfs:member ... ]). Do NOT use rdf:Seq, rdf:Bag, or rdf:List" ;
+    ] ;
+    sh:property [
+        sh:path icm:reportTriggers ;
+        sh:class rdfs:Container ;
+        sh:message "[icm/not_container] icm:reportTriggers must be an rdfs:Container (use: [ a rdfs:Container ; rdfs:member ... ]). Do NOT use rdf:Seq, rdf:Bag, or rdf:List" ;
+    ] ;
+    sh:severity sh:Violation .
+
+# Validates IntentReport properties and datatypes
+icm-shapes:IntentReportPropertiesShape
+    a sh:NodeShape ;
+    rdfs:label "IntentReport Properties Validation" ;
+    rdfs:comment "Validates IntentReport instances have correct property types and datatypes." ;
+    sh:targetClass icm:IntentReport ;
+    sh:property [
+        sh:path icm:reportNumber ;
+        sh:datatype xsd:positiveInteger ;
+        sh:maxCount 1 ;
+        sh:message "[icm/report_number_type] icm:reportNumber must be a positive integer. Got: {$value}" ;
+    ] ;
+    sh:property [
+        sh:path icm:reportGenerated ;
+        sh:class t:Instant ;
+        sh:maxCount 1 ;
+        sh:message "[icm/report_generated_type] icm:reportGenerated must be a time:Instant" ;
+    ] ;
+    sh:property [
+        sh:path icm:intentHandlingState ;
+        sh:class imo:IntentHandlingState ;
+        sh:maxCount 1 ;
+        sh:message "[icm/intent_handling_state_type] icm:intentHandlingState must be an imo:IntentHandlingState" ;
+    ] ;
+    sh:property [
+        sh:path icm:intentUpdateState ;
+        sh:class imo:IntentHandlingState ;
+        sh:maxCount 1 ;
+        sh:message "[icm/intent_update_state_type] icm:intentUpdateState must be an imo:IntentHandlingState" ;
+    ] ;
+    sh:severity sh:Violation .
+
+
+
+# Validates TargetReport properties
+icm-shapes:TargetReportPropertiesShape
+    a sh:NodeShape ;
+    rdfs:label "TargetReport Properties Validation" ;
+    rdfs:comment "Validates TargetReport instances have correct property datatypes." ;
+    sh:targetClass icm:TargetReport ;
+    sh:property [
+        sh:path icm:targetCount ;
+        sh:datatype xsd:nonNegativeInteger ;
+        sh:maxCount 1 ;
+        sh:message "[icm/target_count_type] icm:targetCount must be a non-negative integer. Got: {$value}" ;
+    ] ;
+    sh:severity sh:Violation .
+
+# Validates ExpectationReport properties
+icm-shapes:ExpectationReportPropertiesShape
+    a sh:NodeShape ;
+    rdfs:label "ExpectationReport Properties Validation" ;
+    rdfs:comment "Validates ExpectationReport instances have correct property types." ;
+    sh:targetClass icm:ExpectationReport ;
+    
+    # ExpectationReport specific properties
+    sh:property [
+        sh:path icm:targetReport ;
+        sh:class icm:TargetReport ;
+        sh:message "[icm/target_report_type] ExpectationReport targetReport must be a TargetReport instance." ;
+    ] ;
+    
+    sh:severity sh:Violation .
+
+
+
+# =============================================================================
+# INTENT HIERARCHY VALIDATION
+# =============================================================================
+
+# Validates Intent's boolean functions only reference IntentOperands (Expectations), not Conditions
+# Uses IntentOperand extension for positive validation
+# Previously: Negative check (?arg a log:Condition)
+# Now: Positive check (?arg NOT a IntentOperand)
+icm-shapes:IntentLogicalOperatorArgumentsShape
+    a sh:NodeShape ;
+    rdfs:label "Intent Logical Operator Arguments Validation" ;
+    rdfs:comment "Validates that Intent's boolean functions only reference IntentOperands (Expectations), not Conditions directly." ;
+    sh:targetClass icm:Intent ;
+    sh:sparql [
+        sh:message "[icm/intent_references_condition] Intent {$this} references non-IntentOperand {?operand} in {?operator}. Intent can only reference Expectations. Wrap Conditions in PropertyExpectation." ;
+        sh:select """
+            PREFIX icm: <http://tio.models.tmforum.org/tio/v3.6.0/IntentCommonModel/>
+            PREFIX fun: <http://tio.models.tmforum.org/tio/v3.6.0/FunctionOntology/>
+            PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+            PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+            PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+            SELECT $this ?operator ?operand
+            WHERE {
+                $this a icm:Intent .
+                $this ?operator ?argList .
+                ?operator a fun:BooleanFunction .
+
+                ?argList rdf:rest*/rdf:first ?operand .
+
+                # Skip literal values (e.g., boolean literals like "true"^^xsd:boolean)
+                FILTER(!isLiteral(?operand))
+
+                # Check if operand is NOT an IntentOperand
+                # Need explicit rdfs:subClassOf* because TopBraid doesn't do transitive subclass inference
+                FILTER NOT EXISTS {
+                    ?operand a ?operandType .
+                    ?operandType rdfs:subClassOf* icm:IntentOperand .
+                }
+            }
+        """ ;
+    ] ;
+    sh:severity sh:Violation .
+
+# =============================================================================
+# ACTIONABLE VALIDATION
+# =============================================================================
+
+# Validates Actionable instances have BooleanFunction properties
+# Uses SPARQL target with explicit subclass traversal (TopBraid doesn't do RDFS inference)
+icm-shapes:ActionableInstancesShape
+    a sh:NodeShape ;
+    rdfs:label "Actionable Instances Validation" ;
+    rdfs:comment "Validates Actionable instances have at least one BooleanFunction property." ;
+    sh:target [
+        a sh:SPARQLTarget ;
+        sh:select """
+            PREFIX fun: <http://tio.models.tmforum.org/tio/v3.6.0/FunctionOntology/>
+            PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+            SELECT ?this
+            WHERE {
+                ?this a ?class .
+                ?class rdfs:subClassOf* fun:Actionable .
+            }
+        """ ;
+    ] ;
+    sh:sparql tio-constraints:ActionableBooleanEvaluableConstraint ;
+    sh:severity sh:Violation .
+
+# Warns about unused non-Expectation Actionable instances (e.g., log:Condition)
+# Expectation instances are handled by UnreferencedExpectationShape instead
+icm-shapes:UnusedActionableInstancesShape
+    a sh:NodeShape ;
+    rdfs:label "Unused Non-Expectation Actionable Instances Warning" ;
+    rdfs:comment "Warns about non-Expectation Actionable instances (e.g., log:Condition) that are defined but never referenced. Expectations are covered separately by UnreferencedExpectationShape." ;
+    sh:target [
+        a sh:SPARQLTarget ;
+        sh:select """
+            PREFIX fun: <http://tio.models.tmforum.org/tio/v3.6.0/FunctionOntology/>
+            PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+            SELECT ?this
+            WHERE {
+                ?this a ?class .
+                ?class rdfs:subClassOf* fun:Actionable .
+            }
+        """ ;
+    ] ;
+    sh:sparql tio-constraints:UnusedBooleanEvaluableConstraint ;
+    sh:severity sh:Warning .
+
+# Warns about unreferenced Expectation instances (includes DeliveryExpectation)
+# Different from UnusedActionableInstancesShape which only checks Actionable instances with BooleanFunction
+icm-shapes:UnreferencedExpectationShape
+    a sh:NodeShape ;
+    rdfs:label "Unreferenced Expectation Warning" ;
+    rdfs:comment "Warns about Expectation instances that are defined but never referenced by any Intent." ;
+    sh:target [
+        a sh:SPARQLTarget ;
+        sh:select """
+            PREFIX icm: <http://tio.models.tmforum.org/tio/v3.6.0/IntentCommonModel/>
+            PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+            SELECT ?this
+            WHERE {
+                ?this a ?class .
+                ?class rdfs:subClassOf* icm:Expectation .
+            }
+        """ ;
+    ] ;
+    sh:sparql tio-constraints:UnreferencedExpectationConstraint ;
+    sh:severity sh:Warning .
+
+# =============================================================================
+# NOTES
+# =============================================================================
+# Universal validation (applies to all ontologies):
+# - Vocabulary: tio-lib:VocabularyUsageShape
+# - Function usage: tio-lib:FunctionUsageShape
+# - Function definitions: tio-lib:FunctionDefinitionMixin (mixin)

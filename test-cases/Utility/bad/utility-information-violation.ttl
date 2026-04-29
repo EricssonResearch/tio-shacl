@@ -1,0 +1,54 @@
+# Test: UtilityInformation with invalid function reference
+# This test validates that ut:function must reference a fun:Function instance
+# Should FAIL with: "ut:function must be a fun:Function instance"
+
+@prefix ex:  <http://example.org/> .
+@prefix ut:  <http://tio.models.tmforum.org/tio/v3.6.0/Utility/> .
+@prefix fun: <http://tio.models.tmforum.org/tio/v3.6.0/FunctionOntology/> .
+@prefix icm: <http://tio.models.tmforum.org/tio/v3.6.0/IntentCommonModel/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+################################################################################
+# VIOLATION 1: ut:function references non-Function class
+#
+# Common mistake: Using a resource that is not a fun:Function
+# The ut:function property MUST reference a fun:Function instance
+################################################################################
+
+# WRONG - function references a Target instead of Function
+ex:utilinfo_wrong_function_class
+  a ut:UtilityInformation ;
+  ut:function ex:notAFunction .
+
+ex:notAFunction
+  a icm:Target .
+
+################################################################################
+# VIOLATION 2: ut:function as literal instead of IRI
+#
+# Common mistake: Using a string literal instead of IRI reference
+################################################################################
+
+# WRONG - function as literal string
+ex:utilinfo_literal_function
+  a ut:UtilityInformation ;
+  ut:function "math:add" .
+
+################################################################################
+# VIOLATION 3: ut:forMetric with literal instead of resource
+#
+# Common mistake: Using a literal value instead of a resource
+# The ut:forMetric property should be a blank node or IRI
+################################################################################
+
+# WRONG - forMetric as plain literal
+ex:utilinfo_literal_formetric
+  a ut:UtilityInformation ;
+  ut:function ex:validFunction ;
+  ut:forMetric "metric1" .
+
+# Valid function for reference
+ex:validFunction
+  a fun:Function .

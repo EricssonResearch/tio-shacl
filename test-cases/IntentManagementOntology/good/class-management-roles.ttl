@@ -1,0 +1,29 @@
+# Test: Valid instances of management role and status classes
+# Concepts covered: Error, Warning, LCMrole, Owner, Handler
+# This test validates that valid instances of management-related classes can be created.
+
+@prefix ex: <http://example.org/> .
+@prefix imo: <http://tio.models.tmforum.org/tio/v3.6.0/IntentManagementOntology/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# === Error class ===
+ex:test_error
+  a imo:Error .
+
+# === Warning class ===
+ex:test_warning
+  a imo:Warning .
+
+# === LCMrole class (base class for Owner and Handler) ===
+ex:test_lcmrole
+  a imo:LCMrole .
+
+# === Owner class (subclass of LCMrole) ===
+ex:test_owner
+  a imo:Owner .
+
+# === Handler class (subclass of LCMrole) ===
+ex:test_handler
+  a imo:Handler .

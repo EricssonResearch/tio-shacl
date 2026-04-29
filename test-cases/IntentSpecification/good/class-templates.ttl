@@ -1,0 +1,204 @@
+# Test: Valid instances and property usage of Template classes
+# Concepts covered: Template, ObjectTemplate, ContentTemplate, VocabularyTemplate, IntentSpecification,
+#                   insp:applicableIf, insp:applicableIfNot, insp:content, insp:contentUsing,
+#                   insp:allowedValues, insp:templateType, insp:mandatoryIntent, insp:optionalIntent,
+#                   insp:mandatorySpecification, insp:optionalSpecification
+# This test validates that template classes and properties can be used correctly.
+
+@prefix ex: <http://example.org/> .
+@prefix fun: <http://tio.models.tmforum.org/tio/v3.6.0/FunctionOntology/> .
+@prefix icm: <http://tio.models.tmforum.org/tio/v3.6.0/IntentCommonModel/> .
+@prefix insp: <http://tio.models.tmforum.org/tio/v3.6.0/IntentSpecification/> .
+@prefix log: <http://tio.models.tmforum.org/tio/v3.6.0/LogicalOperators/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+################################################################################
+# Basic class instances
+################################################################################
+
+# === Template ===
+ex:test_template a insp:Template .
+
+# === ObjectTemplate ===
+ex:test_objecttemplate a insp:ObjectTemplate .
+
+# === ContentTemplate ===
+ex:test_contenttemplate a insp:ContentTemplate .
+
+# === VocabularyTemplate ===
+ex:test_vocabularytemplate a insp:VocabularyTemplate .
+
+# === IntentSpecification ===
+ex:test_intentspecification a insp:IntentSpecification .
+
+################################################################################
+# Supporting instances
+################################################################################
+
+# Target for expectation
+ex:target1 a icm:Target .
+
+# Expectation for use in Intents (required for Actionable instances)
+ex:base_expectation a icm:PropertyExpectation ;
+    icm:target ex:target1 ;
+    log:allOf ( "true"^^xsd:boolean ) .
+
+ex:qos_expectation a icm:PropertyExpectation ;
+    icm:target ex:target1 ;
+    log:allOf ( "true"^^xsd:boolean ) .
+
+# Condition for applicability - use log:allOf with boolean, not log:match with literal
+ex:high_priority_condition a log:Condition ;
+    log:allOf ( "true"^^xsd:boolean ) .
+
+ex:low_bandwidth_condition a log:Condition ;
+    log:allOf ( "true"^^xsd:boolean ) .
+
+# Intent for specification - must have BooleanFunction property
+ex:base_intent a icm:Intent ;
+    rdfs:label "Base Intent Template" ;
+    log:allOf ( ex:base_expectation ) .
+
+ex:optional_qos_intent a icm:Intent ;
+    rdfs:label "Optional QoS Intent" ;
+    log:allOf ( ex:qos_expectation ) .
+
+################################################################################
+# insp:applicableIf and insp:applicableIfNot properties - log:Condition
+################################################################################
+
+ex:content_template_with_condition a insp:ContentTemplate ;
+    insp:applicableIf ex:high_priority_condition ;
+    insp:content ex:base_intent .
+
+ex:content_template_with_negative_condition a insp:ContentTemplate ;
+    insp:applicableIfNot ex:low_bandwidth_condition ;
+    insp:content ex:base_intent .
+
+ex:content_template_with_both_conditions a insp:ContentTemplate ;
+    insp:applicableIf ex:high_priority_condition ;
+    insp:applicableIfNot ex:low_bandwidth_condition ;
+    insp:content ex:base_intent .
+
+################################################################################
+# insp:content property - BlankNodeOrIRI
+################################################################################
+
+# Content as named IRI
+ex:content_template_named a insp:ContentTemplate ;
+    insp:content ex:base_intent .
+
+# Content as blank node (inline definition)
+ex:content_template_inline a insp:ContentTemplate ;
+    insp:content [
+        a icm:PropertyExpectation ;
+        icm:target ex:target1 ;
+        log:allOf ( "true"^^xsd:boolean )
+    ] .
+
+################################################################################
+# insp:contentUsing property - VocabularyTemplate
+################################################################################
+
+ex:custom_vocabulary a insp:VocabularyTemplate ;
+    rdfs:label "Custom Network Vocabulary" .
+
+ex:content_template_with_vocabulary a insp:ContentTemplate ;
+    insp:content ex:base_intent ;
+    insp:contentUsing ex:custom_vocabulary .
+
+################################################################################
+# insp:allowedValues property - rdfs:Container
+################################################################################
+
+ex:object_template_with_allowed_values a insp:ObjectTemplate ;
+    insp:allowedValues [
+        a rdfs:Container ;
+        rdfs:member "option1" , "option2" , "option3"
+    ] .
+
+# Using rdf:Bag explicitly
+ex:object_template_with_bag a insp:ObjectTemplate ;
+    insp:allowedValues [
+        a rdfs:Container ;
+        rdfs:member "low" , "medium" , "high"
+    ] .
+
+################################################################################
+# insp:templateType property - must be IRI (class reference)
+################################################################################
+
+ex:object_template_with_type a insp:ObjectTemplate ;
+    insp:templateType icm:PropertyExpectation .
+
+ex:object_template_quantity_type a insp:ObjectTemplate ;
+    insp:templateType <http://tio.models.tmforum.org/tio/v3.6.0/QuantityOntology/Quantity> ;
+    insp:allowedValues [
+        a rdfs:Container ;
+        rdfs:member "10" , "20" , "50" , "100"
+    ] .
+
+################################################################################
+# insp:mandatoryIntent and insp:optionalIntent - icm:Intent
+################################################################################
+
+ex:intent_specification_with_intents a insp:IntentSpecification ;
+    insp:mandatoryIntent ex:base_intent ;
+    insp:optionalIntent ex:optional_qos_intent .
+
+################################################################################
+# insp:mandatorySpecification and insp:optionalSpecification - nested specs
+################################################################################
+
+ex:nested_specification a insp:IntentSpecification ;
+    insp:mandatoryIntent ex:optional_qos_intent .
+
+ex:parent_specification a insp:IntentSpecification ;
+    insp:mandatoryIntent ex:base_intent ;
+    insp:mandatorySpecification ex:nested_specification ;
+    insp:optionalSpecification ex:test_intentspecification .
+
+################################################################################
+# Complete template example
+################################################################################
+
+ex:network_service_vocabulary a insp:VocabularyTemplate ;
+    rdfs:label "Network Service Vocabulary"@en .
+
+ex:bandwidth_condition a log:Condition ;
+    log:allOf ( "true"^^xsd:boolean ) .
+
+ex:bandwidth_template a insp:ObjectTemplate ;
+    insp:templateType <http://tio.models.tmforum.org/tio/v3.6.0/QuantityOntology/Quantity> ;
+    insp:allowedValues [
+        a rdfs:Container ;
+        rdfs:member "100Mbps" , "500Mbps" , "1Gbps"
+    ] .
+
+ex:network_expectation a icm:PropertyExpectation ;
+    icm:target ex:target1 ;
+    log:allOf ( "true"^^xsd:boolean ) .
+
+ex:network_intent a icm:Intent ;
+    rdfs:label "Network Service Intent" ;
+    log:allOf ( ex:network_expectation ) .
+
+ex:qos_enhancement_expectation a icm:PropertyExpectation ;
+    icm:target ex:target1 ;
+    log:allOf ( "true"^^xsd:boolean ) .
+
+ex:qos_enhancement_intent a icm:Intent ;
+    rdfs:label "QoS Enhancement Intent" ;
+    log:allOf ( ex:qos_enhancement_expectation ) .
+
+ex:network_service_content a insp:ContentTemplate ;
+    insp:applicableIf ex:bandwidth_condition ;
+    insp:content ex:network_intent ;
+    insp:contentUsing ex:network_service_vocabulary .
+
+ex:network_service_specification a insp:IntentSpecification ;
+    rdfs:label "Network Service Specification"@en ;
+    insp:mandatoryIntent ex:network_intent ;
+    insp:optionalIntent ex:qos_enhancement_intent .

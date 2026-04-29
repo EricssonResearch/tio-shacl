@@ -1,0 +1,53 @@
+# Test: Valid instances of Expectation classes
+# Concepts covered: Expectation, DeliveryExpectation, PropertyExpectation,
+#                   ReportingExpectation, ObservationReportingExpectation
+# This test validates that valid instances of expectation classes can be created.
+
+@prefix ex: <http://example.org/> .
+@prefix fun: <http://tio.models.tmforum.org/tio/v3.6.0/FunctionOntology/> .
+@prefix icm: <http://tio.models.tmforum.org/tio/v3.6.0/IntentCommonModel/> .
+@prefix log: <http://tio.models.tmforum.org/tio/v3.6.0/LogicalOperators/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# Shared target for all expectations
+ex:shared_target
+  a icm:Target .
+
+# === Intent that references all expectations ===
+ex:test_intent
+  a icm:Intent ;
+  log:allOf ( ex:test_expectation ex:test_deliveryexpectation ex:test_propertyexpectation ex:test_reportingexpectation ex:test_observationreportingexpectation ) .
+
+# === Expectation (base class) ===
+ex:test_expectation
+  a icm:Expectation ;
+  icm:target ex:shared_target .
+
+# === DeliveryExpectation ===
+ex:test_deliveryexpectation
+  a icm:DeliveryExpectation ;
+  icm:target ex:shared_target .
+
+# === PropertyExpectation - must be referenced by an Intent to avoid unused warning ===
+# PropertyExpectation requires a boolean function with at least 1 argument (arityMin=1)
+ex:test_propertyexpectation
+  a icm:PropertyExpectation ;
+  icm:target ex:shared_target ;
+  log:allOf ( ex:test_condition ) .
+
+# Condition used by PropertyExpectation
+ex:test_condition
+  a log:Condition ;
+  log:allOf ( "true"^^xsd:boolean ) .
+
+# === ReportingExpectation ===
+ex:test_reportingexpectation
+  a icm:ReportingExpectation ;
+  icm:target ex:shared_target .
+
+# === ObservationReportingExpectation ===
+ex:test_observationreportingexpectation
+  a icm:ObservationReportingExpectation ;
+  icm:target ex:shared_target .

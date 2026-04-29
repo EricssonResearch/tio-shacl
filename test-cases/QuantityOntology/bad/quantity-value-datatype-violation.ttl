@@ -1,0 +1,33 @@
+# Test: Invalid rdf:value datatype on Quantity
+# This test validates that Quantity rdf:value must be numeric
+# Should FAIL with: "Quantity must have exactly one numeric rdf:value"
+
+@prefix ex:   <http://example.org/> .
+@prefix quan: <http://tio.models.tmforum.org/tio/v3.6.0/QuantityOntology/> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+################################################################################
+# VIOLATION: Quantity rdf:value with wrong datatype
+#
+# Quantity rdf:value MUST be numeric (decimal, integer, float, or double)
+################################################################################
+
+# WRONG - using string instead of numeric
+ex:qty_string_value
+  a quan:Quantity ;
+  rdf:value "fifty" ;
+  quan:unit "kg" .
+
+################################################################################
+# VIOLATION: Quantity with multiple rdf:values
+#
+# Quantity must have at most one rdf:value (maxCount 1)
+################################################################################
+
+# WRONG - multiple values
+ex:qty_multiple_values
+  a quan:Quantity ;
+  rdf:value 10 ;
+  rdf:value 20 ;
+  quan:unit "m" .

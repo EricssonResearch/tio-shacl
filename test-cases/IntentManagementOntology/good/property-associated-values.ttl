@@ -1,0 +1,34 @@
+# Test: Valid usage of associated value properties
+# Concepts covered: associatedValueCombination, associatedValueType
+# This test validates that associated value properties can be used on class definitions.
+# These are meta-level properties with domain rdfs:Class.
+
+@prefix ex: <http://example.org/> .
+@prefix imo: <http://tio.models.tmforum.org/tio/v3.6.0/IntentManagementOntology/> .
+@prefix fun: <http://tio.models.tmforum.org/tio/v3.6.0/FunctionOntology/> .
+@prefix mf: <http://tio.models.tmforum.org/tio/v3.6.0/MathFunctions/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# === Custom class with associatedValueType ===
+# Specifies the type of associated values for instances of this class
+ex:MetricClass
+  a rdfs:Class ;
+  rdfs:label "Metric Class"@en ;
+  imo:associatedValueType xsd:decimal .
+
+# === Custom class with associatedValueCombination ===
+# Specifies how multiple associated values should be combined
+ex:AggregatedMetricClass
+  a rdfs:Class ;
+  rdfs:label "Aggregated Metric Class"@en ;
+  imo:associatedValueType xsd:decimal ;
+  imo:associatedValueCombination mf:avg .
+
+# === Another example with different combination function ===
+ex:SummedMetricClass
+  a rdfs:Class ;
+  rdfs:label "Summed Metric Class"@en ;
+  imo:associatedValueType xsd:decimal ;
+  imo:associatedValueCombination mf:sum .

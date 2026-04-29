@@ -1,0 +1,147 @@
+# Test: Recurring validity patterns using W3C Time Ontology
+# This test covers recurring temporal patterns supported by W3C Time:
+# 1. Valid on specific days of week (every weekend)
+# 2. Valid on specific day of week (every Monday)
+# 3. Valid during specific hours on specific days (Monday-Friday 9am-5pm)
+
+@prefix ex:   <http://example.org/> .
+@prefix icm:  <http://tio.models.tmforum.org/tio/v3.6.0/IntentCommonModel/> .
+@prefix iv:   <http://tio.models.tmforum.org/tio/v3.6.0/IntentValidityOntology/> .
+@prefix log:  <http://tio.models.tmforum.org/tio/v3.6.0/LogicalOperators/> .
+@prefix imo:  <http://tio.models.tmforum.org/tio/v3.6.0/IntentManagementOntology/> .
+@prefix t:    <http://www.w3.org/2006/time#> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+################################################################################
+# SCENARIO 1: Valid on Weekends (Every Saturday and Sunday)
+#
+# Intent valid every weekend using t:dayOfWeek
+# This is a recurring pattern - applies to all weekends
+################################################################################
+
+ex:WeekendIntent
+  a icm:Intent ;
+  rdfs:label "Weekend Only Intent"@en ;
+  rdfs:comment "Valid every Saturday and Sunday"@en ;
+  iv:validIf ex:V_Weekend ;
+  log:allOf ( ex:E_Weekend )
+  .
+
+ex:V_Weekend
+  a iv:Validity ;
+  rdfs:label "Weekend Validity"@en ;
+  rdfs:comment "Recurring: every Saturday and Sunday"@en ;
+  log:match (
+    imo:Now
+    t:inDateTime
+    [ t:dayOfWeek t:Saturday, t:Sunday ]
+  )
+  .
+
+ex:E_Weekend
+  a icm:PropertyExpectation ;
+  rdfs:label "Weekend Expectation"@en ;
+  icm:target ex:T_General ;
+  log:allOf ( ex:C_Weekend )
+  .
+
+ex:C_Weekend
+  a log:Condition ;
+  log:allOf ( "true"^^xsd:boolean )
+  .
+
+################################################################################
+# SCENARIO 2: Valid on Specific Day of Week (Every Monday)
+#
+# Intent valid every Monday
+################################################################################
+
+ex:MondayIntent
+  a icm:Intent ;
+  rdfs:label "Monday Only Intent"@en ;
+  rdfs:comment "Valid every Monday"@en ;
+  iv:validIf ex:V_Monday ;
+  log:allOf ( ex:E_Monday )
+  .
+
+ex:V_Monday
+  a iv:Validity ;
+  rdfs:label "Monday Validity"@en ;
+  rdfs:comment "Recurring: every Monday"@en ;
+  log:match (
+    imo:Now
+    t:inDateTime
+    [ t:dayOfWeek t:Monday ]
+  )
+  .
+
+ex:E_Monday
+  a icm:PropertyExpectation ;
+  rdfs:label "Monday Expectation"@en ;
+  icm:target ex:T_General ;
+  log:allOf ( ex:C_Monday )
+  .
+
+ex:C_Monday
+  a log:Condition ;
+  log:allOf ( "true"^^xsd:boolean )
+  .
+
+################################################################################
+# SCENARIO 3: Valid on Weekdays (Monday through Friday)
+#
+# Intent valid every weekday
+################################################################################
+
+ex:WeekdayIntent
+  a icm:Intent ;
+  rdfs:label "Weekday Only Intent"@en ;
+  rdfs:comment "Valid Monday through Friday"@en ;
+  iv:validIf ex:V_Weekday ;
+  log:allOf ( ex:E_Weekday )
+  .
+
+ex:V_Weekday
+  a iv:Validity ;
+  rdfs:label "Weekday Validity"@en ;
+  rdfs:comment "Recurring: Monday-Friday"@en ;
+  log:match (
+    imo:Now
+    t:inDateTime
+    [ t:dayOfWeek t:Monday, t:Tuesday, t:Wednesday, t:Thursday, t:Friday ]
+  )
+  .
+
+ex:E_Weekday
+  a icm:PropertyExpectation ;
+  rdfs:label "Weekday Expectation"@en ;
+  icm:target ex:T_General ;
+  log:allOf ( ex:C_Weekday )
+  .
+
+ex:C_Weekday
+  a log:Condition ;
+  log:allOf ( "true"^^xsd:boolean )
+  .
+
+################################################################################
+# Common Target (used by all scenarios)
+################################################################################
+
+ex:T_General
+  a icm:Target ;
+  rdfs:label "General Target"@en ;
+  rdfs:member ex:NetworkSlice1
+  .
+
+ex:NetworkSlice1
+  a ex:NetworkSlice ;
+  rdfs:label "Network Slice 1"@en
+  .
+
+ex:NetworkSlice
+  a rdfs:Class ;
+  rdfs:label "Network Slice"@en
+  .

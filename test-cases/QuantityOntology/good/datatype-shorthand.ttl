@@ -1,0 +1,105 @@
+# Test: Quantity datatype usage
+# This test validates quantity instances with explicit quan:Quantity syntax
+# Note: quan:quantity shorthand requires runtime datatype support
+
+@prefix ex:   <http://example.org/> .
+@prefix quan: <http://tio.models.tmforum.org/tio/v3.6.0/QuantityOntology/> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+################################################################################
+# PATTERN 1: Explicit Quantity in comparison functions
+################################################################################
+
+ex:test_explicit_smaller
+  a rdfs:Resource ;
+  quan:smaller (
+    [ a quan:Quantity ; rdf:value "50"^^xsd:decimal ; quan:unit "ms" ]
+    [ a quan:Quantity ; rdf:value "100"^^xsd:decimal ; quan:unit "ms" ]
+  ) .
+
+ex:test_explicit_greater
+  a rdfs:Resource ;
+  quan:greater (
+    [ a quan:Quantity ; rdf:value "95"^^xsd:decimal ; quan:unit "%" ]
+    [ a quan:Quantity ; rdf:value "90"^^xsd:decimal ; quan:unit "%" ]
+  ) .
+
+################################################################################
+# PATTERN 2: Various units with explicit Quantity
+################################################################################
+
+ex:test_explicit_milliseconds
+  a rdfs:Resource ;
+  quan:smaller (
+    [ a quan:Quantity ; rdf:value "10"^^xsd:decimal ; quan:unit "ms" ]
+    [ a quan:Quantity ; rdf:value "100"^^xsd:decimal ; quan:unit "ms" ]
+  ) .
+
+ex:test_explicit_gigabytes
+  a rdfs:Resource ;
+  quan:atLeast (
+    [ a quan:Quantity ; rdf:value "10"^^xsd:decimal ; quan:unit "GB" ]
+    [ a quan:Quantity ; rdf:value "5"^^xsd:decimal ; quan:unit "GB" ]
+  ) .
+
+ex:test_explicit_percentage
+  a rdfs:Resource ;
+  quan:greater (
+    [ a quan:Quantity ; rdf:value "99.9"^^xsd:decimal ; quan:unit "%" ]
+    [ a quan:Quantity ; rdf:value "95"^^xsd:decimal ; quan:unit "%" ]
+  ) .
+
+################################################################################
+# PATTERN 3: Named Quantity instances
+################################################################################
+
+ex:latency50ms a quan:Quantity ;
+    rdf:value "50"^^xsd:decimal ;
+    quan:unit "ms" .
+
+ex:latency100ms a quan:Quantity ;
+    rdf:value "100"^^xsd:decimal ;
+    quan:unit "ms" .
+
+ex:test_named_quantities
+  a rdfs:Resource ;
+  quan:smaller ( ex:latency50ms ex:latency100ms ) .
+
+################################################################################
+# PATTERN 4: Explicit Quantity in range checks
+################################################################################
+
+ex:test_explicit_in_range
+  a rdfs:Resource ;
+  quan:inRange (
+    [ a quan:Quantity ; rdf:value "10"^^xsd:decimal ; quan:unit "ms" ]
+    [ a quan:Quantity ; rdf:value "100"^^xsd:decimal ; quan:unit "ms" ]
+    [ a quan:Quantity ; rdf:value "50"^^xsd:decimal ; quan:unit "ms" ]
+  ) .
+
+################################################################################
+# PATTERN 5: Explicit Quantity in constraint functions
+################################################################################
+
+ex:test_explicit_exactly
+  a rdfs:Resource ;
+  quan:exactly (
+    [ a quan:Quantity ; rdf:value "100"^^xsd:decimal ; quan:unit "ms" ]
+    [ a quan:Quantity ; rdf:value "100"^^xsd:decimal ; quan:unit "ms" ]
+  ) .
+
+ex:test_explicit_atLeast
+  a rdfs:Resource ;
+  quan:atLeast (
+    [ a quan:Quantity ; rdf:value "75"^^xsd:decimal ; quan:unit "%" ]
+    [ a quan:Quantity ; rdf:value "50"^^xsd:decimal ; quan:unit "%" ]
+  ) .
+
+ex:test_explicit_atMost
+  a rdfs:Resource ;
+  quan:atMost (
+    [ a quan:Quantity ; rdf:value "50"^^xsd:decimal ; quan:unit "ms" ]
+    [ a quan:Quantity ; rdf:value "100"^^xsd:decimal ; quan:unit "ms" ]
+  ) .

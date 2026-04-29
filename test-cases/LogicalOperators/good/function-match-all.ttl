@@ -1,0 +1,57 @@
+# Test: Valid usage of match functions
+# Concepts covered: match, matchAll, matchAny, matchNone, matchOne, matchStatement
+# This test validates that match functions can be used correctly.
+
+@prefix ex: <http://example.org/> .
+@prefix log: <http://tio.models.tmforum.org/tio/v3.6.0/LogicalOperators/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# === match function: (subject, predicate, object) ===
+ex:test_match
+  a rdfs:Resource ;
+  log:match ( ex:subject1 ex:predicate1 ex:object1 ) .
+
+# === matchAll function: (subjectContainer, predicate, object) ===
+# All members of container must have the predicate-object relationship
+ex:test_matchall
+  a rdfs:Resource ;
+  log:matchAll ( ex:container1 ex:predicate1 ex:object1 ) .
+
+# === matchAny function: (subjectContainer, predicate, object) ===
+# At least one member of container must have the predicate-object relationship
+ex:test_matchany
+  a rdfs:Resource ;
+  log:matchAny ( ex:container1 ex:predicate1 ex:object1 ) .
+
+# === matchNone function: (subjectContainer, predicate, object) ===
+# No member of container has the predicate-object relationship
+ex:test_matchnone
+  a rdfs:Resource ;
+  log:matchNone ( ex:container1 ex:predicate1 ex:object1 ) .
+
+# === matchOne function: (subjectContainer, predicate, object) ===
+# Exactly one member of container has the predicate-object relationship
+ex:test_matchone
+  a rdfs:Resource ;
+  log:matchOne ( ex:container1 ex:predicate1 ex:object1 ) .
+
+# === matchStatement function: (rdf:Statement) ===
+ex:test_matchstatement
+  a rdfs:Resource ;
+  log:matchStatement ( ex:statement1 ) .
+
+ex:statement1 a rdf:Statement ;
+    rdf:subject ex:subject1 ;
+    rdf:predicate ex:predicate1 ;
+    rdf:object ex:object1 .
+
+# Supporting instances
+ex:container1 a rdfs:Container ;
+    rdfs:member ex:subject1 ;
+    rdfs:member ex:subject2 .
+ex:subject1 a rdfs:Resource .
+ex:subject2 a rdfs:Resource .
+ex:predicate1 a rdf:Property .
+ex:object1 a rdfs:Resource .

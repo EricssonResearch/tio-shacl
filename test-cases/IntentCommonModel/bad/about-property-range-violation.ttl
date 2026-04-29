@@ -1,0 +1,23 @@
+# Test: Invalid icm:about usage with literal value
+# This test validates that icm:about must be an IRI, not a literal
+# Should FAIL with: "icm:about must be an IRI (resource reference), not a literal"
+
+@prefix ex:   <http://example.org/> .
+@prefix icm:  <http://tio.models.tmforum.org/tio/v3.6.0/IntentCommonModel/> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+################################################################################
+# VIOLATION: icm:about with literal value
+#
+# Common mistake: Using a literal string instead of an IRI reference
+# The icm:about property MUST reference another resource (Intent, Expectation, etc.)
+################################################################################
+
+# WRONG - using literal string
+ex:IR1
+  a icm:IntentReport ;
+  icm:about "my-intent-name" ;  # WRONG: This is a literal, not an IRI
+  icm:result true
+  .

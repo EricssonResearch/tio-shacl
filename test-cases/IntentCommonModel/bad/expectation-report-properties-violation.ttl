@@ -1,0 +1,38 @@
+# Test: ExpectationReportPropertiesShape violation
+# Tests: targetReport must be icm:TargetReport
+# Should FAIL with: "ExpectationReport targetReport must be a TargetReport"
+
+@prefix ex:   <http://example.org/> .
+@prefix icm:  <http://tio.models.tmforum.org/tio/v3.6.0/IntentCommonModel/> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+################################################################################
+# VIOLATION: targetReport must be icm:TargetReport
+#
+# Common mistake: Using a resource that is not typed as icm:TargetReport
+# The icm:targetReport property MUST point to an icm:TargetReport instance
+################################################################################
+
+# WRONG - targetReport is not a TargetReport
+ex:wrong_target_report
+  a icm:ExpectationReport ;
+  icm:about ex:myExpectation ;
+  icm:result true ;
+  icm:targetReport ex:notATargetReport  # WRONG: not icm:TargetReport
+  .
+
+# This resource is NOT a TargetReport
+ex:notATargetReport
+  a rdfs:Resource
+  .
+
+ex:myExpectation
+  a icm:PropertyExpectation ;
+  icm:target ex:myTarget
+  .
+
+ex:myTarget
+  a icm:Target
+  .

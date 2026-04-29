@@ -1,0 +1,200 @@
+# Test: Cross-ontology integration - Preference Workflow for Solution Selection
+# Concepts covered: JudgementRequest, Preference, PreferenceScore, ScoreInterpretation,
+#                   IntentReport, ProposalBestIntent integration
+# This test validates the complete business decision workflow.
+
+@prefix ex: <http://example.org/> .
+@prefix icm: <http://tio.models.tmforum.org/tio/v3.6.0/IntentCommonModel/> .
+@prefix imo: <http://tio.models.tmforum.org/tio/v3.6.0/IntentManagementOntology/> .
+@prefix log: <http://tio.models.tmforum.org/tio/v3.6.0/LogicalOperators/> .
+@prefix pbi: <http://tio.models.tmforum.org/tio/v3.6.0/ProposalBestIntent/> .
+@prefix pre: <http://tio.models.tmforum.org/tio/v3.6.0/PreferenceOfHandlingOutcomes/> .
+@prefix quan: <http://tio.models.tmforum.org/tio/v3.6.0/QuantityOntology/> .
+@prefix t: <http://www.w3.org/2006/time#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+################################################################################
+# Scenario: Network Upgrade Decision Workflow
+#
+# Business Context:
+# - Customer requests network upgrade
+# - System presents three solution options via IntentReports
+# - Customer provides preferences via JudgementRequest/Preference
+# - System recommends best proposal based on scores
+################################################################################
+
+# =============================================================================
+# STEP 1: DEFINE THE ORIGINAL INTENT AND EXPECTATIONS
+# =============================================================================
+
+ex:upgrade_target a icm:Target ;
+    rdfs:label "Network Infrastructure"@en .
+
+ex:bandwidth_expectation a icm:PropertyExpectation ;
+    icm:target ex:upgrade_target ;
+    log:allOf ( "true"^^xsd:boolean ) .
+
+ex:network_upgrade_intent a icm:Intent ;
+    rdfs:label "Network Upgrade Intent"@en ;
+    log:allOf ( ex:bandwidth_expectation ) .
+
+# =============================================================================
+# STEP 2: GENERATE SOLUTION OPTIONS AS INTENT REPORTS
+# =============================================================================
+
+# Option 1: Premium Package - High bandwidth, low latency, premium support
+ex:option_premium_report a icm:IntentReport ;
+    rdfs:label "Premium Network Package"@en ;
+    rdfs:comment "10 Gbps bandwidth, <10ms latency, 24/7 support, 99.99% SLA"@en ;
+    icm:reportNumber "1"^^xsd:positiveInteger .
+
+# Option 2: Standard Package - Balanced performance and cost
+ex:option_standard_report a icm:IntentReport ;
+    rdfs:label "Standard Network Package"@en ;
+    rdfs:comment "1 Gbps bandwidth, <50ms latency, business hours support, 99.9% SLA"@en ;
+    icm:reportNumber "2"^^xsd:positiveInteger .
+
+# Option 3: Economy Package - Cost-optimized
+ex:option_economy_report a icm:IntentReport ;
+    rdfs:label "Economy Network Package"@en ;
+    rdfs:comment "100 Mbps bandwidth, <100ms latency, email support, 99% SLA"@en ;
+    icm:reportNumber "3"^^xsd:positiveInteger .
+
+# =============================================================================
+# STEP 3: CREATE JUDGEMENT REQUEST WITH DEADLINE
+# =============================================================================
+
+ex:upgrade_decision_deadline a t:Instant ;
+    t:inXSDDateTimeStamp "2024-12-15T17:00:00Z"^^xsd:dateTimeStamp .
+
+ex:upgrade_judgement_request a pre:JudgementRequest ;
+    rdfs:label "Network Upgrade Decision Request"@en ;
+    rdfs:comment "Please review the following network upgrade options and provide your preference"@en ;
+    pre:preferenceDeadline ex:upgrade_decision_deadline .
+
+# =============================================================================
+# STEP 4: DEFINE SCORE INTERPRETATION SCALE
+# =============================================================================
+
+# 100-point scale with thresholds
+ex:hundred_point_scale a pre:ScoreInterpretation ;
+    rdfs:label "Percentage Score Scale"@en ;
+    pre:minScore "0"^^xsd:decimal ;
+    pre:maxScore "100"^^xsd:decimal ;
+    pre:preferredThreshold "75"^^xsd:decimal ;
+    pre:objectedThreshold "30"^^xsd:decimal .
+
+# Alternative: 5-star scale
+ex:five_star_scale a pre:ScoreInterpretation ;
+    rdfs:label "5-Star Rating Scale"@en ;
+    pre:minScore "1"^^xsd:decimal ;
+    pre:maxScore "5"^^xsd:decimal ;
+    pre:preferredThreshold "4"^^xsd:decimal ;
+    pre:objectedThreshold "2"^^xsd:decimal .
+
+# =============================================================================
+# STEP 5: CUSTOMER PROVIDES PREFERENCE SCORES
+# =============================================================================
+
+# Score for Premium option
+ex:premium_score a pre:PreferenceScore ;
+    pre:aboutOption ex:option_premium_report ;
+    pre:scoreValue "92"^^xsd:decimal .
+
+# Score for Standard option
+ex:standard_score a pre:PreferenceScore ;
+    pre:aboutOption ex:option_standard_report ;
+    pre:scoreValue "78"^^xsd:decimal .
+
+# Score for Economy option
+ex:economy_score a pre:PreferenceScore ;
+    pre:aboutOption ex:option_economy_report ;
+    pre:scoreValue "25"^^xsd:decimal .
+
+# =============================================================================
+# STEP 6: COMPLETE PREFERENCE STATEMENT
+# =============================================================================
+
+ex:customer_preference a pre:Preference ;
+    rdfs:label "Customer Network Upgrade Preference"@en ;
+    pre:about ex:upgrade_judgement_request ;
+    # Categorical preferences
+    pre:preferred ex:option_premium_report ;
+    pre:neutral ex:option_standard_report ;
+    pre:objected ex:option_economy_report ;
+    # Numerical scores
+    pre:score ex:premium_score ,
+              ex:standard_score ,
+              ex:economy_score ;
+    # Interpretation guidance
+    pre:scoreInterpretation ex:hundred_point_scale .
+
+# =============================================================================
+# STEP 7: PROPOSAL AND BEST INTENT RECOMMENDATION
+# =============================================================================
+
+# Proposal for the premium option (recommended based on scores)
+ex:premium_proposal a pbi:Proposal ;
+    rdfs:label "Premium Package Proposal"@en ;
+    pbi:proposedFor ex:bandwidth_expectation ;
+    pbi:proposedBest ex:option_premium_report .
+
+# Proposal for the standard option (alternative)
+ex:standard_proposal a pbi:Proposal ;
+    rdfs:label "Standard Package Proposal"@en ;
+    pbi:proposedFor ex:bandwidth_expectation ;
+    pbi:proposedBest ex:option_standard_report .
+
+# Best Proposal Report - aggregates all proposals
+ex:upgrade_best_proposal_report a pbi:BestProposalReport ;
+    rdfs:label "Network Upgrade Best Proposal Report"@en ;
+    pbi:proposed ex:premium_proposal ,
+                 ex:standard_proposal .
+
+# =============================================================================
+# STEP 8: INTENT MANAGEMENT INTEGRATION
+# =============================================================================
+
+ex:upgrade_manager a imo:IntentManager ;
+    rdfs:label "Network Upgrade Manager"@en .
+
+ex:preference_received_event a imo:IntentReceived ;
+    rdfs:label "Customer Preference Received"@en ;
+    imo:eventIssuedBy ex:upgrade_manager ;
+    imo:eventIssuedFor ex:network_upgrade_intent .
+
+ex:decision_accepted_event a imo:IntentAccepted ;
+    rdfs:label "Upgrade Decision Accepted"@en ;
+    imo:eventIssuedBy ex:upgrade_manager ;
+    imo:eventIssuedFor ex:network_upgrade_intent .
+
+# =============================================================================
+# ALTERNATIVE: PREFERENCE WITH MULTIPLE JUDGEMENT REQUESTS
+# =============================================================================
+
+# Second judgement for backup provider selection
+ex:backup_judgement_request a pre:JudgementRequest ;
+    rdfs:label "Backup Provider Selection"@en ;
+    pre:preferenceDeadline [
+        a t:Instant ;
+        t:inXSDDateTimeStamp "2024-12-20T12:00:00Z"^^xsd:dateTimeStamp
+    ] .
+
+ex:backup_option_a a icm:IntentReport ;
+    rdfs:label "Backup Provider A" .
+
+ex:backup_option_b a icm:IntentReport ;
+    rdfs:label "Backup Provider B" .
+
+ex:backup_preference a pre:Preference ;
+    pre:about ex:backup_judgement_request ;
+    pre:preferred ex:backup_option_a ;
+    pre:neutral ex:backup_option_b ;
+    pre:score [
+        a pre:PreferenceScore ;
+        pre:aboutOption ex:backup_option_a ;
+        pre:scoreValue "4.5"^^xsd:decimal
+    ] ;
+    pre:scoreInterpretation ex:five_star_scale .

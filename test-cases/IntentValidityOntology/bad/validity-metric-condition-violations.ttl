@@ -1,0 +1,25 @@
+# Test: Invalid usage of iv:Validity with metric-based condition
+# This test validates that violations are caught for incorrect metric comparisons
+
+@prefix ex:   <http://example.org/> .
+@prefix iv:   <http://tio.models.tmforum.org/tio/v3.6.0/IntentValidityOntology/> .
+@prefix quan: <http://tio.models.tmforum.org/tio/v3.6.0/QuantityOntology/> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+################################################################################
+# VIOLATION: quan:smaller with wrong arity
+# quan:smaller requires exactly 2 arguments (arityMin=2, arityMax=2)
+################################################################################
+
+# Invalid: only 1 argument provided
+ex:InvalidV1
+  a iv:Validity ;
+  quan:smaller ( ex:NumberOfUsersQuantity )  # VIOLATION: missing second argument
+  .
+
+ex:NumberOfUsersQuantity
+  a quan:Quantity ;
+  rdf:value "500"^^xsd:decimal ;
+  quan:unit "users"
+  .

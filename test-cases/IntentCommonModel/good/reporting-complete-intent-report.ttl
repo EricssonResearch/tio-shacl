@@ -1,0 +1,142 @@
+# Test: Complete Intent → IntentReport → ExpectationReport → ConditionReport chain
+# This test validates the full reporting structure from TR290B
+# Based on TR290B Intent Common Model Intent Reporting example 1
+
+@prefix ex:   <http://example.org/> .
+@prefix icm:  <http://tio.models.tmforum.org/tio/v3.6.0/IntentCommonModel/> .
+@prefix log:  <http://tio.models.tmforum.org/tio/v3.6.0/LogicalOperators/> .
+@prefix quan: <http://tio.models.tmforum.org/tio/v3.6.0/QuantityOntology/> .
+@prefix met:  <http://tio.models.tmforum.org/tio/v3.6.0/MetricsAndObservations/> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+################################################################################
+# Complete Intent Reporting Example
+#
+# This example shows the full reporting chain:
+# - Intent I1 has two expectations (E1, E2)
+# - IntentReport IR1 reports on I1
+# - ExpectationReport ER1 reports on E1
+# - ExpectationReport ER2 reports on E2
+# - Each ExpectationReport has ConditionReports (CR1, CR2, CR3)
+#
+# Key aspects tested:
+# - icm:IntentReport with icm:about and icm:resultFrom
+# - icm:ExpectationReport with icm:about and icm:resultFrom
+# - icm:ConditionReport with icm:about and icm:result
+# - Complete reporting chain from Intent → Expectation → Condition
+################################################################################
+
+# Intent Definition
+ex:Intent1
+  a icm:Intent ;
+  rdfs:label "Network Slice Performance Intent"@en ;
+  log:allOf ( ex:E1 ex:E2 )
+  .
+
+# Expectation E1: Latency requirement
+ex:E1
+  a icm:PropertyExpectation ;
+  rdfs:label "Latency Expectation"@en ;
+  icm:target ex:T1 ;
+  log:allOf ( ex:C1 ex:C2 )
+  .
+
+# Expectation E2: Throughput requirement
+ex:E2
+  a icm:PropertyExpectation ;
+  rdfs:label "Throughput Expectation"@en ;
+  icm:target ex:T1 ;
+  log:allOf ( ex:C1 ex:C3 )
+  .
+
+# Shared target
+ex:T1
+  a icm:Target ;
+  rdfs:member ex:Slice1
+  .
+
+ex:Slice1
+  a ex:NetworkSlice ;
+  rdfs:label "Network Slice 1"@en
+  .
+
+ex:NetworkSlice
+  a rdfs:Class ;
+  rdfs:label "Network Slice"@en
+  .
+
+# Conditions
+ex:C1
+  a log:Condition ;
+  rdfs:label "Base Condition"@en ;
+  log:allOf ( "true"^^xsd:boolean )
+  .
+
+ex:C2
+  a log:Condition ;
+  rdfs:label "Latency Condition"@en ;
+  log:allOf ( "true"^^xsd:boolean )
+  .
+
+ex:C3
+  a log:Condition ;
+  rdfs:label "Throughput Condition"@en ;
+  log:allOf ( "true"^^xsd:boolean )
+  .
+
+################################################################################
+# Reporting Structure
+################################################################################
+
+# IntentReport: Reports on Intent1
+ex:IR1
+  a icm:IntentReport ;
+  rdfs:label "Intent Report 1"@en ;
+  icm:about ex:Intent1 ;
+  icm:result true ;
+  icm:resultFrom ex:ER1, ex:ER2
+  .
+
+# ExpectationReport ER1: Reports on E1
+ex:ER1
+  a icm:ExpectationReport ;
+  rdfs:label "Expectation Report 1"@en ;
+  icm:about ex:E1 ;
+  icm:result true ;
+  icm:resultFrom ex:CR1, ex:CR2
+  .
+
+# ExpectationReport ER2: Reports on E2
+ex:ER2
+  a icm:ExpectationReport ;
+  rdfs:label "Expectation Report 2"@en ;
+  icm:about ex:E2 ;
+  icm:result true ;
+  icm:resultFrom ex:CR1, ex:CR3
+  .
+
+# ConditionReport CR1: Reports on C1 (shared by both expectations)
+ex:CR1
+  a icm:ConditionReport ;
+  rdfs:label "Condition Report 1"@en ;
+  icm:about ex:C1 ;
+  icm:result true
+  .
+
+# ConditionReport CR2: Reports on C2
+ex:CR2
+  a icm:ConditionReport ;
+  rdfs:label "Condition Report 2"@en ;
+  icm:about ex:C2 ;
+  icm:result true
+  .
+
+# ConditionReport CR3: Reports on C3
+ex:CR3
+  a icm:ConditionReport ;
+  rdfs:label "Condition Report 3"@en ;
+  icm:about ex:C3 ;
+  icm:result true
+  .

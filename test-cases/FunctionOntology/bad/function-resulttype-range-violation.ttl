@@ -1,0 +1,26 @@
+# Test: FunctionResultTypeRangeShape violation
+# Tests: fun:resultType must be an IRI (type reference), not a literal
+# Should FAIL with: "fun:resultType must be an IRI reference to a type, not a literal value"
+
+@prefix ex:   <http://example.org/> .
+@prefix fun:  <http://tio.models.tmforum.org/tio/v3.6.0/FunctionOntology/> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+################################################################################
+# VIOLATION: fun:resultType with literal value instead of IRI
+#
+# Common mistake: Using string literals like "boolean" or "decimal" instead of
+# proper IRI references like xsd:boolean or xsd:decimal
+################################################################################
+
+# WRONG - resultType is a literal string instead of IRI
+ex:func_with_literal_type
+  a fun:Function ;
+  fun:arityMin 1 ;
+  fun:resultType "boolean" .  # WRONG: should be xsd:boolean
+
+# WRONG - resultType is a typed literal instead of IRI
+ex:func_with_typed_literal
+  a fun:Function ;
+  fun:arityMin 2 ;
+  fun:resultType "decimal"^^xsd:string .  # WRONG: should be xsd:decimal

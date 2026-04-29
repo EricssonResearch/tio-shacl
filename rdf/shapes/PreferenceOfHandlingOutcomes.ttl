@@ -1,0 +1,199 @@
+# TMF PreferenceOfHandlingOutcomes SHACL Shapes
+#
+# Domain-specific validation for PreferenceOfHandlingOutcomes.
+# Global validation (function usage, vocabulary) handled by lib/GlobalShapes.ttl
+#
+# Ontology URI: http://tio.models.tmforum.org/tio/v3.6.0/PreferenceOfHandlingOutcomes/
+
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# TMF namespaces
+@prefix pre: <http://tio.models.tmforum.org/tio/v3.6.0/PreferenceOfHandlingOutcomes/> .
+@prefix icm: <http://tio.models.tmforum.org/tio/v3.6.0/IntentCommonModel/> .
+@prefix fun: <http://tio.models.tmforum.org/tio/v3.6.0/FunctionOntology/> .
+@prefix imo: <http://tio.models.tmforum.org/tio/v3.6.0/IntentManagementOntology/> .
+
+# Shape namespaces
+@prefix pre-shapes: <http://tio.models.tmforum.org/tio/v3.6.0/shapes/PreferenceOfHandlingOutcomes/> .
+@prefix tio-lib: <http://tio.models.tmforum.org/tio/v3.6.0/shapes/lib/> .
+@prefix tio-targets: <http://tio.models.tmforum.org/tio/v3.6.0/shapes/lib/targets/> .
+@prefix tio-constraints: <http://tio.models.tmforum.org/tio/v3.6.0/shapes/lib/constraints/> .
+
+# =============================================================================
+# JUDGEMENT REQUEST VALIDATION
+# =============================================================================
+
+pre-shapes:JudgementRequestShape
+    a sh:NodeShape ;
+    rdfs:label "Judgement Request Shape" ;
+    rdfs:comment "Validates JudgementRequest class instances. Judgement requests solicit intent owner preferences on available solution options by presenting expected outcomes via intent reports." ;
+    sh:targetClass pre:JudgementRequest ;
+
+    # preferenceDeadline: time limit for receiving preference statements
+    sh:property [
+        sh:path pre:preferenceDeadline ;
+        sh:class <http://www.w3.org/2006/time#Instant> ;
+        sh:maxCount 1 ;
+        sh:name "preferenceDeadline" ;
+        sh:description "Point in time until preference must be provided" ;
+        sh:message "[pre/deadline_not_instant] pre:preferenceDeadline must be a time:Instant when present. In TIO v3.6.0, use W3C Time ontology to specify when preference must be submitted. Example: pre:preferenceDeadline [ a time:Instant ; time:inXSDDateTimeStamp \"2024-01-01T12:00:00Z\"^^xsd:dateTimeStamp ]" ;
+    ] ;
+
+    sh:severity sh:Violation ;
+    sh:message "[domain/judgement_request] JudgementRequest validation failed: ensure preferenceDeadline is a time:Instant if specified" .
+
+# =============================================================================
+# PREFERENCE VALIDATION
+# =============================================================================
+
+pre-shapes:PreferenceShape
+    a sh:NodeShape ;
+    rdfs:label "Preference Shape" ;
+    rdfs:comment "Validates Preference class instances. Preferences express intent owner judgements about solution alternatives presented in judgement requests." ;
+    sh:targetClass pre:Preference ;
+
+    # about: reference to the judgement request
+    sh:property [
+        sh:path pre:about ;
+        sh:class pre:JudgementRequest ;
+        sh:name "about" ;
+        sh:description "Judgement request this preference responds to" ;
+        sh:message "[pre/about_type] pre:about must be a pre:JudgementRequest instance. In TIO v3.6.0, preferences respond to judgement requests. Ensure: pre:about <request-uri> where the URI has rdf:type pre:JudgementRequest" ;
+    ] ;
+
+    # neutral: intent reports without strong preference
+    sh:property [
+        sh:path pre:neutral ;
+        sh:class icm:IntentReport ;
+        sh:name "neutral" ;
+        sh:description "Intent reports the owner neither prefers nor objects to" ;
+        sh:message "[domain/pre_neutral_type] pre:neutral must be an icm:IntentReport instance when present" ;
+    ] ;
+
+    # objected: problematic intent reports to avoid
+    sh:property [
+        sh:path pre:objected ;
+        sh:class icm:IntentReport ;
+        sh:name "objected" ;
+        sh:description "Intent reports the owner considers problematic and should be avoided" ;
+        sh:message "[domain/pre_objected_type] pre:objected must be an icm:IntentReport instance when present" ;
+    ] ;
+
+    # preferred: desirable intent reports
+    sh:property [
+        sh:path pre:preferred ;
+        sh:class icm:IntentReport ;
+        sh:name "preferred" ;
+        sh:description "Intent reports the owner considers preferential" ;
+        sh:message "[pre/preferred_type] pre:preferred must be an icm:IntentReport instance when present" ;
+    ] ;
+
+    # score: quantified preference scores
+    sh:property [
+        sh:path pre:score ;
+        sh:class pre:PreferenceScore ;
+        sh:name "score" ;
+        sh:description "Numerical scores quantifying preferences for options" ;
+        sh:message "[pre/score_type] pre:score must be a pre:PreferenceScore instance when present" ;
+    ] ;
+
+    # scoreInterpretation: how to interpret score values
+    sh:property [
+        sh:path pre:scoreInterpretation ;
+        sh:class pre:ScoreInterpretation ;
+        sh:name "scoreInterpretation" ;
+        sh:description "Interpretation guidance for preference scores" ;
+        sh:message "[domain/pre_score_interpretation_type] pre:scoreInterpretation must be a pre:ScoreInterpretation instance when present" ;
+    ] ;
+
+    sh:severity sh:Violation ;
+    sh:message "[domain/preference_properties] Preference validation failed: ensure all preference properties reference correct class instances (JudgementRequest, IntentReport, PreferenceScore, ScoreInterpretation)" .
+
+# =============================================================================
+# PREFERENCE SCORE VALIDATION
+# =============================================================================
+
+pre-shapes:PreferenceScoreShape
+    a sh:NodeShape ;
+    rdfs:label "Preference Score Shape" ;
+    rdfs:comment "Validates PreferenceScore class instances. Preference scores quantify intent owner preferences for specific solution options with numerical values." ;
+    sh:targetClass pre:PreferenceScore ;
+
+    # aboutOption: which intent report this score applies to
+    sh:property [
+        sh:path pre:aboutOption ;
+        sh:class icm:IntentReport ;
+        sh:name "aboutOption" ;
+        sh:description "Intent report being scored" ;
+        sh:message "[pre/about_option_type] pre:aboutOption must be an icm:IntentReport instance when present" ;
+    ] ;
+
+    # scoreValue: the numerical score
+    sh:property [
+        sh:path pre:scoreValue ;
+        sh:nodeKind sh:Literal ;
+        sh:name "scoreValue" ;
+        sh:description "Numerical value representing preference strength" ;
+        sh:message "[pre/score_value_type] pre:scoreValue must be a literal value (typically numeric). In TIO v3.6.0, scores quantify preference strength. Example: pre:scoreValue \"85\"^^xsd:decimal or pre:scoreValue \"4.5\"^^xsd:double" ;
+    ] ;
+
+    sh:severity sh:Violation ;
+    sh:message "[domain/preference_score] PreferenceScore validation failed: ensure aboutOption references an IntentReport and scoreValue is a literal" .
+
+# =============================================================================
+# SCORE INTERPRETATION VALIDATION
+# =============================================================================
+
+pre-shapes:ScoreInterpretationShape
+    a sh:NodeShape ;
+    rdfs:label "Score Interpretation Shape" ;
+    rdfs:comment "Validates ScoreInterpretation class instances. Score interpretations define thresholds and bounds for understanding numerical preference scores." ;
+    sh:targetClass pre:ScoreInterpretation ;
+
+    # maxScore: maximum/full score value
+    sh:property [
+        sh:path pre:maxScore ;
+        sh:nodeKind sh:Literal ;
+        sh:maxCount 1 ;
+        sh:name "maxScore" ;
+        sh:description "Maximum score value used in preferences" ;
+        sh:message "[pre/score_not_literal] pre:maxScore must be a literal value (typically numeric) when present" ;
+    ] ;
+
+    # minScore: minimum score value
+    sh:property [
+        sh:path pre:minScore ;
+        sh:nodeKind sh:Literal ;
+        sh:maxCount 1 ;
+        sh:name "minScore" ;
+        sh:description "Minimum score value used in preferences (default 0 if not specified)" ;
+        sh:message "[pre/score_not_literal] pre:minScore must be a literal value (typically numeric) when present" ;
+    ] ;
+
+    # objectedThreshold: maximum score for objected options
+    sh:property [
+        sh:path pre:objectedThreshold ;
+        sh:nodeKind sh:Literal ;
+        sh:maxCount 1 ;
+        sh:name "objectedThreshold" ;
+        sh:description "Maximum score for objected options (scores below this should be avoided)" ;
+        sh:message "[pre/score_not_literal] pre:objectedThreshold must be a literal value (typically numeric) when present" ;
+    ] ;
+
+    # preferredThreshold: minimum score for preferred options
+    sh:property [
+        sh:path pre:preferredThreshold ;
+        sh:nodeKind sh:Literal ;
+        sh:maxCount 1 ;
+        sh:name "preferredThreshold" ;
+        sh:description "Minimum score for preferred options (scores at or above this are preferred)" ;
+        sh:message "[pre/score_not_literal] pre:preferredThreshold must be a literal value (typically numeric) when present" ;
+    ] ;
+
+    sh:severity sh:Violation ;
+    sh:message "[domain/score_interpretation] ScoreInterpretation validation failed: ensure all threshold and bound values (maxScore, minScore, objectedThreshold, preferredThreshold) are literals" .
+
+# Note: Vocabulary validation handled globally by tio-lib:VocabularyUsageShape in GlobalShapes.ttl

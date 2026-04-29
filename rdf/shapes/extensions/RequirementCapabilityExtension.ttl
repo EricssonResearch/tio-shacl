@@ -1,0 +1,238 @@
+# TMF RequirementCapabilityExtension SHACL Shapes
+#
+# Domain-specific validation for RequirementCapabilityExtension.
+# Global validation (function usage, vocabulary) handled by lib/GlobalShapes.ttl
+#
+# Ontology: http://tio.models.tmforum.org/tio/v3.6.0/RequirementCapability/
+
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# TMF namespaces
+@prefix req: <http://tio.models.tmforum.org/tio/v3.6.0/RequirementCapability/> .
+@prefix met: <http://tio.models.tmforum.org/tio/v3.6.0/MetricsAndObservations/> .
+
+# Shape namespaces
+@prefix req-shapes: <http://tio.models.tmforum.org/tio/v3.6.0/shapes/RequirementCapabilityExtension/> .
+@prefix tio-lib: <http://tio.models.tmforum.org/tio/v3.6.0/shapes/lib/> .
+@prefix tio-targets: <http://tio.models.tmforum.org/tio/v3.6.0/shapes/lib/targets/> .
+@prefix tio-constraints: <http://tio.models.tmforum.org/tio/v3.6.0/shapes/lib/constraints/> .
+
+# =============================================================================
+# REQUIREMENT SHAPE
+# =============================================================================
+
+req-shapes:RequirementShape
+    a sh:NodeShape ;
+    sh:targetClass req:Requirement ;
+    rdfs:label "Requirement Shape" ;
+    rdfs:comment "Validates req:Requirement instances." ;
+
+    # Required: metric reference
+    sh:property [
+        sh:path req:metric ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:name "metric" ;
+        sh:description "The metric being constrained (must reference a dim: metric)." ;
+        sh:message "req:Requirement must have exactly one req:metric." ;
+    ] ;
+
+    # Optional: comparison operator
+    sh:property [
+        sh:path req:operator ;
+        sh:class req:ComparisonOperator ;
+        sh:maxCount 1 ;
+        sh:name "operator" ;
+        sh:description "Comparison operator (req:AtLeast, req:AtMost, req:Equals, req:In)." ;
+        sh:message "req:operator must be a req:ComparisonOperator (req:AtLeast, req:AtMost, req:Equals, req:In)." ;
+    ] ;
+
+    # Value for numeric/exact requirements
+    sh:property [
+        sh:path req:value ;
+        sh:maxCount 1 ;
+        sh:name "value" ;
+        sh:description "The threshold value for the requirement." ;
+    ] ;
+
+    # Allowed values for enumeration requirements
+    sh:property [
+        sh:path req:allowedValues ;
+        sh:maxCount 1 ;
+        sh:name "allowedValues" ;
+        sh:description "Set of allowed values for enumeration requirements." ;
+    ] ;
+
+    # Optional unit
+    sh:property [
+        sh:path req:unit ;
+        sh:datatype xsd:string ;
+        sh:maxCount 1 ;
+        sh:name "unit" ;
+        sh:description "Unit of measurement (e.g., 'ms', 'kbps')." ;
+        sh:message "req:unit must be xsd:string." ;
+    ] ;
+
+    sh:severity sh:Violation .
+
+# =============================================================================
+# CAPABILITY SHAPE
+# =============================================================================
+
+req-shapes:CapabilityShape
+    a sh:NodeShape ;
+    sh:targetClass req:Capability ;
+    rdfs:label "Capability Shape" ;
+    rdfs:comment "Validates req:Capability instances." ;
+
+    # Required: metric reference
+    sh:property [
+        sh:path req:metric ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:name "metric" ;
+        sh:description "The metric this capability provides." ;
+        sh:message "req:Capability must have exactly one req:metric." ;
+    ] ;
+
+    # Range bounds for numeric capabilities
+    sh:property [
+        sh:path req:minValue ;
+        sh:maxCount 1 ;
+        sh:name "minValue" ;
+        sh:description "Lower bound of capability range (inclusive)." ;
+    ] ;
+
+    sh:property [
+        sh:path req:maxValue ;
+        sh:maxCount 1 ;
+        sh:name "maxValue" ;
+        sh:description "Upper bound of capability range (inclusive)." ;
+    ] ;
+
+    # Supported values for enumeration capabilities
+    sh:property [
+        sh:path req:supportedValues ;
+        sh:maxCount 1 ;
+        sh:name "supportedValues" ;
+        sh:description "Set of values supported for enumeration capabilities." ;
+    ] ;
+
+    # Optional unit
+    sh:property [
+        sh:path req:unit ;
+        sh:datatype xsd:string ;
+        sh:maxCount 1 ;
+        sh:name "unit" ;
+        sh:description "Unit of measurement." ;
+        sh:message "req:unit must be xsd:string." ;
+    ] ;
+
+    sh:severity sh:Violation .
+
+# =============================================================================
+# EXTRACTED INTENT SHAPE
+# =============================================================================
+
+req-shapes:ExtractedIntentShape
+    a sh:NodeShape ;
+    sh:targetClass req:ExtractedIntent ;
+    rdfs:label "Extracted Intent Shape" ;
+    rdfs:comment "Validates req:ExtractedIntent instances used for validation." ;
+
+    sh:property [
+        sh:path req:sourceIntent ;
+        sh:maxCount 1 ;
+        sh:name "sourceIntent" ;
+        sh:description "Reference to the original TIO Intent." ;
+    ] ;
+
+    sh:property [
+        sh:path req:targetType ;
+        sh:maxCount 1 ;
+        sh:name "targetType" ;
+        sh:description "The target service type (e.g., cust:GamingCFSS)." ;
+    ] ;
+
+    sh:property [
+        sh:path req:hasRequirement ;
+        sh:class req:Requirement ;
+        sh:name "hasRequirement" ;
+        sh:description "Requirements extracted from the intent." ;
+        sh:message "req:hasRequirement must reference req:Requirement instances." ;
+    ] ;
+
+    sh:severity sh:Violation .
+
+# =============================================================================
+# REQUIREMENT VALUE CONSTRAINT
+# =============================================================================
+
+# A Requirement must specify either req:value (with req:operator) or req:allowedValues.
+req-shapes:RequirementValueConstraint
+    a sh:NodeShape ;
+    sh:targetClass req:Requirement ;
+    rdfs:label "Requirement Value Constraint" ;
+    rdfs:comment "A requirement must have either req:value (for numeric) or req:allowedValues (for enum)." ;
+
+    sh:or (
+        [
+            sh:property [
+                sh:path req:operator ;
+                sh:minCount 1 ;
+            ] ;
+            sh:property [
+                sh:path req:value ;
+                sh:minCount 1 ;
+            ] ;
+        ]
+        [
+            sh:property [
+                sh:path req:allowedValues ;
+                sh:minCount 1 ;
+            ] ;
+        ]
+    ) ;
+
+    sh:severity sh:Violation .
+
+# =============================================================================
+# CAPABILITY RANGE CONSTRAINT
+# =============================================================================
+
+# A Capability must specify either minValue/maxValue (for numeric) or supportedValues (for enum).
+req-shapes:CapabilityRangeConstraint
+    a sh:NodeShape ;
+    sh:targetClass req:Capability ;
+    rdfs:label "Capability Range Constraint" ;
+    rdfs:comment "A capability must have either minValue/maxValue (for numeric) or supportedValues (for enum)." ;
+
+    sh:or (
+        [
+            sh:or (
+                [
+                    sh:property [
+                        sh:path req:minValue ;
+                        sh:minCount 1 ;
+                    ] ;
+                ]
+                [
+                    sh:property [
+                        sh:path req:maxValue ;
+                        sh:minCount 1 ;
+                    ] ;
+                ]
+            ) ;
+        ]
+        [
+            sh:property [
+                sh:path req:supportedValues ;
+                sh:minCount 1 ;
+            ] ;
+        ]
+    ) ;
+
+    sh:severity sh:Violation .

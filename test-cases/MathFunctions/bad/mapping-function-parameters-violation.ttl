@@ -1,0 +1,18 @@
+# Test: Missing required mf:map parameter on mapping function instances
+# This test validates that mf:mapping instances must have mf:map parameter
+# Should FAIL with: "Mapping function missing required mf:map parameter"
+
+@prefix ex:  <http://example.org/> .
+@prefix mf:  <http://tio.models.tmforum.org/tio/v3.6.0/MathFunctions/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+################################################################################
+# VIOLATION: Mapping function missing required mf:map parameter
+#
+# Instances of mf:mapping MUST have mf:map to define the mapping table
+################################################################################
+
+# WRONG - mapping function without map parameter
+ex:mapping_no_map
+  a mf:mapping .

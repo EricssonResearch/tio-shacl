@@ -1,0 +1,27 @@
+# Test: TargetReportPropertiesShape violation
+# Tests: targetCount must be xsd:nonNegativeInteger
+# Should FAIL with: "icm:targetCount must be a non-negative integer"
+
+@prefix ex:   <http://example.org/> .
+@prefix icm:  <http://tio.models.tmforum.org/tio/v3.6.0/IntentCommonModel/> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+################################################################################
+# VIOLATION: targetCount must be xsd:nonNegativeInteger
+#
+# Common mistake: Using a string or wrong datatype for targetCount
+# The icm:targetCount property MUST be xsd:nonNegativeInteger
+################################################################################
+
+# WRONG - targetCount as string literal
+ex:wrong_target_count
+  a icm:TargetReport ;
+  icm:targetCount "five" ;  # WRONG: string, not xsd:nonNegativeInteger
+  icm:about ex:myTarget
+  .
+
+ex:myTarget
+  a icm:Target
+  .

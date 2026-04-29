@@ -1,0 +1,111 @@
+# TMF External Ontology Whitelist Configuration
+#
+# This file defines the list of external ontology namespaces that are trusted
+# and should be excluded from type validation in function argument checking.
+#
+# Instead of hardcoding namespace URIs in SPARQL constraints, this data-driven
+# approach allows easy maintenance and extension of the whitelist.
+#
+# Usage in SPARQL constraints:
+#   FILTER NOT EXISTS {
+#       tio-ext:ExternalOntologyWhitelist tio-ext:namespace ?ns .
+#       FILTER(STRSTARTS(STR(?arg), ?ns))
+#   }
+
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix tio-ext: <http://tio.models.tmforum.org/tio/v3.6.0/shapes/lib/external/> .
+@prefix tio-lib: <http://tio.models.tmforum.org/tio/v3.6.0/shapes/lib/> .
+
+# =============================================================================
+# EXTERNAL ONTOLOGY NAMESPACE DEFINITIONS
+# =============================================================================
+
+# Property for declaring trusted external namespaces
+tio-ext:namespace
+    a rdf:Property ;
+    rdfs:label "External Namespace" ;
+    rdfs:comment "Declares a trusted external ontology namespace URI that bypasses type validation" ;
+    rdfs:domain tio-ext:ExternalOntologyWhitelist ;
+    rdfs:range xsd:string .
+
+# =============================================================================
+# WHITELIST CONFIGURATION
+# =============================================================================
+# Add or remove namespaces here to control which external ontologies are trusted.
+# Arguments from these namespaces skip type validation in FunctionUsageArgumentTypeConstraint.
+
+tio-ext:ExternalOntologyWhitelist
+    a rdfs:Resource ;
+    rdfs:label "External Ontology Whitelist" ;
+    rdfs:comment """
+        Configuration of external (non-TIO) ontology namespaces whose resources
+        are trusted and should bypass strict type validation.
+
+        These are well-known W3C and industry standards that TIO integrates with
+        but does not define shapes for. Arguments using resources from these
+        namespaces are assumed to be valid.
+
+        To add a new external ontology:
+        1. Add a new tio-ext:namespace triple below
+        2. Document the ontology in the comment
+        3. Re-run validation tests to verify no regressions
+    """ ;
+
+    # W3C Time Ontology (OWL-Time)
+    # Used for temporal expressions in intent validity windows
+    # See: https://www.w3.org/TR/owl-time/
+    tio-ext:namespace "http://www.w3.org/2006/time" ;
+
+    # QUDT Units and Quantities Ontology
+    # Used for physical measurements and unit conversions
+    # See: https://www.qudt.org/
+    tio-ext:namespace "http://qudt.org/schema/qudt/" ;
+
+    # W3C XML Schema Datatypes
+    # Core datatypes used throughout RDF/OWL
+    # See: https://www.w3.org/TR/xmlschema-2/
+    tio-ext:namespace "http://www.w3.org/2001/XMLSchema" ;
+
+    # Dublin Core Terms
+    # Metadata vocabulary for documentation
+    # See: https://www.dublincore.org/specifications/dublin-core/dcmi-terms/
+    tio-ext:namespace "http://purl.org/dc/terms/" ;
+
+    # W3C SKOS (Simple Knowledge Organization System)
+    # Used for concept hierarchies and taxonomies
+    # See: https://www.w3.org/TR/skos-reference/
+    tio-ext:namespace "http://www.w3.org/2004/02/skos/core" .
+
+# =============================================================================
+# USAGE DOCUMENTATION
+# =============================================================================
+# This file is loaded as part of the shared components by cache.py.
+# The whitelist is queried dynamically in SPARQL constraints.
+#
+# Example: Replacing hardcoded FILTER in FunctionUsageArgumentTypeConstraint
+#
+# BEFORE (hardcoded):
+#   FILTER(
+#       !(
+#           STRSTARTS(STR(?arg), "http://www.w3.org/2006/time") ||
+#           STRSTARTS(STR(?arg), "http://qudt.org/schema/qudt/") ||
+#           STRSTARTS(STR(?arg), "http://www.w3.org/2001/XMLSchema") ||
+#           STRSTARTS(STR(?arg), "http://purl.org/dc/terms/") ||
+#           STRSTARTS(STR(?arg), "http://www.w3.org/2004/02/skos/core")
+#       )
+#   )
+#
+# AFTER (data-driven):
+#   FILTER NOT EXISTS {
+#       tio-ext:ExternalOntologyWhitelist tio-ext:namespace ?ns .
+#       FILTER(STRSTARTS(STR(?arg), ?ns))
+#   }
+#
+# Benefits:
+# - Single source of truth for external ontology configuration
+# - Easy to add/remove namespaces without modifying SPARQL
+# - Self-documenting with comments for each namespace
+# - Can be extended with additional metadata (version, description, etc.)

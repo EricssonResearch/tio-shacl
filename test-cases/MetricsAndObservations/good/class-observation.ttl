@@ -1,0 +1,19 @@
+# Test: Valid instances of observation classes
+# Concepts covered: Observation
+# This test validates that valid instances of observation classes can be created.
+
+@prefix ex: <http://example.org/> .
+@prefix met: <http://tio.models.tmforum.org/tio/v3.6.0/MetricsAndObservations/> .
+@prefix quan: <http://tio.models.tmforum.org/tio/v3.6.0/QuantityOntology/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# Metric definition
+ex:cpuUsage a met:Metric ;
+    rdfs:label "CPU Usage" ;
+    rdfs:range quan:Quantity .
+
+# === Observation class - requires met:observedMetric ===
+ex:test_observation a met:Observation ;
+    met:observedMetric ex:cpuUsage .

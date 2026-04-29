@@ -1,0 +1,101 @@
+# TMF SHACL Reusable Target Types
+#
+# Parameterized SPARQL Target Types reused across TMF ontology validation shapes.
+#
+# Based on SHACL Advanced Features: https://www.w3.org/TR/shacl-af/#SPARQLTargetType
+# NOTE: Requires advanced=True in pyshacl.validate() to support SPARQLTarget
+
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix tio-targets: <http://tio.models.tmforum.org/tio/v3.6.0/shapes/lib/targets/> .
+@prefix tio-lib: <http://tio.models.tmforum.org/tio/v3.6.0/shapes/lib/> .
+
+# =============================================================================
+# TARGET TYPES
+# =============================================================================
+
+# Target all instances of a specific class within an ontology namespace
+tio-targets:OntologyClassTargetType
+    a rdfs:Class, sh:SPARQLTargetType ;
+    rdfs:subClassOf sh:Target ;
+    rdfs:label "Ontology Class Target Type" ;
+    rdfs:comment "Targets all instances of a specific class within a TMF ontology namespace" ;
+    sh:parameter [
+        sh:path tio-lib:ontologyNamespace ;
+        sh:description "The namespace URI of the ontology (e.g., 'http://tio.models.tmforum.org/tio/v3.6.0/FunctionOntology/')" ;
+        sh:name "ontologyNamespace" ;
+        sh:datatype xsd:string ;
+    ], [
+        sh:path tio-lib:targetClass ;
+        sh:description "The class to target within the ontology namespace" ;
+        sh:name "targetClass" ;
+    ] ;
+    sh:select """
+        SELECT ?this
+        WHERE {
+            ?this a $targetClass .
+            FILTER(STRSTARTS(STR(?this), $ontologyNamespace))
+        }
+    """ .
+
+# Target nodes that use properties from a specific ontology namespace
+tio-targets:VocabularyUsageTargetType
+    a rdfs:Class, sh:SPARQLTargetType ;
+    rdfs:subClassOf sh:Target ;
+    rdfs:label "Vocabulary Usage Target Type" ;
+    rdfs:comment "Targets nodes that use properties from a specific TMF ontology namespace" ;
+    sh:parameter [
+        sh:path tio-lib:ontologyNamespace ;
+        sh:description "The namespace URI of the ontology" ;
+        sh:name "ontologyNamespace" ;
+        sh:datatype xsd:string ;
+    ] ;
+    sh:select """
+        SELECT ?this
+        WHERE {
+            ?this ?prop ?value .
+            FILTER(STRSTARTS(STR(?prop), $ontologyNamespace))
+        }
+    """ .
+
+# Target subjects using a specific property
+tio-targets:SubjectsOfPropertyTargetType
+    a rdfs:Class, sh:SPARQLTargetType ;
+    rdfs:subClassOf sh:Target ;
+    rdfs:label "Subjects of Property Target Type" ;
+    rdfs:comment "Targets all subjects that use a specific property" ;
+    sh:parameter [
+        sh:path tio-lib:property ;
+        sh:description "The property whose subjects to target" ;
+        sh:name "property" ;
+    ] ;
+    sh:select """
+        SELECT ?this
+        WHERE {
+            ?this $property ?value .
+        }
+    """ .
+
+# =============================================================================
+# PARAMETER DECLARATIONS
+# =============================================================================
+
+tio-lib:ontologyNamespace
+    a rdf:Property ;
+    rdfs:label "Ontology Namespace Parameter" ;
+    rdfs:comment "Parameter for specifying the namespace URI of a TMF ontology" ;
+    rdfs:range xsd:string .
+
+tio-lib:targetClass
+    a rdf:Property ;
+    rdfs:label "Target Class Parameter" ;
+    rdfs:comment "Parameter for specifying the class to target" ;
+    rdfs:range rdfs:Class .
+
+tio-lib:property
+    a rdf:Property ;
+    rdfs:label "Property Parameter" ;
+    rdfs:comment "Parameter for specifying a property filter" ;
+    rdfs:range rdf:Property .

@@ -1,0 +1,62 @@
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix tio-meta: <http://tio.models.tmforum.org/tio/v3.6.0/shapes/meta/> .
+
+# Universal Meta-Level Validation for All TMF Ontologies
+# Uses standard SHACL constraints instead of SPARQL where possible
+
+# =============================================================================
+# PROPERTY AND RESOURCE VALIDATION
+# =============================================================================
+
+# Validates all TMF properties have domain and range
+tio-meta:PropertyMetadataShape
+    a sh:NodeShape ;
+    sh:target [
+        a sh:SPARQLTarget ;
+        sh:select """
+            SELECT ?this
+            WHERE {
+                ?this a rdf:Property .
+                FILTER(STRSTARTS(STR(?this), "http://tio.models.tmforum.org/tio/v3.6.0/"))
+            }
+        """ ;
+    ] ;
+    sh:property [
+        sh:path rdfs:domain ;
+        sh:minCount 1 ;
+        sh:message "Property must have rdfs:domain defined" ;
+    ] ;
+    sh:property [
+        sh:path rdfs:range ;
+        sh:minCount 1 ;
+        sh:message "Property must have rdfs:range defined" ;
+    ] ;
+    sh:severity sh:Violation .
+
+# Validates all TMF resources have documentation
+tio-meta:ResourceDocumentationShape
+    a sh:NodeShape ;
+    sh:target [
+        a sh:SPARQLTarget ;
+        sh:select """
+            SELECT ?this
+            WHERE {
+                ?this a ?type .
+                FILTER(STRSTARTS(STR(?this), "http://tio.models.tmforum.org/tio/v3.6.0/"))
+                FILTER(?type != rdfs:Resource)
+            }
+        """ ;
+    ] ;
+    sh:property [
+        sh:path rdfs:label ;
+        sh:minCount 1 ;
+        sh:message "Resource should have rdfs:label for documentation" ;
+    ] ;
+    sh:property [
+        sh:path rdfs:comment ;
+        sh:minCount 1 ;
+        sh:message "Resource should have rdfs:comment for documentation" ;
+    ] ;
+    sh:severity sh:Warning .

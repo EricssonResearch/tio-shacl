@@ -1,0 +1,188 @@
+# TMF IntentManagementOntology SHACL Shapes
+#
+# Domain-specific validation for IntentManagementOntology.
+# Global validation (function usage, vocabulary) handled by lib/GlobalShapes.ttl
+#
+# Ontology URI: http://tio.models.tmforum.org/tio/v3.6.0/IntentManagementOntology/
+
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix dct: <http://purl.org/dc/terms/> .
+
+# TMF namespaces
+@prefix imo: <http://tio.models.tmforum.org/tio/v3.6.0/IntentManagementOntology/> .
+@prefix fun: <http://tio.models.tmforum.org/tio/v3.6.0/FunctionOntology/> .
+
+# Shape namespaces  
+@prefix imo-shapes: <http://tio.models.tmforum.org/tio/v3.6.0/shapes/IntentManagementOntology/> .
+@prefix tio-lib: <http://tio.models.tmforum.org/tio/v3.6.0/shapes/lib/> .
+@prefix tio-targets: <http://tio.models.tmforum.org/tio/v3.6.0/shapes/lib/targets/> .
+@prefix tio-constraints: <http://tio.models.tmforum.org/tio/v3.6.0/shapes/lib/constraints/> .
+
+# =============================================================================
+# BASE ONTOLOGY MODEL VALIDATION (Enhanced)
+# =============================================================================
+
+# Reusable mixin for validating ontology metadata
+# Target-less - compose into domain shapes using sh:and
+tio-lib:OntologyMetadataMixin
+    a sh:NodeShape ;
+    rdfs:label "Ontology Metadata Validation Mixin" ;
+    rdfs:comment "Reusable mixin for validating imo:BaseOntologyModel metadata. Target-less - compose using sh:and in domain shapes." ;
+    
+    # Apply universal metadata constraints
+    sh:sparql tio-constraints:OntologyTitleRequiredConstraint ,
+              tio-constraints:OntologyDescriptionRequiredConstraint ;
+    
+    # Required metadata properties
+    sh:property [
+        sh:path dct:title ;
+        sh:minCount 1 ;
+        sh:datatype rdf:langString ;
+        sh:message "[domain/ontology_metadata] Ontology missing dct:title. Every imo:BaseOntologyModel in TIO v3.6.0 requires Dublin Core metadata. Add: dct:title \"Your Ontology Name\"@en with language tag." ;
+    ], [
+        sh:path dct:description ;
+        sh:minCount 1 ;
+        sh:datatype rdf:langString ;
+        sh:message "[domain/ontology_metadata] Ontology missing dct:description. Every imo:BaseOntologyModel in TIO v3.6.0 requires Dublin Core metadata. Add: dct:description \"Brief description of what this ontology defines\"@en with language tag." ;
+    ], [
+        sh:path dct:created ;
+        sh:minCount 1 ;
+        sh:datatype xsd:date ;
+        sh:message "[domain/ontology_metadata] Ontology missing dct:created. Every imo:BaseOntologyModel in TIO v3.6.0 requires Dublin Core metadata. Add: dct:created \"2024-01-01\"^^xsd:date (use YYYY-MM-DD format with xsd:date datatype)." ;
+    ], [
+        sh:path dct:creator ;
+        sh:minCount 1 ;
+        sh:message "[domain/ontology_metadata] Ontology missing dct:creator. Every imo:BaseOntologyModel in TIO v3.6.0 requires Dublin Core metadata. Add: dct:creator <http://example.org/your-organization> or dct:creator \"Creator Name\" as IRI or string." ;
+    ] ;
+    
+    sh:severity sh:Violation .
+
+# Validates BaseOntologyModel instances
+imo-shapes:OntologyMetadataShape
+    a sh:NodeShape ;
+    rdfs:label "Ontology Metadata Validation" ;
+    rdfs:comment "Validates imo:BaseOntologyModel instances have required metadata." ;
+    sh:target [
+        a tio-targets:OntologyClassTargetType ;
+        tio-lib:ontologyNamespace "http://tio.models.tmforum.org/tio/v3.6.0/IntentManagementOntology/" ;
+        tio-lib:targetClass imo:BaseOntologyModel ;
+    ] ;
+    sh:and ( tio-lib:OntologyMetadataMixin ) ;
+    sh:severity sh:Violation .
+
+# =============================================================================
+# EVENT VALIDATION
+# =============================================================================
+
+
+
+# =============================================================================
+# PROPERTY RANGE VALIDATION
+# =============================================================================
+
+# Validates imo:eventIssuedBy property range
+imo-shapes:RangeOfEventIssuedByShape
+    a sh:NodeShape ;
+    rdfs:label "Range Validation for imo:eventIssuedBy" ;
+    rdfs:comment "Validates imo:eventIssuedBy references imo:IntentManager instances." ;
+    sh:target [
+        a tio-targets:SubjectsOfPropertyTargetType ;
+        tio-lib:property imo:eventIssuedBy ;
+    ] ;
+    sh:property [
+        sh:path imo:eventIssuedBy ;
+        sh:nodeKind sh:IRI ;
+        sh:message "[imo/event_issued_by_literal] imo:eventIssuedBy must be an IRI, not a literal." ;
+    ] ;
+    sh:property [
+        sh:path imo:eventIssuedBy ;
+        sh:class imo:IntentManager ;
+        sh:message "[imo/event_issued_by_not_manager] imo:eventIssuedBy must reference an imo:IntentManager instance." ;
+    ] ;
+    sh:severity sh:Violation .
+
+# Validates imo:eventIssuedFor property range
+imo-shapes:RangeOfEventIssuedForShape
+    a sh:NodeShape ;
+    rdfs:label "Range Validation for imo:eventIssuedFor" ;
+    rdfs:comment "Validates imo:eventIssuedFor is an IRI reference." ;
+    sh:target [
+        a tio-targets:SubjectsOfPropertyTargetType ;
+        tio-lib:property imo:eventIssuedFor ;
+    ] ;
+    sh:property [
+        sh:path imo:eventIssuedFor ;
+        sh:nodeKind sh:IRI ;
+        sh:message "[imo/event_issued_for_literal] imo:eventIssuedFor must be an IRI (resource reference), not a literal string. Got: {$value}. In TIO v3.6.0, this property links events to the Intent or resource they relate to. Use IRI references like <intent-uri>, not strings." ;
+    ] ;
+    sh:severity sh:Violation .
+
+# =============================================================================
+# INTENT HANDLING EVENT VALIDATION
+# =============================================================================
+
+# Validates IntentHandlingEvent subclass relationship
+imo-shapes:IntentHandlingEventSubclassShape
+    a sh:NodeShape ;
+    rdfs:label "IntentHandlingEvent Subclass Validation" ;
+    rdfs:comment "Validates imo:IntentHandlingEvent is subclass of imo:Event." ;
+    sh:target [
+        a tio-targets:OntologyClassTargetType ;
+        tio-lib:ontologyNamespace "http://tio.models.tmforum.org/tio/v3.6.0/IntentManagementOntology/" ;
+        tio-lib:targetClass imo:IntentHandlingEvent ;
+    ] ;
+    sh:sparql tio-constraints:IntentHandlingEventSubclassConstraint ;
+    sh:severity sh:Violation .
+
+# =============================================================================
+# PROPERTY RANGE VALIDATION
+# =============================================================================
+
+# Validates imo:handler property range
+imo-shapes:RangeOfHandlerShape
+    a sh:NodeShape ;
+    rdfs:label "Range Validation for imo:handler" ;
+    rdfs:comment "Validates imo:handler references imo:IntentManager instances." ;
+    sh:target [
+        a tio-targets:SubjectsOfPropertyTargetType ;
+        tio-lib:property imo:handler ;
+    ] ;
+    sh:property [
+        sh:path imo:handler ;
+        sh:nodeKind sh:IRI ;
+        sh:class imo:IntentManager ;
+        sh:message "[imo/handler_not_manager] imo:handler must reference an imo:IntentManager instance. In TIO v3.6.0, imo:handler links Intent handling events to the manager processing them. Add: imo:handler <manager-uri> where the URI has rdf:type imo:IntentManager." ;
+    ] ;
+    sh:severity sh:Violation .
+
+# Validates imo:owner property range
+imo-shapes:RangeOfOwnerShape
+    a sh:NodeShape ;
+    rdfs:label "Range Validation for imo:owner" ;
+    rdfs:comment "Validates imo:owner references imo:IntentManager instances." ;
+    sh:target [
+        a tio-targets:SubjectsOfPropertyTargetType ;
+        tio-lib:property imo:owner ;
+    ] ;
+    sh:property [
+        sh:path imo:owner ;
+        sh:nodeKind sh:IRI ;
+        sh:message "[imo/owner_literal] imo:owner must be an IRI, not a literal." ;
+    ] ;
+    sh:property [
+        sh:path imo:owner ;
+        sh:class imo:IntentManager ;
+        sh:message "[imo/owner_not_manager] imo:owner must reference an imo:IntentManager instance." ;
+    ] ;
+    sh:severity sh:Violation .
+
+# =============================================================================
+# NOTES
+# =============================================================================
+# Universal validation (applies to all ontologies):
+# - Vocabulary: tio-lib:VocabularyUsageShape
+# - Function usage: tio-lib:FunctionUsageShape
+# - Function definitions: tio-lib:FunctionDefinitionMixin (mixin)

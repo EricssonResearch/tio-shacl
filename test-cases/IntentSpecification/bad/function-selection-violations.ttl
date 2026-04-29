@@ -1,0 +1,35 @@
+# Test: Invalid usage of Selection functions
+# Concepts covered: chosenAll, chosenAllFor, chosenAny, chosenAnyFor, selectValues,
+#                   usedVocabularyFor, valueSelected, valueSelectedFor
+# Constraints tested: Arity violations
+# This test validates that violations are caught for invalid function usage.
+
+@prefix ex: <http://example.org/> .
+@prefix isp: <http://tio.models.tmforum.org/tio/v3.6.0/IntentSpecification/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# === chosenAll violations (zero args) ===
+ex:invalid_chosenall isp:chosenAll ( ) .
+
+# === chosenAllFor violations (zero args) ===
+ex:invalid_chosenallfor isp:chosenAllFor ( ) .
+
+# === chosenAny violations (zero args) ===
+ex:invalid_chosenany isp:chosenAny ( ) .
+
+# === chosenAnyFor violations (zero args) ===
+ex:invalid_chosenanyfor isp:chosenAnyFor ( ) .
+
+# === selectValues violations (zero args) ===
+ex:invalid_selectvalues isp:selectValues ( ) .
+
+# === usedVocabularyFor violations (zero args) ===
+ex:invalid_usedvocabularyfor isp:usedVocabularyFor ( ) .
+
+# === valueSelected violations (zero args) ===
+ex:invalid_valueselected isp:valueSelected ( ) .
+
+# === valueSelectedFor violations (zero args) ===
+ex:invalid_valueselectedfor isp:valueSelectedFor ( ) .

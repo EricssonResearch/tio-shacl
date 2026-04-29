@@ -1,0 +1,163 @@
+# Test: Comprehensive reporting frequency scenarios
+# This test covers reporting frequency patterns supported by TIO:
+# 1. No reporting needed (Intent without ReportingExpectation)
+# 2. On-demand only (ReportingExpectation without triggers)
+# 3. On change (state change triggers)
+
+@prefix ex:   <http://example.org/> .
+@prefix icm:  <http://tio.models.tmforum.org/tio/v3.6.0/IntentCommonModel/> .
+@prefix imo:  <http://tio.models.tmforum.org/tio/v3.6.0/IntentManagementOntology/> .
+@prefix log:  <http://tio.models.tmforum.org/tio/v3.6.0/LogicalOperators/> .
+@prefix t:    <http://www.w3.org/2006/time#> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+################################################################################
+# SCENARIO 1: No Reporting Needed
+#
+# Intent does not include any ReportingExpectation
+# This is the simplest case - intent execution without reporting requirements
+################################################################################
+
+ex:NoReportingIntent
+  a icm:Intent ;
+  rdfs:label "Intent Without Reporting"@en ;
+  rdfs:comment "This intent has no reporting requirements"@en ;
+  log:allOf ( ex:E_NoReporting )
+  .
+
+ex:E_NoReporting
+  a icm:PropertyExpectation ;
+  rdfs:label "Expectation Without Reporting"@en ;
+  icm:target ex:T_General ;
+  log:allOf ( ex:C_NoReporting )
+  .
+
+ex:C_NoReporting
+  a log:Condition ;
+  log:allOf ( "true"^^xsd:boolean )
+  .
+
+################################################################################
+# SCENARIO 2: On-Demand Reporting Only
+#
+# ReportingExpectation without reportTriggers
+# Reports are generated only when explicitly requested by the operator
+# No automatic report generation
+################################################################################
+
+ex:OnDemandIntent
+  a icm:Intent ;
+  rdfs:label "On-Demand Reporting Intent"@en ;
+  rdfs:comment "Reports generated only on explicit request"@en ;
+  log:allOf ( ex:E_OnDemand_Property ex:E_OnDemand_Reporting )
+  .
+
+ex:E_OnDemand_Property
+  a icm:PropertyExpectation ;
+  rdfs:label "On-Demand Property Expectation"@en ;
+  icm:target ex:T_General ;
+  log:allOf ( ex:C_OnDemand )
+  .
+
+ex:E_OnDemand_Reporting
+  a icm:ReportingExpectation ;
+  rdfs:label "On-Demand Reporting Expectation"@en ;
+  rdfs:comment "No triggers - reports generated only on demand"@en ;
+  icm:target ex:T_General ;
+  icm:reportDestinations [
+    a rdfs:Container ;
+    rdfs:member ex:IMF_Dashboard
+  ]
+  # Note: No icm:reportTriggers property - on-demand only
+  .
+
+ex:C_OnDemand
+  a log:Condition ;
+  log:allOf ( "true"^^xsd:boolean )
+  .
+
+################################################################################
+# SCENARIO 3: On Change Reporting (State Change Triggers)
+#
+# Reports generated when intent handling state changes
+# Uses predefined IntentManagementOntology state events
+# Most common pattern for operational monitoring
+################################################################################
+
+ex:OnChangeIntent
+  a icm:Intent ;
+  rdfs:label "On-Change Reporting Intent"@en ;
+  rdfs:comment "Reports generated when intent state changes"@en ;
+  log:allOf ( ex:E_OnChange_Property ex:E_OnChange_Reporting )
+  .
+
+ex:E_OnChange_Property
+  a icm:PropertyExpectation ;
+  rdfs:label "On-Change Property Expectation"@en ;
+  icm:target ex:T_General ;
+  log:allOf ( ex:C_OnChange )
+  .
+
+ex:E_OnChange_Reporting
+  a icm:ReportingExpectation ;
+  rdfs:label "On-Change Reporting Expectation"@en ;
+  rdfs:comment "Generate reports on state changes (Accepted, Rejected, Complies, Degrades)"@en ;
+  icm:target ex:T_General ;
+  icm:reportDestinations [
+    a rdfs:Container ;
+    rdfs:member ex:IMF_Dashboard
+  ] ;
+  icm:reportTriggers [
+    a rdfs:Container ;
+    rdfs:member imo:IntentAccepted ;
+    rdfs:member imo:IntentRejected ;
+    rdfs:member imo:Complies ;
+    rdfs:member imo:Degrades
+  ]
+  .
+
+ex:C_OnChange
+  a log:Condition ;
+  log:allOf ( "true"^^xsd:boolean )
+  .
+
+################################################################################
+# Common Resources (used by all scenarios)
+################################################################################
+
+# Common Target
+ex:T_General
+  a icm:Target ;
+  rdfs:label "General Target"@en ;
+  rdfs:member ex:NetworkSlice1
+  .
+
+ex:NetworkSlice1
+  a ex:NetworkSlice ;
+  rdfs:label "Network Slice 1"@en
+  .
+
+ex:NetworkSlice
+  a rdfs:Class ;
+  rdfs:label "Network Slice"@en
+  .
+
+# Intent Management Functions (report destinations)
+ex:IMF_Dashboard
+  a ex:IntentManagementFunction ;
+  rdfs:label "Dashboard IMF"@en ;
+  rdfs:comment "Intent management function for dashboard display"@en
+  .
+
+ex:IMF_Alerting
+  a ex:IntentManagementFunction ;
+  rdfs:label "Alerting IMF"@en ;
+  rdfs:comment "Intent management function for alert notifications"@en
+  .
+
+ex:IntentManagementFunction
+  a rdfs:Class ;
+  rdfs:label "Intent Management Function"@en
+  .

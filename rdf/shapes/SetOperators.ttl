@@ -1,0 +1,47 @@
+# TMF SetOperators SHACL Shapes
+#
+# Domain-specific validation for SetOperators.
+# Global validation (function usage, vocabulary) handled by lib/GlobalShapes.ttl
+#
+# Ontology URI: http://tio.models.tmforum.org/tio/v3.6.0/SetOperators/
+
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# TMF namespaces
+@prefix set: <http://tio.models.tmforum.org/tio/v3.6.0/SetOperators/> .
+@prefix fun: <http://tio.models.tmforum.org/tio/v3.6.0/FunctionOntology/> .
+@prefix imo: <http://tio.models.tmforum.org/tio/v3.6.0/IntentManagementOntology/> .
+
+# Shape namespaces  
+@prefix set-shapes: <http://tio.models.tmforum.org/tio/v3.6.0/shapes/SetOperators/> .
+@prefix tio-lib: <http://tio.models.tmforum.org/tio/v3.6.0/shapes/lib/> .
+@prefix tio-targets: <http://tio.models.tmforum.org/tio/v3.6.0/shapes/lib/targets/> .
+@prefix tio-constraints: <http://tio.models.tmforum.org/tio/v3.6.0/shapes/lib/constraints/> .
+
+# =============================================================================
+# SET MEMBERSHIP FUNCTION RESULT TYPE VALIDATION
+# =============================================================================
+
+# Validates set membership functions return boolean
+set-shapes:SetMembershipFunctionResultTypeShape
+    a sh:NodeShape ;
+    rdfs:label "Set Membership Function Result Type Validation" ;
+    rdfs:comment "Validates set membership functions (elementOf, includedIn, intersectsWith) have xsd:boolean as resultType." ;
+    sh:target [
+        a tio-targets:OntologyClassTargetType ;
+        tio-lib:ontologyNamespace "http://tio.models.tmforum.org/tio/v3.6.0/SetOperators/" ;
+        tio-lib:targetClass fun:Function ;
+    ] ;
+    
+    sh:sparql tio-constraints:SetMembershipFunctionBooleanResultTypeConstraint ;
+    sh:severity sh:Violation .
+
+# =============================================================================
+# NOTES
+# =============================================================================
+# Universal validation (applies to all ontologies):
+# - Vocabulary: tio-lib:VocabularyUsageShape
+# - Function usage: tio-lib:FunctionUsageShape

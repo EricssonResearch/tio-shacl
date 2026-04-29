@@ -1,0 +1,28 @@
+# Test: Blank node with quan:unit but missing Quantity type
+# This test validates that quan:unit requires the node to be a quan:Quantity
+# Should FAIL with: "quan:unit property may only be used on quan:Quantity instances"
+
+@prefix ex:   <http://example.org/> .
+@prefix quan: <http://tio.models.tmforum.org/tio/v3.6.0/QuantityOntology/> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+################################################################################
+# VIOLATION: Blank node with quan:unit but missing type declaration
+#
+# Common mistake: Using quan:unit on a blank node without declaring it as Quantity
+# The DomainOfQuantityPropertiesShape enforces that quan:unit is only used on
+# quan:Quantity instances
+################################################################################
+
+# WRONG - blank node missing "a quan:Quantity ;"
+ex:test_missing_type
+  quan:smaller (
+    [
+      # WRONG: Missing "a quan:Quantity ;"
+      rdf:value "100"^^xsd:decimal ;
+      quan:unit "ms"
+    ]
+    "200ms"^^quan:quantity
+  )
+  .

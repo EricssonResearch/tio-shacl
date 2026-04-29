@@ -1,0 +1,23 @@
+# Test: ObservationReportingExpectation missing target
+# Inherits from ReportingExpectation which requires icm:target
+
+@prefix ex:  <http://example.org/> .
+@prefix icm: <http://tio.models.tmforum.org/tio/v3.6.0/IntentCommonModel/> .
+@prefix imo: <http://tio.models.tmforum.org/tio/v3.6.0/IntentManagementOntology/> .
+@prefix log: <http://tio.models.tmforum.org/tio/v3.6.0/LogicalOperators/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+################################################################################
+# VIOLATION: ObservationReportingExpectation missing target
+################################################################################
+
+ex:obs_reporting_no_target
+  a icm:ObservationReportingExpectation ;
+  log:allOf ( "true"^^xsd:boolean ) ;
+  icm:reportTriggers [
+    a rdfs:Container ;
+    rdfs:member imo:Complies
+  ] .
+  # WRONG: Missing icm:target

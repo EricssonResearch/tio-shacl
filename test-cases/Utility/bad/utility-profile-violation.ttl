@@ -1,0 +1,21 @@
+# Test: UtilityProfile usage violations
+
+@prefix ex:  <http://example.org/> .
+@prefix ut:  <http://tio.models.tmforum.org/tio/v3.6.0/Utility/> .
+@prefix fun: <http://tio.models.tmforum.org/tio/v3.6.0/FunctionOntology/> .
+@prefix icm: <http://tio.models.tmforum.org/tio/v3.6.0/IntentCommonModel/> .
+@prefix log: <http://tio.models.tmforum.org/tio/v3.6.0/LogicalOperators/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+################################################################################
+# VIOLATION: UtilityProfile used where UtilityInformation expected
+################################################################################
+
+ex:intent_wrong_utility_type
+  a icm:Intent ;
+  log:allOf ( "true"^^xsd:boolean ) ;
+  ut:utility ex:wrongUtilityType .  # WRONG: UtilityProfile, not UtilityInformation
+
+ex:wrongUtilityType
+  a ut:UtilityProfile .

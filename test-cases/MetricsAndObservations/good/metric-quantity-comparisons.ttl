@@ -1,0 +1,92 @@
+# Test: Metric definitions and usage with quantity comparisons
+# This test validates:
+# - Metrics can be defined with rdfs:range
+# - Quantity comparisons work with explicit Quantity instances
+# - Nested function invocations use correct blank node syntax
+
+@prefix ex:   <http://example.org/> .
+@prefix met:  <http://tio.models.tmforum.org/tio/v3.6.0/MetricsAndObservations/> .
+@prefix quan: <http://tio.models.tmforum.org/tio/v3.6.0/QuantityOntology/> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+################################################################################
+# Metric definitions
+################################################################################
+
+ex:cpuUsage a met:Metric ;
+    rdfs:label "CPU Usage" ;
+    rdfs:range quan:Quantity .
+
+ex:networkIn a met:Metric ;
+    rdfs:label "Network Input" ;
+    rdfs:range quan:Quantity .
+
+ex:networkOut a met:Metric ;
+    rdfs:label "Network Output" ;
+    rdfs:range quan:Quantity .
+
+ex:latency a met:Metric ;
+    rdfs:label "Latency Metric" ;
+    rdfs:range quan:Quantity .
+
+ex:bandwidth a met:Metric ;
+    rdfs:label "Bandwidth Metric" ;
+    rdfs:range quan:Quantity .
+
+################################################################################
+# Quantity comparisons with explicit Quantity instances
+################################################################################
+
+ex:threshold_cpu a quan:Quantity ;
+    rdf:value "80"^^xsd:decimal ;
+    quan:unit "%" .
+
+ex:test_cpu_threshold
+  a rdfs:Resource ;
+  quan:atLeast (
+    [ a quan:Quantity ; rdf:value "90"^^xsd:decimal ; quan:unit "%" ]
+    ex:threshold_cpu
+  ) .
+
+ex:threshold_latency a quan:Quantity ;
+    rdf:value "100"^^xsd:decimal ;
+    quan:unit "ms" .
+
+ex:test_latency_threshold
+  a rdfs:Resource ;
+  quan:atMost (
+    [ a quan:Quantity ; rdf:value "50"^^xsd:decimal ; quan:unit "ms" ]
+    ex:threshold_latency
+  ) .
+
+ex:threshold_bandwidth a quan:Quantity ;
+    rdf:value "1"^^xsd:decimal ;
+    quan:unit "Gbps" .
+
+ex:test_bandwidth_threshold
+  a rdfs:Resource ;
+  quan:exactly (
+    [ a quan:Quantity ; rdf:value "1"^^xsd:decimal ; quan:unit "Gbps" ]
+    ex:threshold_bandwidth
+  ) .
+
+################################################################################
+# Nested function invocations using CORRECT blank node syntax
+# Use [ met:lastValue ( metric ) ] - NOT met:lastValue ( metric ) unwrapped
+################################################################################
+
+ex:test_lastvalue_cpu
+  a rdfs:Resource ;
+  quan:atMost (
+    [ met:lastValue ( ex:cpuUsage ) ]
+    "95%"^^quan:quantity
+  ) .
+
+ex:test_lastvalue_latency
+  a rdfs:Resource ;
+  quan:atLeast (
+    [ met:lastValue ( ex:latency ) ]
+    "10ms"^^quan:quantity
+  ) .

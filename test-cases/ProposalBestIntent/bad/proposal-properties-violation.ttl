@@ -1,0 +1,30 @@
+# Test: Invalid pbi:proposedFor and pbi:proposedBest values
+# This test validates that these properties must be BlankNodeOrIRI
+# Should FAIL with: "must be a resource (blank node or IRI)"
+
+@prefix ex:  <http://example.org/> .
+@prefix pbi: <http://tio.models.tmforum.org/tio/v3.6.0/ProposalBestIntent/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+################################################################################
+# VIOLATION: pbi:proposedFor with literal value
+#
+# pbi:proposedFor MUST be a resource (BlankNodeOrIRI)
+################################################################################
+
+# WRONG - using literal string instead of resource
+ex:proposal_literal_for
+  a pbi:Proposal ;
+  pbi:proposedFor "requirement1" .
+
+################################################################################
+# VIOLATION: pbi:proposedBest with literal value
+#
+# pbi:proposedBest MUST be a resource (BlankNodeOrIRI)
+################################################################################
+
+# WRONG - using literal number instead of resource
+ex:proposal_literal_best
+  a pbi:Proposal ;
+  pbi:proposedBest 42 .

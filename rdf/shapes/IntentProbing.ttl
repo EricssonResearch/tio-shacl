@@ -1,0 +1,72 @@
+# TMF IntentProbing SHACL Shapes
+#
+# Domain-specific validation for IntentProbing.
+# Global validation (function usage, vocabulary) handled by lib/GlobalShapes.ttl
+#
+# Ontology URI: http://tio.models.tmforum.org/tio/v3.6.0/IntentProbing/
+
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# TMF namespaces
+@prefix pro: <http://tio.models.tmforum.org/tio/v3.6.0/IntentProbing/> .
+@prefix icm: <http://tio.models.tmforum.org/tio/v3.6.0/IntentCommonModel/> .
+@prefix met: <http://tio.models.tmforum.org/tio/v3.6.0/MetricsAndObservations/> .
+@prefix fun: <http://tio.models.tmforum.org/tio/v3.6.0/FunctionOntology/> .
+@prefix imo: <http://tio.models.tmforum.org/tio/v3.6.0/IntentManagementOntology/> .
+
+# Shape namespaces
+@prefix pro-shapes: <http://tio.models.tmforum.org/tio/v3.6.0/shapes/IntentProbing/> .
+@prefix tio-lib: <http://tio.models.tmforum.org/tio/v3.6.0/shapes/lib/> .
+@prefix tio-targets: <http://tio.models.tmforum.org/tio/v3.6.0/shapes/lib/targets/> .
+@prefix tio-constraints: <http://tio.models.tmforum.org/tio/v3.6.0/shapes/lib/constraints/> .
+
+# Note: Vocabulary validation handled globally by tio-lib:VocabularyUsageShape in GlobalShapes.ttl
+
+# =============================================================================
+# PROPERTY VALIDATION
+# =============================================================================
+
+# Validate expectedResult datatype
+pro-shapes:ExpectedResultShape
+    a sh:NodeShape ;
+    rdfs:label "Expected Result Property Validation" ;
+    rdfs:comment "Validates that pro:expectedResult has correct datatype" ;
+    sh:target [
+        a tio-targets:SubjectsOfPropertyTargetType ;
+        tio-lib:property pro:expectedResult ;
+    ] ;
+
+    sh:property [
+        sh:path pro:expectedResult ;
+        sh:description "expectedResult must be xsd:boolean" ;
+        sh:datatype xsd:boolean ;
+        sh:name "expectedResult" ;
+        sh:message "[pro/expected_result_type] pro:expectedResult must be xsd:boolean datatype. In TIO v3.6.0, intent probing tests expect true/false outcomes. Add: pro:expectedResult \"true\"^^xsd:boolean or pro:expectedResult \"false\"^^xsd:boolean" ;
+    ] ;
+
+    sh:severity sh:Violation .
+
+# Validate expectedObservation range
+pro-shapes:ExpectedObservationShape
+    a sh:NodeShape ;
+    rdfs:label "Expected Observation Property Validation" ;
+    rdfs:comment "Validates that pro:expectedObservation points to Observation" ;
+    sh:target [
+        a tio-targets:SubjectsOfPropertyTargetType ;
+        tio-lib:property pro:expectedObservation ;
+    ] ;
+
+    sh:property [
+        sh:path pro:expectedObservation ;
+        sh:description "expectedObservation must point to met:Observation" ;
+        sh:class met:Observation ;
+        sh:name "expectedObservation" ;
+        sh:message "[pro/expected_observation_type] pro:expectedObservation must reference a met:Observation instance. In TIO v3.6.0, probing tests link to expected observation outcomes. Add: pro:expectedObservation <observation-uri> where the resource has rdf:type met:Observation" ;
+    ] ;
+
+    sh:severity sh:Violation .
+
+# Note: Global validation (vocabulary, function usage) handled by lib/GlobalShapes.ttl

@@ -1,0 +1,35 @@
+# Test: DomainOfFunctionPropertiesShape violation
+# Tests: Function properties (fun:arityMin, fun:arityMax, etc.) can only be used on fun:Function instances
+# Should FAIL with: "Function property used on non-Function resource"
+
+@prefix ex:   <http://example.org/> .
+@prefix fun:  <http://tio.models.tmforum.org/tio/v3.6.0/FunctionOntology/> .
+@prefix icm:  <http://tio.models.tmforum.org/tio/v3.6.0/IntentCommonModel/> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+################################################################################
+# VIOLATION: Function properties used on non-Function resources
+#
+# Common mistake: Using function metadata properties on Intents or other classes
+# Function properties (arityMin, arityMax, resultType, etc.) can ONLY be used
+# on resources declared as fun:Function
+################################################################################
+
+# WRONG - fun:arityMin used without declaring as fun:Function
+ex:not_a_function_1
+  fun:arityMin 2 .
+
+# WRONG - fun:arityMax used on Intent (Intent is NOT a Function)
+ex:intent_with_arity
+  a icm:Intent ;
+  fun:arityMax 5 .
+
+# WRONG - fun:resultType used without declaring as fun:Function
+ex:not_a_function_2
+  fun:resultType xsd:boolean .
+
+# WRONG - Multiple function properties without fun:Function type
+ex:not_a_function_3
+  fun:arityMin 1 ;
+  fun:arityMax 3 ;
+  fun:argumentTypes ( xsd:string xsd:integer ) .

@@ -1,0 +1,52 @@
+# Test: Valid usage of utility properties
+# Concepts covered: elevatedMaxUtility, forMetric, function, maxUtility, minUtility, utility, utilityProfile, utilityResult, withArgument, withArguments
+# This test validates that utility properties can be used correctly.
+
+@prefix ex: <http://example.org/> .
+@prefix fun: <http://tio.models.tmforum.org/tio/v3.6.0/FunctionOntology/> .
+@prefix utl: <http://tio.models.tmforum.org/tio/v3.6.0/Utility/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+ex:test_elevatedmaxutility
+  a rdfs:Resource ;
+  utl:elevatedMaxUtility "100"^^xsd:decimal .
+ex:test_formetric
+  a rdfs:Resource ;
+  utl:forMetric ex:metric1 .
+ex:test_function
+  a rdfs:Resource ;
+  utl:function ex:func1 .
+ex:test_maxutility
+  a rdfs:Resource ;
+  utl:maxUtility "100"^^xsd:decimal .
+ex:test_minutility
+  a rdfs:Resource ;
+  utl:minUtility "0"^^xsd:decimal .
+ex:test_utility
+  a rdfs:Resource ;
+  utl:utility ex:utility_value .
+ex:test_utilityprofile
+  a rdfs:Resource ;
+  utl:utilityProfile ex:profile1 .
+ex:test_utilityresult
+  a rdfs:Resource ;
+  utl:utilityResult ex:result1 .
+ex:test_withargument
+  a rdfs:Resource ;
+  utl:withArgument ex:arg1 .
+ex:test_witharguments
+  a rdfs:Resource ;
+  utl:withArguments ( ex:arg1 ex:arg2 ) .
+
+# Supporting instances
+ex:metric1 a rdfs:Resource .
+# utl:function must reference a fun:Function instance with resultType
+ex:func1 a fun:Function ;
+    fun:resultType xsd:decimal .
+ex:utility_value a utl:UtilityInformation .
+ex:profile1 a utl:UtilityProfile .
+ex:result1 a rdfs:Resource .
+ex:arg1 a rdfs:Resource .
+ex:arg2 a rdfs:Resource .

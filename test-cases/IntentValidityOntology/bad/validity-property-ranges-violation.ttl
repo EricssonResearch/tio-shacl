@@ -1,0 +1,51 @@
+# Test: Invalid iv:validIf and iv:sameValidityAs property ranges
+# This test validates that these properties must reference correct class instances
+# Should FAIL with: "must reference an instance of iv:Validity" or "must reference a ValidityCandidate"
+
+@prefix ex:  <http://example.org/> .
+@prefix iv:  <http://tio.models.tmforum.org/tio/v3.6.0/IntentValidityOntology/> .
+@prefix icm: <http://tio.models.tmforum.org/tio/v3.6.0/IntentCommonModel/> .
+@prefix log: <http://tio.models.tmforum.org/tio/v3.6.0/LogicalOperators/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+################################################################################
+# VIOLATION: iv:validIf with literal value
+#
+# The iv:validIf property MUST reference an iv:Validity instance
+################################################################################
+
+# WRONG - using literal string instead of Validity instance
+ex:intent_wrong_validif
+  a icm:Intent ;
+  log:allOf ( "true"^^xsd:boolean ) ;
+  iv:validIf "always" .
+
+################################################################################
+# VIOLATION: iv:validIf with wrong class
+################################################################################
+
+# WRONG - referencing a Target instead of Validity
+ex:intent_validif_wrong_class
+  a icm:Intent ;
+  log:allOf ( "true"^^xsd:boolean ) ;
+  iv:validIf ex:notValidity .
+
+ex:notValidity
+  a icm:Target .
+
+################################################################################
+# VIOLATION: iv:sameValidityAs with wrong class
+#
+# The iv:sameValidityAs property MUST reference a ValidityCandidate (Intent or Expectation)
+# NOT a Target or other IntentElement
+################################################################################
+
+# WRONG - referencing a Target instead of Intent/Expectation
+ex:exp_wrong_sameas
+  a icm:PropertyExpectation ;
+  icm:target [ a icm:Target ] ;
+  iv:sameValidityAs ex:target1 .
+
+ex:target1
+  a icm:Target .

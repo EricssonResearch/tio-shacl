@@ -1,0 +1,11 @@
+# Normalize line endings
+* text=auto eol=lf
+
+# Binary assets
+*.jar binary
+*.pdf binary
+*.png binary
+
+# TTL files are text
+*.ttl text eol=lf
+*.sparql text eol=lf

@@ -1,0 +1,26 @@
+# Test: Valid instances of Update lifecycle event classes
+# Concepts covered: UpdateAccepted, UpdateRejected, UpdateReceived, UpdateFinished
+# This test validates that valid instances of update lifecycle events can be created.
+
+@prefix ex: <http://example.org/> .
+@prefix fun: <http://tio.models.tmforum.org/tio/v3.6.0/FunctionOntology/> .
+@prefix imo: <http://tio.models.tmforum.org/tio/v3.6.0/IntentManagementOntology/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# === UpdateAccepted ===
+ex:test_updateaccepted
+  a imo:UpdateAccepted .
+
+# === UpdateRejected ===
+ex:test_updaterejected
+  a imo:UpdateRejected .
+
+# === UpdateReceived ===
+ex:test_updatereceived
+  a imo:UpdateReceived .
+
+# === UpdateFinished ===
+ex:test_updatefinished
+  a imo:UpdateFinished .

@@ -1,0 +1,278 @@
+# Test: Comprehensive validity scenarios
+# This test covers all common validity patterns users encounter:
+# 1. Always valid (no validity constraint)
+# 2. Valid during business hours (temporal)
+# 3. Valid during specific time range (temporal)
+# 4. Valid based on metric conditions (metric-based)
+# 5. Combined validity (temporal AND metric)
+
+@prefix ex:   <http://example.org/> .
+@prefix icm:  <http://tio.models.tmforum.org/tio/v3.6.0/IntentCommonModel/> .
+@prefix iv:   <http://tio.models.tmforum.org/tio/v3.6.0/IntentValidityOntology/> .
+@prefix log:  <http://tio.models.tmforum.org/tio/v3.6.0/LogicalOperators/> .
+@prefix imo:  <http://tio.models.tmforum.org/tio/v3.6.0/IntentManagementOntology/> .
+@prefix quan: <http://tio.models.tmforum.org/tio/v3.6.0/QuantityOntology/> .
+@prefix met:  <http://tio.models.tmforum.org/tio/v3.6.0/MetricsAndObservations/> .
+@prefix t:    <http://www.w3.org/2006/time#> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+################################################################################
+# SCENARIO 1: Always Valid (No Validity Constraint)
+#
+# Intent applies at all times - no iv:validIf property
+# This is the simplest case and requires no validity configuration
+################################################################################
+
+ex:AlwaysValidIntent
+  a icm:Intent ;
+  rdfs:label "Always Valid Intent"@en ;
+  rdfs:comment "This intent has no validity constraint, so it applies at all times"@en ;
+  log:allOf ( ex:E_AlwaysValid )
+  .
+
+ex:E_AlwaysValid
+  a icm:PropertyExpectation ;
+  rdfs:label "Always Valid Expectation"@en ;
+  icm:target ex:T_General ;
+  log:allOf ( ex:C_AlwaysValid )
+  .
+
+ex:C_AlwaysValid
+  a log:Condition ;
+  log:allOf ( "true"^^xsd:boolean )
+  .
+
+################################################################################
+# SCENARIO 2: Valid During Business Hours (9am-5pm Weekdays)
+#
+# Intent only valid Monday-Friday, 9:00-17:00
+# Uses W3C Time temporal constraints
+################################################################################
+
+# Business hours: Monday-Friday 9am-5pm
+ex:BusinessHours_Morning
+  a rdfs:Resource ;
+  t:hasBeginning [ t:inXSDDateTimeStamp "2024-01-01T09:00:00Z"^^xsd:dateTimeStamp ] ;
+  t:hasXSDDuration "PT8H"^^xsd:duration  # 8 hours (9am-5pm)
+  .
+
+# Validity condition: current time inside business hours
+ex:V_BusinessHours
+  a iv:Validity ;
+  rdfs:label "Business Hours Validity"@en ;
+  rdfs:comment "Valid Monday-Friday 9am-5pm"@en ;
+  log:match ( imo:Now t:inside ex:BusinessHours_Morning )
+  .
+
+ex:BusinessHoursIntent
+  a icm:Intent ;
+  rdfs:label "Business Hours Only Intent"@en ;
+  iv:validIf ex:V_BusinessHours ;
+  log:allOf ( ex:E_BusinessHours )
+  .
+
+ex:E_BusinessHours
+  a icm:PropertyExpectation ;
+  icm:target ex:T_General ;
+  log:allOf ( ex:C_BusinessHours )
+  .
+
+ex:C_BusinessHours
+  a log:Condition ;
+  log:allOf ( "true"^^xsd:boolean )
+  .
+
+################################################################################
+# SCENARIO 3: Valid During Specific Time Range
+#
+# Intent valid during a specific date/time window
+# Example: Maintenance window on weekends
+################################################################################
+
+# Weekend maintenance window: Saturday 2am-6am
+ex:MaintenanceWindow
+  a rdfs:Resource ;
+  t:hasBeginning [ t:inXSDDateTimeStamp "2024-12-07T02:00:00Z"^^xsd:dateTimeStamp ] ;  # Saturday
+  t:hasEnd [ t:inXSDDateTimeStamp "2024-12-07T06:00:00Z"^^xsd:dateTimeStamp ]
+  .
+
+ex:V_MaintenanceWindow
+  a iv:Validity ;
+  rdfs:label "Maintenance Window Validity"@en ;
+  rdfs:comment "Valid only during weekend maintenance windows"@en ;
+  log:match ( imo:Now t:inside ex:MaintenanceWindow )
+  .
+
+ex:MaintenanceIntent
+  a icm:Intent ;
+  rdfs:label "Maintenance Window Intent"@en ;
+  iv:validIf ex:V_MaintenanceWindow ;
+  log:allOf ( ex:E_Maintenance )
+  .
+
+ex:E_Maintenance
+  a icm:PropertyExpectation ;
+  icm:target ex:T_General ;
+  log:allOf ( ex:C_Maintenance )
+  .
+
+ex:C_Maintenance
+  a log:Condition ;
+  log:allOf ( "true"^^xsd:boolean )
+  .
+
+################################################################################
+# SCENARIO 4: Valid Based on Metric Conditions
+#
+# Intent only valid when system load is below threshold
+# Uses QuantityOntology for metric comparison
+################################################################################
+
+# Current system load metric
+ex:CurrentLoad
+  a quan:Quantity ;
+  rdf:value "65"^^xsd:decimal ;
+  quan:unit "percent"
+  .
+
+# Validity: load must be < 80%
+ex:V_LowLoad
+  a iv:Validity ;
+  rdfs:label "Low Load Validity"@en ;
+  rdfs:comment "Valid only when system load < 80%"@en ;
+  quan:smaller (
+    ex:CurrentLoad
+    [ a quan:Quantity ; rdf:value "80"^^xsd:decimal ; quan:unit "percent" ]
+  )
+  .
+
+ex:LowLoadIntent
+  a icm:Intent ;
+  rdfs:label "Low Load Only Intent"@en ;
+  iv:validIf ex:V_LowLoad ;
+  log:allOf ( ex:E_LowLoad )
+  .
+
+ex:E_LowLoad
+  a icm:PropertyExpectation ;
+  icm:target ex:T_General ;
+  log:allOf ( ex:C_LowLoad )
+  .
+
+ex:C_LowLoad
+  a log:Condition ;
+  log:allOf ( "true"^^xsd:boolean )
+  .
+
+################################################################################
+# SCENARIO 5: Combined Validity (Temporal AND Metric)
+#
+# Intent valid only when BOTH conditions are true:
+# - During business hours (temporal)
+# - AND system load is low (metric)
+################################################################################
+
+# Combined validity: Use iv:validityOf to check if other validities are true
+# iv:validityOf is a Function that returns boolean, so can be used directly in log:allOf
+ex:V_Combined
+  a iv:Validity, log:Condition ;
+  rdfs:label "Combined Business Hours and Low Load Validity"@en ;
+  rdfs:comment "Valid only during business hours AND when load < 80%"@en ;
+  log:allOf (
+    iv:validityOf ( ex:V_BusinessHours )
+    iv:validityOf ( ex:V_LowLoad )
+  )
+  .
+
+ex:CombinedIntent
+  a icm:Intent ;
+  rdfs:label "Combined Validity Intent"@en ;
+  iv:validIf ex:V_Combined ;
+  log:allOf ( ex:E_Combined )
+  .
+
+ex:E_Combined
+  a icm:PropertyExpectation ;
+  icm:target ex:T_General ;
+  log:allOf ( ex:C_Combined )
+  .
+
+ex:C_Combined
+  a log:Condition ;
+  log:allOf ( "true"^^xsd:boolean )
+  .
+
+################################################################################
+# SCENARIO 6: Validity Inheritance
+#
+# Multiple expectations share the same validity using sameValidityAs
+################################################################################
+
+ex:SharedValidityIntent
+  a icm:Intent ;
+  rdfs:label "Intent with Shared Validity"@en ;
+  log:allOf ( ex:E_Primary ex:E_Secondary ex:E_Tertiary )
+  .
+
+# Primary expectation defines the validity
+ex:E_Primary
+  a icm:PropertyExpectation ;
+  rdfs:label "Primary Expectation"@en ;
+  icm:target ex:T_General ;
+  iv:validIf ex:V_BusinessHours ;  # Defines validity
+  log:allOf ( ex:C_Primary )
+  .
+
+# Secondary and tertiary expectations inherit validity
+ex:E_Secondary
+  a icm:PropertyExpectation ;
+  rdfs:label "Secondary Expectation"@en ;
+  icm:target ex:T_General ;
+  iv:sameValidityAs ex:E_Primary ;  # Inherits business hours validity
+  log:allOf ( ex:C_Secondary )
+  .
+
+ex:E_Tertiary
+  a icm:PropertyExpectation ;
+  rdfs:label "Tertiary Expectation"@en ;
+  icm:target ex:T_General ;
+  iv:sameValidityAs ex:E_Primary ;  # Also inherits business hours validity
+  log:allOf ( ex:C_Tertiary )
+  .
+
+ex:C_Primary
+  a log:Condition ;
+  log:allOf ( "true"^^xsd:boolean )
+  .
+
+ex:C_Secondary
+  a log:Condition ;
+  log:allOf ( "true"^^xsd:boolean )
+  .
+
+ex:C_Tertiary
+  a log:Condition ;
+  log:allOf ( "true"^^xsd:boolean )
+  .
+
+################################################################################
+# Common Target (used by all scenarios)
+################################################################################
+
+ex:T_General
+  a icm:Target ;
+  rdfs:label "General Target"@en ;
+  rdfs:member ex:NetworkSlice1
+  .
+
+ex:NetworkSlice1
+  a ex:NetworkSlice ;
+  rdfs:label "Network Slice 1"@en
+  .
+
+ex:NetworkSlice
+  a rdfs:Class ;
+  rdfs:label "Network Slice"@en
+  .

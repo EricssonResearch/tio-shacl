@@ -1,0 +1,45 @@
+# Test: IntentReportPropertiesShape violations
+# Tests: reportNumber must be xsd:positiveInteger, reportGenerated must be t:Instant
+# Should FAIL with: "icm:reportNumber must be a positive integer" and
+#                   "icm:reportGenerated must be a time:Instant"
+
+@prefix ex:   <http://example.org/> .
+@prefix icm:  <http://tio.models.tmforum.org/tio/v3.6.0/IntentCommonModel/> .
+@prefix t:    <http://www.w3.org/2006/time#> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+################################################################################
+# VIOLATION 1: reportNumber must be xsd:positiveInteger
+#
+# Common mistake: Using a string or wrong datatype for reportNumber
+# The icm:reportNumber property MUST be xsd:positiveInteger
+################################################################################
+
+# WRONG - reportNumber as string literal
+ex:wrong_report_number
+  a icm:IntentReport ;
+  icm:about ex:myIntent ;
+  icm:reportNumber "42" ;  # WRONG: string, not xsd:positiveInteger
+  icm:result true
+  .
+
+################################################################################
+# VIOLATION 2: reportGenerated must be t:Instant
+#
+# Common mistake: Using a literal timestamp instead of a t:Instant resource
+# The icm:reportGenerated property MUST be a time:Instant
+################################################################################
+
+# WRONG - reportGenerated as literal timestamp
+ex:wrong_report_timestamp
+  a icm:IntentReport ;
+  icm:about ex:myIntent ;
+  icm:reportGenerated "2024-01-01T12:00:00Z"^^xsd:dateTime ;  # WRONG: not t:Instant
+  icm:result true
+  .
+
+ex:myIntent
+  a icm:Intent
+  .

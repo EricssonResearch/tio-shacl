@@ -1,0 +1,10 @@
+# Test: Invalid usage of math functions
+# Concepts covered: logistic, mapping, poly
+# Constraints tested: Arity violations
+@prefix ex: <http://example.org/> .
+@prefix mth: <http://tio.models.tmforum.org/tio/v3.6.0/MathFunctions/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+ex:invalid_logistic mth:logistic ( ) .
+ex:invalid_mapping mth:mapping ( ) .
+ex:invalid_poly mth:poly ( ) .

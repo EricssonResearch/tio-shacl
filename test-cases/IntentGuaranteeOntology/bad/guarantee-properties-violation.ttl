@@ -1,0 +1,40 @@
+# Test: Guarantee and GuaranteeReport class violations
+# Tests invalid usage of guarantee-related classes
+
+@prefix ex:  <http://example.org/> .
+@prefix ig:  <http://tio.models.tmforum.org/tio/v3.6.0/IntentGuaranteeOntology/> .
+@prefix icm: <http://tio.models.tmforum.org/tio/v3.6.0/IntentCommonModel/> .
+@prefix log: <http://tio.models.tmforum.org/tio/v3.6.0/LogicalOperators/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+################################################################################
+# VIOLATION: Guarantee missing target (inherits from Expectation)
+################################################################################
+
+ex:guarantee_no_target
+  a ig:Guarantee ;
+  log:allOf ( "true"^^xsd:boolean ) .
+  # WRONG: Missing icm:target
+
+################################################################################
+# VIOLATION: GuaranteeReportingExpectation missing target
+################################################################################
+
+ex:guarantee_reporting_no_target
+  a ig:GuaranteeReportingExpectation ;
+  log:allOf ( "true"^^xsd:boolean ) .
+  # WRONG: Missing icm:target
+
+################################################################################
+# VIOLATION: GuaranteeReport with wrong about class
+################################################################################
+
+ex:guarantee_report_wrong_about
+  a ig:GuaranteeReport ;
+  icm:about ex:notAGuarantee ;
+  icm:result true .
+
+ex:notAGuarantee
+  a rdfs:Resource .

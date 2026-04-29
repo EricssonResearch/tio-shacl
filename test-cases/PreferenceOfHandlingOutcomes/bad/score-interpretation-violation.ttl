@@ -1,0 +1,66 @@
+# Test: ScoreInterpretation with IRI values instead of literals
+# This test validates that maxScore, minScore, objectedThreshold, preferredThreshold must be literals
+# Should FAIL with: "pre:maxScore must be a literal value" and similar messages
+
+@prefix ex:  <http://example.org/> .
+@prefix pre: <http://tio.models.tmforum.org/tio/v3.6.0/PreferenceOfHandlingOutcomes/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+################################################################################
+# VIOLATION 1: maxScore with IRI instead of literal
+#
+# Common mistake: Using a resource reference instead of a numeric literal
+# The pre:maxScore property MUST be a literal value (typically numeric)
+################################################################################
+
+# WRONG - maxScore as IRI instead of literal
+ex:score_interp_wrong_max
+  a pre:ScoreInterpretation ;
+  pre:maxScore ex:someResource .
+
+ex:someResource
+  a rdfs:Resource .
+
+################################################################################
+# VIOLATION 2: minScore with IRI instead of literal
+#
+# Common mistake: Using a resource reference instead of a numeric literal
+################################################################################
+
+# WRONG - minScore as IRI instead of literal
+ex:score_interp_wrong_min
+  a pre:ScoreInterpretation ;
+  pre:minScore ex:anotherResource .
+
+ex:anotherResource
+  a rdfs:Resource .
+
+################################################################################
+# VIOLATION 3: objectedThreshold with IRI instead of literal
+#
+# Common mistake: Using a resource reference instead of a numeric literal
+################################################################################
+
+# WRONG - objectedThreshold as IRI
+ex:score_interp_wrong_objected
+  a pre:ScoreInterpretation ;
+  pre:objectedThreshold ex:thresholdResource .
+
+ex:thresholdResource
+  a rdfs:Resource .
+
+################################################################################
+# VIOLATION 4: preferredThreshold with IRI instead of literal
+#
+# Common mistake: Using a resource reference instead of a numeric literal
+################################################################################
+
+# WRONG - preferredThreshold as IRI
+ex:score_interp_wrong_preferred
+  a pre:ScoreInterpretation ;
+  pre:preferredThreshold ex:preferredResource .
+
+ex:preferredResource
+  a rdfs:Resource .

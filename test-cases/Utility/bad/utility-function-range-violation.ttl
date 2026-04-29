@@ -1,0 +1,33 @@
+# Test: Invalid ut:function range
+# This test validates that ut:function must reference a fun:Function instance
+# Should FAIL with: "ut:function must reference a fun:Function instance"
+
+@prefix ex:  <http://example.org/> .
+@prefix ut:  <http://tio.models.tmforum.org/tio/v3.6.0/Utility/> .
+@prefix fun: <http://tio.models.tmforum.org/tio/v3.6.0/FunctionOntology/> .
+@prefix icm: <http://tio.models.tmforum.org/tio/v3.6.0/IntentCommonModel/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+################################################################################
+# VIOLATION: ut:function with literal value
+#
+# ut:function MUST reference a fun:Function instance
+################################################################################
+
+# WRONG - using literal instead of Function instance
+ex:util_literal_func
+  a ut:UtilityInformation ;
+  ut:function "calculate" .
+
+################################################################################
+# VIOLATION: ut:function with wrong class
+################################################################################
+
+# WRONG - referencing an Intent instead of Function
+ex:util_wrong_class
+  a ut:UtilityInformation ;
+  ut:function ex:notFunction .
+
+ex:notFunction
+  a icm:Intent .

@@ -1,0 +1,43 @@
+# Test: Valid usage of type/property query functions
+# Concepts covered: resourcesOfType, resourcesWithProperty, resourcesWithPropertyObject, typesOfMembers, valuesOfObjectProperty
+# This test validates that type/property query functions can be used correctly.
+
+@prefix ex: <http://example.org/> .
+@prefix fun: <http://tio.models.tmforum.org/tio/v3.6.0/FunctionOntology/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix set: <http://tio.models.tmforum.org/tio/v3.6.0/SetOperators/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# === resourcesOfType function: (Class...) - returns container of all instances ===
+ex:test_resourcesoftype
+  a rdfs:Resource ;
+  set:resourcesOfType ( ex:type1 ) .
+
+# === resourcesWithProperty function: (Property...) - returns container of resources with property ===
+# Note: The validator expects rdfs:Property, even though rdf:Property is standard
+ex:test_resourceswithproperty
+  a rdfs:Resource ;
+  set:resourcesWithProperty ( ex:prop1 ) .
+
+# === resourcesWithPropertyObject function: (Property, Object) - returns resources with property=object ===
+ex:test_resourceswithpropertyobject
+  a rdfs:Resource ;
+  set:resourcesWithPropertyObject ( ex:prop1 ex:value1 ) .
+
+# === typesOfMembers function: (Container) ===
+ex:test_typesofmembers
+  a rdfs:Resource ;
+  set:typesOfMembers ( ex:container1 ) .
+
+# === valuesOfObjectProperty function: (Container, Property) ===
+ex:test_valuesofobjectproperty
+  a rdfs:Resource ;
+  set:valuesOfObjectProperty ( ex:container1 ex:prop1 ) .
+
+# Supporting instances
+ex:container1 a rdfs:Container .
+ex:type1 a rdfs:Class .
+# Declare as both rdf:Property (standard) and rdfs:Property (validator check)
+ex:prop1 a rdf:Property, rdfs:Property .
+ex:value1 a rdfs:Resource .

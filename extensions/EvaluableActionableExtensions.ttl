@@ -1,0 +1,269 @@
+# ==============================================================================
+# TIO Evaluable/Actionable Extensions
+# ==============================================================================
+#
+# Purpose:
+#   This file extends TM Forum Intent Ontology (TIO) v3.6.0 with semantic
+#   classification for boolean evaluation and intent operationalization.
+#
+# Rationale:
+#   TIO 3.6.0 allows structurally valid intents that cannot be operationalized
+#   (i.e., executed by Intent Management Functions). These extensions add:
+#
+#   1. fun:BooleanFunction  - Functions that produce boolean results
+#   2. fun:Evaluable        - Entities that can participate in boolean logic
+#   3. fun:Actionable       - Entities that MUST have computation to be valid
+#
+#   This enables:
+#   - Validation that intents are actually executable
+#   - Polymorphic type checking for function arguments
+#   - Detection of "dead code" (defined but unreferenced conditions)
+#   - Clear contract between intent specification and execution
+#
+# Design:
+#   These extensions are separated from the TIO baseline to:
+#   - Keep TIO 3.6.0 ontology files pristine and unchanged
+#   - Enable clean merging of future TIO updates
+#   - Simplify proposing these additions upstream to TM Forum
+#   - Clearly distinguish "TM Forum baseline" vs "extensions"
+#
+# Compatibility:
+#   - Backward compatible: All existing valid intents remain valid
+#   - Forward compatible: Extensions inherit validation automatically
+#   - Zero breaking changes to TIO 3.6.0 semantics
+#
+# Documentation:
+#   See docs/03-function-argument-types.md for function type system
+#   See docs/04-actionable-boolean-evaluable.md for detailed design rationale
+#
+# ==============================================================================
+
+@prefix fun:  <http://tio.models.tmforum.org/tio/v3.6.0/FunctionOntology/> .
+@prefix icm:  <http://tio.models.tmforum.org/tio/v3.6.0/IntentCommonModel/> .
+@prefix log:  <http://tio.models.tmforum.org/tio/v3.6.0/LogicalOperators/> .
+@prefix quan: <http://tio.models.tmforum.org/tio/v3.6.0/QuantityOntology/> .
+@prefix set:  <http://tio.models.tmforum.org/tio/v3.6.0/SetOperators/> .
+@prefix spec: <http://tio.models.tmforum.org/tio/v3.6.0/IntentSpecification/> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+# ==============================================================================
+# SECTION 1: Core Class Definitions
+# ==============================================================================
+#
+# These three mixin classes form the foundation of the operationalization
+# semantics:
+#
+#   BooleanFunction: Categorizes functions that produce boolean results
+#   Evaluable:       Things that CAN be used in boolean contexts
+#   Actionable:      Things that MUST have boolean computation to be valid
+#
+# ==============================================================================
+
+fun:BooleanFunction
+  rdfs:label "Boolean Function Class"@en ;
+  rdfs:comment """A function that computes a boolean value. All instances must have fun:resultType xsd:boolean.
+
+  Design Note: While fun:resultType also specifies the return type, the class membership serves complementary purposes:
+  - Enables efficient category-based queries (e.g., "find all boolean functions")
+  - Allows BooleanFunction-specific constraints and properties
+  - Provides semantic documentation via type hierarchy
+  - Aligns with OWL reasoning patterns
+
+  SHACL validation ensures consistency between class membership and fun:resultType property."""@en ;
+  rdf:type rdfs:Class ;
+  rdfs:subClassOf fun:Function
+.
+
+fun:Evaluable
+  rdfs:label "Evaluable Class"@en ;
+  rdfs:comment """Things that can participate in boolean evaluation (can be used as boolean arguments).
+
+  This is a mixin class that can be combined with domain-specific classes like IntentElement. Instances
+  of Evaluable classes can be used wherever a boolean value is expected - either directly or through
+  implicit evaluation.
+
+  Examples of Evaluable entities:
+  - PropertyExpectation: Evaluates to true when property constraint is satisfied
+  - DeliveryExpectation: Evaluates to true when delivery requirement is met
+  - Condition: Evaluates according to its logical operator
+
+  Evaluable does NOT guarantee that evaluation logic exists - it only marks semantic capability.
+  Use fun:Actionable for entities that MUST have evaluation logic."""@en ;
+  rdf:type rdfs:Class
+.
+
+fun:Actionable
+  rdfs:label "Actionable Class"@en ;
+  rdfs:comment """Evaluable entities that must have an outgoing BooleanFunction to be actionable.
+
+  Instances of Actionable subclasses MUST have at least one property that is a fun:BooleanFunction.
+  This ensures that the entity can be operationalized - there is a defined computation that drives action.
+
+  Examples:
+  - Intent: Must have boolean function to determine when intent is satisfied
+  - Condition: Must have logical operator (log:allOf, log:anyOf, etc.)
+  - PropertyExpectation: Must have comparison function (quan:atLeast, quan:atMost, etc.)
+
+  SHACL validation enforces this requirement via ActionableBooleanEvaluableConstraint."""@en ;
+  rdf:type rdfs:Class ;
+  rdfs:subClassOf fun:Evaluable
+.
+
+# ==============================================================================
+# SECTION 2: Intent Common Model Extensions
+# ==============================================================================
+#
+# Extends core TIO classes with Evaluable/Actionable semantics:
+# - Intent and PropertyExpectation are Actionable (MUST have functions)
+# - Other Expectations are Evaluable (CAN be used in boolean contexts)
+#
+# ==============================================================================
+
+icm:DeliveryExpectation
+  rdfs:subClassOf fun:Evaluable .
+
+icm:Expectation
+  rdfs:subClassOf fun:Evaluable .
+
+icm:Intent
+  rdfs:subClassOf fun:Actionable .
+
+icm:PropertyExpectation
+  rdfs:subClassOf fun:Actionable .
+
+icm:ReportingExpectation
+  rdfs:subClassOf fun:Evaluable .
+
+
+# ==============================================================================
+# SECTION 3: Logical Operators Extensions
+# ==============================================================================
+#
+# Marks all logical operators as BooleanFunctions and Condition as Actionable.
+# Condition instances MUST have a logical operator to be valid.
+#
+# ==============================================================================
+
+log:Condition
+  rdfs:subClassOf fun:Actionable .
+
+log:allOf
+  rdf:type fun:BooleanFunction .
+
+log:anyOf
+  rdf:type fun:BooleanFunction .
+
+log:match
+  rdf:type fun:BooleanFunction .
+
+log:matchAll
+  rdf:type fun:BooleanFunction .
+
+log:matchAny
+  rdf:type fun:BooleanFunction .
+
+log:matchNone
+  rdf:type fun:BooleanFunction .
+
+log:matchOne
+  rdf:type fun:BooleanFunction .
+
+log:matchStatement
+  rdf:type fun:BooleanFunction .
+
+# Note: log:not is not defined in TIO v3.6.0 LogicalOperators ontology
+# Use log:noneOf with a single argument for simple negation
+
+log:noneOf
+  rdf:type fun:BooleanFunction .
+
+log:oneOf
+  rdf:type fun:BooleanFunction .
+
+# ==============================================================================
+# SECTION 4: Quantity Ontology Extensions
+# ==============================================================================
+#
+# Marks all quantity comparison functions as BooleanFunctions.
+# These enable PropertyExpectation operationalization.
+#
+# ==============================================================================
+
+quan:atLeast
+  rdf:type fun:BooleanFunction .
+
+quan:atMost
+  rdf:type fun:BooleanFunction .
+
+quan:exactly
+  rdf:type fun:BooleanFunction .
+
+quan:greater
+  rdf:type fun:BooleanFunction .
+
+quan:inRange
+  rdf:type fun:BooleanFunction .
+
+quan:smaller
+  rdf:type fun:BooleanFunction .
+
+# ==============================================================================
+# SECTION 5: Set Operators Extensions
+# ==============================================================================
+#
+# Marks all set operations as BooleanFunctions.
+# These enable set-based intent specifications.
+#
+# ==============================================================================
+
+set:elementOf
+  rdf:type fun:BooleanFunction .
+
+set:empty
+  rdf:type fun:BooleanFunction .
+
+set:forAll
+  rdf:type fun:BooleanFunction .
+
+set:includedIn
+  rdf:type fun:BooleanFunction .
+
+set:intersectsWith
+  rdf:type fun:BooleanFunction .
+
+set:isMember
+  rdf:type fun:BooleanFunction .
+
+# ==============================================================================
+# SECTION 6: Intent Validity Ontology Extensions
+# ==============================================================================
+#
+# Marks validity checking function as BooleanFunction.
+# This enables composing validity conditions using logical operators.
+#
+# ==============================================================================
+
+@prefix iv: <http://tio.models.tmforum.org/tio/v3.6.0/IntentValidityOntology/> .
+
+iv:validityOf
+  rdf:type fun:BooleanFunction .
+
+# ==============================================================================
+# SECTION 7: Vocabulary Extension
+# ==============================================================================
+#
+# Adds extension terms to fun:Vocabulary so they are recognized by vocabulary
+# validation constraints.
+#
+# ==============================================================================
+
+fun:Vocabulary
+  rdfs:member fun:BooleanFunction ,
+              fun:Evaluable ,
+              fun:Actionable .
+
+# ==============================================================================
+# End of EvaluableActionableExtensions.ttl
+# ==============================================================================

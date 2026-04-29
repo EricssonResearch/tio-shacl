@@ -1,0 +1,31 @@
+# Test: Invalid usage of State query functions
+# Concepts covered: handlingStateOf, updateStateOf
+# Constraints tested: Arity violations, type violations
+# This test validates that violations are caught for invalid state query function usage.
+
+@prefix ex: <http://example.org/> .
+@prefix fun: <http://tio.models.tmforum.org/tio/v3.6.0/FunctionOntology/> .
+@prefix imo: <http://tio.models.tmforum.org/tio/v3.6.0/IntentManagementOntology/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# === handlingStateOf violations ===
+ex:invalid_handlingstateof_zero_args
+  imo:handlingStateOf ( ) .
+
+ex:invalid_handlingstateof_too_many_args
+  imo:handlingStateOf ( ex:arg1 ex:arg2 ) .
+
+ex:invalid_handlingstateof_wrong_type
+  imo:handlingStateOf ( ex:not_an_intent ) .
+
+# === updateStateOf violations ===
+ex:invalid_updatestateof_zero_args
+  imo:updateStateOf ( ) .
+
+ex:invalid_updatestateof_too_many_args
+  imo:updateStateOf ( ex:arg1 ex:arg2 ) .
+
+ex:invalid_updatestateof_wrong_type
+  imo:updateStateOf ( ex:not_an_intent ) .

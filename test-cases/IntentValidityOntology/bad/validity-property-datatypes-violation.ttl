@@ -1,0 +1,27 @@
+# Test: Invalid iv:isValid datatype usage
+# This test validates that iv:isValid must be xsd:boolean
+# Should FAIL with: "iv:isValid must be of datatype xsd:boolean"
+
+@prefix ex:  <http://example.org/> .
+@prefix iv:  <http://tio.models.tmforum.org/tio/v3.6.0/IntentValidityOntology/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+################################################################################
+# VIOLATION: iv:isValid with wrong datatype
+#
+# The iv:isValid property MUST be xsd:boolean
+# Common mistakes: using strings, integers, or untyped literals
+################################################################################
+
+# WRONG - using string "yes" instead of boolean
+ex:valid_string
+  iv:isValid "yes" .
+
+# WRONG - using integer 1 instead of boolean
+ex:valid_integer
+  iv:isValid 1 .
+
+# WRONG - using untyped string that looks like a boolean
+ex:valid_untyped
+  iv:isValid "true" .

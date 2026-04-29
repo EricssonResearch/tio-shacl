@@ -1,0 +1,32 @@
+# Test: Valid usage of observation properties
+# Concepts covered: metric, observed, observedMetric, obtainedAt
+# This test validates that observation properties can be used correctly.
+
+@prefix ex: <http://example.org/> .
+@prefix met: <http://tio.models.tmforum.org/tio/v3.6.0/MetricsAndObservations/> .
+@prefix quan: <http://tio.models.tmforum.org/tio/v3.6.0/QuantityOntology/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+ex:test_metric
+  a rdfs:Resource ;
+  met:metric ex:metric1 .
+ex:test_observed
+  a rdfs:Resource ;
+  met:observed ex:observation1 .
+ex:test_observedmetric
+  a rdfs:Resource ;
+  met:observedMetric ex:metric1 .
+ex:test_obtainedat
+  a rdfs:Resource ;
+  met:obtainedAt "2024-01-01T00:00:00"^^xsd:dateTime .
+
+# Supporting instances
+ex:metric1 a met:Metric ;
+    rdfs:label "Test Metric" ;
+    rdfs:range quan:Quantity .
+
+# Observation requires met:observedMetric
+ex:observation1 a met:Observation ;
+    met:observedMetric ex:metric1 .

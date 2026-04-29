@@ -1,0 +1,41 @@
+# Test: Valid usage of Intent Probing properties
+# Concepts covered: expectedObservation, expectedResult
+# This test validates that probing properties can be used to express predictions.
+
+@prefix ex: <http://example.org/> .
+@prefix pro: <http://tio.models.tmforum.org/tio/v3.6.0/IntentProbing/> .
+@prefix met: <http://tio.models.tmforum.org/tio/v3.6.0/MetricsAndObservations/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# === Metric definitions ===
+ex:latencyMetric a met:Metric ;
+  rdfs:label "Latency Metric" .
+
+ex:throughputMetric a met:Metric ;
+  rdfs:label "Throughput Metric" .
+
+# === met:Observation instances for probing ===
+# Note: pro:expectedObservation requires met:Observation (not icm:Observation)
+ex:expected_latency_obs a met:Observation ;
+  met:observedMetric ex:latencyMetric .
+
+ex:expected_throughput_obs a met:Observation ;
+  met:observedMetric ex:throughputMetric .
+
+# === Probing with expectedObservation ===
+ex:probing_intent
+  a rdfs:Resource ;
+  pro:expectedObservation ex:expected_latency_obs .
+
+# === Probing with expectedResult (boolean prediction) ===
+ex:probing_result
+  a rdfs:Resource ;
+  pro:expectedResult "true"^^xsd:boolean .
+
+# === Combined probing prediction ===
+ex:combined_probing
+  a rdfs:Resource ;
+  pro:expectedObservation ex:expected_throughput_obs ;
+  pro:expectedResult "false"^^xsd:boolean .

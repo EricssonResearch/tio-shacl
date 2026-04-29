@@ -1,0 +1,23 @@
+# Test: Invalid usage of aggregation functions
+# Concepts covered: greatest, smallest, greatestInSet, smallestInSet
+# Constraints tested: Arity violations
+# This test validates that violations are caught for invalid aggregation function usage.
+
+@prefix ex: <http://example.org/> .
+@prefix fun: <http://tio.models.tmforum.org/tio/v3.6.0/FunctionOntology/> .
+@prefix quan: <http://tio.models.tmforum.org/tio/v3.6.0/QuantityOntology/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# === greatest violations (zero args) ===
+ex:invalid_greatest quan:greatest ( ) .
+
+# === smallest violations (zero args) ===
+ex:invalid_smallest quan:smallest ( ) .
+
+# === greatestInSet violations (zero args) ===
+ex:invalid_greatestinset quan:greatestInSet ( ) .
+
+# === smallestInSet violations (zero args) ===
+ex:invalid_smallestinset quan:smallestInSet ( ) .

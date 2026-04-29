@@ -1,0 +1,44 @@
+# Test: Invalid ContentTemplate property values
+# This test validates that ContentTemplate properties reference correct types
+# Should FAIL with constraint violation messages
+
+@prefix ex:   <http://example.org/> .
+@prefix insp: <http://tio.models.tmforum.org/tio/v3.6.0/IntentSpecification/> .
+@prefix log:  <http://tio.models.tmforum.org/tio/v3.6.0/LogicalOperators/> .
+@prefix icm:  <http://tio.models.tmforum.org/tio/v3.6.0/IntentCommonModel/> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+################################################################################
+# VIOLATION: insp:applicableIf with literal value
+#
+# insp:applicableIf MUST reference a log:Condition instance
+################################################################################
+
+# WRONG - using literal string instead of Condition instance
+ex:template_wrong_condition
+  a insp:ContentTemplate ;
+  insp:applicableIf "when active" .
+
+################################################################################
+# VIOLATION: insp:applicableIf with wrong class
+################################################################################
+
+# WRONG - referencing a Target instead of Condition
+ex:template_condition_wrong_class
+  a insp:ContentTemplate ;
+  insp:applicableIf ex:notCondition .
+
+ex:notCondition
+  a icm:Target .
+
+################################################################################
+# VIOLATION: insp:content with literal value
+#
+# insp:content MUST be a resource (BlankNodeOrIRI)
+################################################################################
+
+# WRONG - using literal string instead of resource
+ex:template_literal_content
+  a insp:ContentTemplate ;
+  insp:content "some content" .

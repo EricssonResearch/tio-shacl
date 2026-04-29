@@ -1,0 +1,32 @@
+# Test: Invalid usage of Time query functions
+# Concepts covered: timeOfLastEventFor, timeOfLastEventsFor, timeOfLastReportFor
+# Constraints tested: Arity violations, type violations
+# This test validates that violations are caught for invalid time query function usage.
+
+@prefix ex: <http://example.org/> .
+@prefix fun: <http://tio.models.tmforum.org/tio/v3.6.0/FunctionOntology/> .
+@prefix imo: <http://tio.models.tmforum.org/tio/v3.6.0/IntentManagementOntology/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# === timeOfLastEventFor violations ===
+ex:invalid_timeoflasteventfor_zero_args
+  imo:timeOfLastEventFor ( ) .
+
+ex:invalid_timeoflasteventfor_wrong_type
+  imo:timeOfLastEventFor ( ex:not_an_intent ) .
+
+# === timeOfLastEventsFor violations ===
+ex:invalid_timeoflasteventsfor_zero_args
+  imo:timeOfLastEventsFor ( ) .
+
+ex:invalid_timeoflasteventsfor_wrong_type
+  imo:timeOfLastEventsFor ( ex:not_an_intent ) .
+
+# === timeOfLastReportFor violations ===
+ex:invalid_timeoflastreportfor_zero_args
+  imo:timeOfLastReportFor ( ) .
+
+ex:invalid_timeoflastreportfor_wrong_type
+  imo:timeOfLastReportFor ( ex:not_an_intent ) .

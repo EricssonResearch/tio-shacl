@@ -1,0 +1,40 @@
+# TMF SHACL Reusable Constraint Library
+#
+# This file is part of the modular constraint library.
+# Based on SHACL Advanced Features constraint patterns
+
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix fun: <http://tio.models.tmforum.org/tio/v3.6.0/FunctionOntology/> .
+@prefix quan: <http://tio.models.tmforum.org/tio/v3.6.0/QuantityOntology/> .
+@prefix tio-constraints: <http://tio.models.tmforum.org/tio/v3.6.0/shapes/lib/constraints/> .
+@prefix tio-lib: <http://tio.models.tmforum.org/tio/v3.6.0/shapes/lib/> .
+
+# =============================================================================
+# QUANTITY VALIDATION CONSTRAINTS
+# =============================================================================
+
+# Note: Non-negative value validation uses core SHACL sh:minInclusive 0
+# in QuantityOntology.ttl shapes instead of SPARQL.
+
+# Finds Quantity instances missing required value (except function results)
+tio-constraints:QuantityMissingValueConstraint
+    a sh:SPARQLConstraint ;
+    rdfs:label "Quantity Missing Value Constraint" ;
+    rdfs:comment "Validates that Quantity instances have a value, except function results" ;
+    sh:message "[quan/value_required] Quantity {$this} must have exactly one rdf:value. Add: rdf:value \"100\"^^xsd:decimal or use quan:quantity literal: \"100kbps\"^^quan:quantity. For dynamic values from metrics, the quantity is created implicitly by met:lastValue and does not need rdf:value." ;
+    sh:select """
+        PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+        PREFIX quan: <http://tio.models.tmforum.org/tio/v3.6.0/QuantityOntology/>
+        PREFIX fun: <http://tio.models.tmforum.org/tio/v3.6.0/FunctionOntology/>
+
+        SELECT $this
+        WHERE {
+            $this a quan:Quantity .
+            FILTER NOT EXISTS { $this ?prop ?val . ?prop a fun:Function . }
+            FILTER NOT EXISTS { $this rdf:value ?value }
+        }
+    """ .
+

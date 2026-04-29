@@ -1,0 +1,1147 @@
+--- a/FunctionOntology.ttl
++++ b/FunctionOntology.ttl
+@@ -41,7 +41,7 @@
+   rdfs:label "Argument Names Property"@en ;
+   rdfs:comment "The property fun:argumentNames is used in function definitions. It allows connecting each argument of the function to a property of the function. The range of fun:argumentNames is a list which contains one entry per function argument in the order of function arguments. Each entry refers to a property and is interpreted as a property of the function. The properties can be provided directly in the function definition and outside the arguments as well. The values provided for a property in the arguments has preference and would override the values assigned directly to the function. This means the equivalent properties used directly in the function definition are defaults."@en ;
+   rdf:type rdf:Property ;
+-  rdfs:domain fun:function ;
++  rdfs:domain fun:Function ;
+   rdfs:range rdfs:List
+ .
+ 
+@@ -49,7 +49,7 @@
+   rdfs:label "Argument Types Property"@en ;
+   rdfs:comment "The property fun:argumentTypes defines the type of each argument of a function. It uses a collection of types expressing the type of each respective argument of the function. For example, if the 1st member of the collection of fun:argumentTypes is rdf:Container and the second member is quan:Quantity, this means that the first argument of the function needs to be a container and the second argument needs to be a quantity. If the function can have more arguments than matched by elements in fun:argumentTypes, the last defined type determines the type of all additional arguments."@en ;
+   rdf:type rdf:Property ;
+-  rdfs:domain fun:function ;
++  rdfs:domain fun:Function ;
+   rdfs:range rdfs:List
+ .
+ 
+@@ -76,10 +76,10 @@
+   rdfs:subClassOf imo:Error
+ .
+ 
+-fun:Function
+-  rdfs:label "Function Property"@en ;
+-  rdfs:comment "An instance of fun:Function represents a function. It is a sub-property of rdf:Property. Therefore, instances of fun:function can be used as properties in statements. The range of all instances of fun:Function is a list. It represents the list of function arguments."@en ;
+-  rdf:subPropertyOf: rdf:Property ;
++fun:Function a rdfs:Class ;
++  rdfs:label "Function Class"@en ;
++  rdfs:comment "An instance of fun:Function represents a function. It is a subclass of rdf:Property. Therefore, instances of fun:Function can be used as properties in statements. The range of all instances of fun:Function is a list. It represents the list of function arguments."@en ;
++  rdfs:subClassOf rdf:Property ;
+   rdfs:range rdf:List
+ .
+ 
+--- a/IntentCommonModel.ttl
++++ b/IntentCommonModel.ttl
+@@ -10,6 +10,7 @@
+ @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+ @prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+ 
++
+ <http://tio.models.tmforum.org/tio/v3.6.0/IntentCommonModel/>
+   rdf:type imo:IntentCommonModel ;
+   rdfs:label "Intent Common Model"@en ;
+@@ -147,7 +148,7 @@
+   rdfs:label "Intent Class"@en ;
+   rdfs:comment "The class icm:Intent expresses that its instance is an intent object. As such it defines requirements."@en ;
+   rdf:type rdfs:Class ;
+-  rdfs:subClassOf icm:IntentElement 
++  rdfs:subClassOf icm:IntentElement
+ .
+ 
+ icm:IntentReport
+@@ -159,14 +160,14 @@
+ icm:IntentElement
+   rdfs:label "Intent Element Class"@en ;
+   rdfs:comment "Objects of class icm:intentElement are distinct components of the intent expression. Intent elements participate in defining requirements and intent reports can provide details about them."@en ;
+-  rdfs:type rdfs:Class
++  rdf:type rdfs:Class
+ .
+ 
+ icm:intentElements
+   rdfs:label "Intent Elements Function"@en ;
+   rdfs:comment "The function icm:intentElements represents a container of all individual intent element resources used to express requirements for the intent elements given as arguments. This includes the given intent element object itself and its parents. It represents all intent elements in the subtree that contains the function argument."@en ;
+   rdf:type fun:Function ;
+-  fun:resultTtype rdfs:Container ;
++  fun:resultType rdfs:Container ;
+   fun:argumentTypes ( icm:IntentElement ) 
+ .
+ 
+@@ -207,6 +208,14 @@
+   rdfs:subClassOf  icm:ExpectationReport
+ .
+ 
++
++# @jean: Added to fix vocabulary validation - referenced by ig:GuaranteeReport as superclass
++icm:Report
++  rdfs:label "Report Class"@en ;
++  rdfs:comment "The class icm:Report represents reports in the intent common model. This is a base class for all intent-related reports."@en ;
++  rdf:type rdfs:Class
++.
++
+ icm:Reason
+   rdfs:label "Reason Class"@en ;
+   rdfs:comment "Instances of class icm:Reason specify explanations for intent handling results."@en ;
+@@ -330,11 +339,12 @@
+   rdfs:label "Values of Target Property Function"@en ;
+   rdfs:comment "The function icm:valuesOfTargetProperty represents a container of all values that are assigned to members of the target container with the properties specified as function argument. If multiple properties are specified as arguments the result is a superset of all values from all specified properties."@en ;
+   rdf:type fun:Function ;
+-  fun:resultType xsd:boolean ;
+-  fun:arityMin 1 ;
++  fun:resultType rdfs:Container ; # Jean - Changed from xsd:boolean to rdfs:Container
++  fun:arityMin "1"^^xsd:nonNegativeInteger ;
+   fun:argumentTypes ( rdf:Property ) 
+ .
+ 
++
+ icm:Vocabulary
+   rdfs:label "Intent Common Model Vocabulary"@en ;
+   rdfs:comment "The object icm:Vocabulary is a container of all model elements."@en ;
+@@ -364,6 +374,7 @@
+ 			  icm:PropertyExpectation ,
+ 			  icm:PropertyExpectationReport ,
+ 			  icm:Reason ,
++			  icm:Report ,
+ 			  icm:reason ,
+ 			  icm:reportDestination ,
+ 			  icm:reportDestinations ,
+--- a/IntentGuaranteeOntology.ttl
++++ b/IntentGuaranteeOntology.ttl
+@@ -126,7 +126,7 @@
+   rdfs:label "Guarantee Rejected Event Class"@en ;
+   rdfs:comment "The class ig:GuaranteeRejected specifies an event. The meaning of the event is that the intent handler has concluded that it is not capable of issuing a requested guarantee. The guarantee target state is ig:GuaranteeStateRejected."@en ;
+   rdf:type rdfs:Class ;
+-  rdfs:subClassOf icm:Event
++  rdfs:subClassOf imo:Event
+ .
+ 
+ ig:GuaranteeReportingExpectation
+@@ -163,6 +163,14 @@
+   rdf:type rdfs:Class
+ .
+ 
++# @jean:Added to fix vocabulary validation - referenced by ig:state and ig:until properties
++ig:GuaranteeReport
++  rdfs:label "Guarantee Report Class"@en ;
++  rdfs:comment "The class ig:GuaranteeReport represents a report about the guarantee state. It is used to communicate guarantee status to the intent owner."@en ;
++  rdf:type rdfs:Class ;
++  rdfs:subClassOf icm:Report
++.
++
+ ig:state
+   rdfs:label "State Property"@en ;
+   rdfs:comment "The property ig:state specifies the state of a guarantee."@en ;
+@@ -196,12 +204,16 @@
+               ig:GuaranteePeriodTooLong ,
+               ig:GuaranteePeriodUpdateIntervalTooLong ,
+               ig:GuaranteeRejected ,
++              ig:GuaranteeReport ,
+               ig:GuaranteeReportingExpectation ,
+               ig:GuaranteeStateCompliant ,
+               ig:GuaranteeStateDegraded ,
+               ig:hasGuarantee ,
+               ig:State ,
+               ig:state ,
+-              ig:until 
++              ig:stateReportedAt ,
++              ig:until
+ .
+ 
++
++
+--- a/IntentManagementOntology.ttl
++++ b/IntentManagementOntology.ttl
+@@ -1,6 +1,7 @@
+ # Intent Management Ontology version 3.6.0
+ 
+ @prefix imo:  <http://tio.models.tmforum.org/tio/v3.6.0/IntentManagementOntology/> .
++@prefix icm:  <http://tio.models.tmforum.org/tio/v3.6.0/IntentCommonModel/> .
+ @prefix dct:  <http://purl.org/dc/terms/> .
+ @prefix fun:  <http://tio.models.tmforum.org/tio/v3.6.0/FunctionOntology/> .
+ @prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@@ -17,9 +18,10 @@
+   dct:description "This is the Intent Management Ontology model within the TM Forum Intent Ontology (TIO)"@en ;
+   dct:subject "intent managment elements"@en,
+               "intent managment state machines"@en ;
+-  dct:identifier <http://tio.models.tmforum.org/tio/v3.6.0/IntentManagmentOntology/> ;
++  # @jean: Fixed typo ...IntentManagmentOntology... 
++  dct:identifier <http://tio.models.tmforum.org/tio/v3.6.0/IntentManagementOntology/> ;
+   # dct:isPartOf <http://tio.models.tmforum.org/tio/v3.6.0/TMForumIntentOntology> ;
+-  dct:replaces <http://tio.models.tmforum.org/tio/v3.5.0/IntentManagmentOntology/> ;
++  dct:replaces <http://tio.models.tmforum.org/tio/v3.5.0/IntentManagementOntology/> ;
+   dct:contributor <mailto:joerg.niemoeller@ericsson.com> ;
+   dct:created "2024-10-09"^^xsd:date ;
+   dct:creator <mailto:joerg.niemoeller@ericsson.com> ;
+@@ -72,6 +74,21 @@
+   rdfs:subClassOf imo:IntentHandlingEvent
+ .
+ 
++
++# @jean: Added to fix vocabulary validation - referenced by fun:Warning as superclass
++imo:Warning
++  rdfs:label "Warning Class"@en ;
++  rdfs:comment "The class imo:Warning represents warnings that occur during intent handling. This is the base class for all intent management warnings."@en ;
++  rdf:type rdfs:Class
++.
++
++
++# @jean:Added to fix vocabulary validation - referenced by fun:Error as superclass
++imo:Error
++  rdfs:label "Error Class"@en ;
++  rdfs:comment "The class imo:Error represents errors that occur during intent handling. This is the base class for all intent management errors."@en ;
++  rdf:type rdfs:Class
++.
+ imo:Event
+   rdfs:label "Event Class"@en ;
+   rdfs:comment "The class imo:Event represents an event of intent management within an intent management function. An event is also a subclass of t:Instance from the time ontology. This means it represents the point in time the event instance was issued by the intent manager."@en ;
+@@ -91,7 +108,7 @@
+   rdfs:comment "The property imo:eventFor is used in the class definition of subclasses of imo:Event. It is therefore part of the defintion of new event types. It specifies the Intent instance the event of this class is supposed to be issued for. This intent instance will be reflected by the imo:eventIssuedFor property used with event instances."@en ;
+   rdf:type rdf:Property ;
+   rdfs:domain imo:Event ;
+-  rdfs:range rdf:Resource
++  rdfs:range rdfs:Resource
+ .
+ 
+ imo:eventIssuedBy
+@@ -107,7 +124,7 @@
+   rdfs:comment "The property imo:eventIssuedFor refers to the resource the event is generated for. This can for example be the intent instance the event was issued from the handling procedure for this intent and because of a situation reached concerning this intent."@en ;
+   rdf:type rdf:Property ;
+   rdfs:domain imo:Event ;
+-  rdfs:range rdf:Resource
++  rdfs:range rdfs:Resource
+ .
+ 
+ imo:Handler
+@@ -143,15 +160,15 @@
+   rdfs:comment "The function imo:handlingStateOf represents the current state in the intent handling state machine for the handling of the intent in the function argument."@en ;
+   rdf:type fun:Function ;
+   fun:resultType imo:IntentHandlingState ;
+-  fun:arityMin 1 ;
+-  fun:arityMax 1 ;
++  fun:arityMin "1"^^xsd:nonNegativeInteger ;
++  fun:arityMax "1"^^xsd:nonNegativeInteger ;
+   fun:argumentTypes ( icm:Intent )
+ .
+ 
+ imo:IntentAccepted
+   rdfs:label "Intent Accepted Event"@en ;
+   rdfs:comment "The class imo:IntentAccepted represents a state transition event in the intent handling state machine. It indicates that the intent is accepted by the intent handler."@en ;
+-  rdf:type rdfs:Class
++  rdf:type rdfs:Class ;
+   rdfs:subClassOf imo:IntentHandlingEvent
+ .
+ 
+@@ -165,7 +182,7 @@
+ imo:IntentExtensionModel
+   rdfs:label "Intent Extension Model Class"@en ;
+   rdfs:comment "The class imo:IntentExtensionModel is a subclass of imo:TIOmodel. Its instances are an intent extension model within the TM Forum Intent Ontology."@en ;
+-  rdf:type rdfs:Class ;
++  rdf:type rdfs:Class ; 
+   rdfs:subClassOf imo:TIOmodel
+ .
+ 
+@@ -205,7 +222,7 @@
+ imo:IntentRemoval
+   rdfs:label "Intent Removal Event"@en ;
+   rdfs:comment "The class imo:IntentRemoval represents a state transition event in the intent handling state machine. It indicates that the intent owner has ordered a removal of the intent."@en ;
+-  rdf:type rdfs:Class
++  rdf:type rdfs:Class ;
+   rdfs:subClassOf imo:IntentHandlingEvent
+ .
+ 
+@@ -288,8 +305,8 @@
+   rdfs:comment "The function imo:timeOfLastEventFor represents the point in time when the last event of the specified event type was generated for an intent. The first argument specifies the event type and the second argument specifies the event instance. If no event of this type was issued yet for the intent, the reception of the intent is used as last event time. This means there is always a time provided. "@en ;
+   rdf:type fun:Function ;
+   fun:resultType t:Instant ;
+-  fun:arityMin 2 ;
+-  fun:arityMax 2 ;
++  fun:arityMin "2"^^xsd:nonNegativeInteger ;
++  fun:arityMax "2"^^xsd:nonNegativeInteger ;
+   fun:argumentTypes ( imo:Event icm:Intent )
+ .
+ 
+@@ -298,18 +315,19 @@
+   rdfs:comment "The function imo:timeOfLastEventsFor represents the point in time when the last event of the specified event types was generated for an intent. The first argument specifies a container. Its members represent the event types to be considered. The second argument specifies the intent instance for which the events were issued. If no event of these types was issued yet for the intent, the reception of the intent is used as last event time. This means there is always a time provided."@en ;
+   rdf:type fun:Function ;
+   fun:resultType t:Instant ;
+-  fun:arityMin 2 ;
+-  fun:arityMax 2
+-  fun:argumentTypes ( imo:Container icm:Intent )
++  fun:arityMin "2"^^xsd:nonNegativeInteger ;
++  fun:arityMax "2"^^xsd:nonNegativeInteger ;
++  # @jean: imo:Container was expected but not defined in the ontology -- changed to rdfs:Container
++  fun:argumentTypes ( rdfs:Container icm:Intent )
+ .
+ 
+ imo:timeOfLastReportFor
+   rdfs:label "Time Of Last Report For Function"@en ;
+-  rdfs:comment "The function imo:timeOfLastReportFor represents the point in time when the last intent report was generated for the intent specified in the function argument. If no report was issued yet, the reception of the intent is used as last report time. This means there is always a time provided. 
+-  rdf:type fun:Function"@en ;
++  rdfs:comment "The function imo:timeOfLastReportFor represents the point in time when the last intent report was generated for the intent specified in the function argument. If no report was issued yet, the reception of the intent is used as last report time. This means there is always a time provided."@en ;
++  rdf:type fun:Function ;
+   fun:resultType t:Instant ;
+-  fun:arityMin 1 ;
+-  fun:arityMax 1 ;
++  fun:arityMin "1"^^xsd:nonNegativeInteger ;
++  fun:arityMax "1"^^xsd:nonNegativeInteger ;
+   fun:argumentTypes ( icm:Intent )
+ .
+ 
+@@ -354,8 +372,8 @@
+   rdfs:comment "The function imo:updateStateOf represents the current state in the intent handling state machine for the handling of an update of the intent in the function argument"@en ;
+   rdf:type fun:Function ;
+   fun:resultType imo:IntentHandlingState ;
+-  fun:arityMin 1 ;
+-  fun:arityMax 1 ;
++  fun:arityMin "1"^^xsd:nonNegativeInteger ;
++  fun:arityMax "1"^^xsd:nonNegativeInteger ;
+   fun:argumentTypes ( icm:Intent ) 
+ .
+ 
+@@ -369,6 +387,7 @@
+               imo:Complies ,
+               imo:Degrades ,
+               imo:Event ,
++              imo:Error ,
+               imo:event ,
+               imo:eventFor ,
+               imo:eventIssuedBy ,
+@@ -407,6 +426,6 @@
+               imo:UpdateReceived ,
+               imo:UpdateRejected ,
+               imo:updateState ,
+-              imo:updateStateOf
+-.
+-
++              imo:updateStateOf ,
++              imo:Warning
++.
+\ No newline at end of file
+--- a/IntentProbing.ttl
++++ b/IntentProbing.ttl
+@@ -2,6 +2,7 @@
+ 
+ @prefix pro:  <http://tio.models.tmforum.org/tio/v3.6.0/IntentProbing/> .
+ @prefix icm:  <http://tio.models.tmforum.org/tio/v3.6.0/IntentCommonModel/> .
++@prefix met:  <http://tio.models.tmforum.org/tio/v3.6.0/MetricsAndObservations/> .
+ @prefix imo:  <http://tio.models.tmforum.org/tio/v3.6.0/IntentManagementOntology/> .
+ @prefix dct:  <http://purl.org/dc/terms/> .
+ @prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@@ -39,14 +40,14 @@
+   rdfs:label "Expected Observation Property"@en ;
+   rdfs:comment "The property pro:expectedObservation states predicted values for metrics rather than actually observed ones."@en ;
+   rdf:type rdf:Property ;
+-  rdfs:range icm:Observation
++  # @jean: Fixed from icm:Observation to met:Observation 
++  rdfs:range met:Observation
+ .
+ 
+ pro:expectedResult
+   rdfs:label "Expexted Result Property"@en ;
+   rdfs:comment "The property pro:expectedResult is used to state the predicted evaluation result for a probed intent."@en ;
+   rdf:type rdf:Property ;
+-  rdfs:domain xsd:Boolean
+ .
+ 
+ pro:Vocabulary
+--- a/IntentSpecification.ttl
++++ b/IntentSpecification.ttl
+@@ -82,7 +82,7 @@
+   rdfs:comment "<xsd:boolean> = insp:chosenAll ( <insp:ContentTemplate> ... )"@en ;
+   rdf:type fun:Function ;
+   fun:resultType xsd:boolean ;
+-  fun:arityMin 1 ;
++  fun:arityMin "1"^^xsd:nonNegativeInteger ;
+   fun:argumentTypes ( insp:ContentTemplate ) 
+ .
+ 
+@@ -92,7 +92,7 @@
+   rdfs:comment "<xsd:boolean> = insp:chosenAllFor ( <intent element> <insp:ContentTemplate> ... )"@en ;
+   rdf:type fun:Function ;
+   fun:resultType xsd:boolean ;
+-  fun:arityMin 2 ;
++  fun:arityMin "2"^^xsd:nonNegativeInteger ;
+   fun:argumentTypes ( rdfs:Resource insp:ContentTemplate ) ;
+   rdfs:Comment "The first argument is of type rdfs:Resource. It is referring to an element of the intent. The second and remaining arguments have type insp:ContentTemplate."@en
+ .
+@@ -103,7 +103,7 @@
+   rdfs:comment "<xsd:boolean> = insp:chosenAny ( <insp:ContentTemplate> ... )"@en ;
+   rdf:type fun:Function ;
+   fun:resultType xsd:boolean ;
+-  fun:arityMin 1 ;
++  fun:arityMin "1"^^xsd:nonNegativeInteger ;
+   fun:argumentTypes ( insp:ContentTemplate ) ;
+   rdfs:comment "All arguments have type insp:ContentTemplate."@en
+ .
+@@ -114,7 +114,7 @@
+   rdfs:comment "<xsd:boolean> = insp:chosenAnyFor ( <intent element> <insp:ContentTemplate> ... )"@en ;
+   rdf:type fun:Function ;
+   fun:resultType xsd:boolean ;
+-  fun:arityMin 2 ;
++  fun:arityMin "2"^^xsd:nonNegativeInteger ;
+   fun:argumentTypes ( rdfs:Resource insp:ContentTemplate ) ;
+   rdfs:comment "The first argument is of type rdfs:Resource. It is referring to an element of the intent. The second and remaining arguments have type insp:ContentTemplate."@en
+ .
+@@ -255,7 +255,7 @@
+   rdfs:comment "<rdfs:Container> = insp:selectValues ( <rdfs:Resource> <log:Condition> ... )"@en ;
+   rdf:type fun:Function ;
+   fun:resultType rdfs:Container ;
+-  fun:arityMin 2 ;
++  fun:arityMin "2"^^xsd:nonNegativeInteger ;
+   fun:argumentTypes ( rdfs:Resource log:Condition ) ;
+   rdfs:comment "The first argument is any rdfs:Resource. The second and further arguments are log:Condition."@en 
+ .
+@@ -279,7 +279,7 @@
+   rdfs:comment "<xsd:boolean> = insp:usedVocabularyFor ( <intent element> <rdfs:Container> ... )"@en ;
+   rdf:type fun:Function ;
+   fun:resultType xsd:boolean ;
+-  fun:arityMin 2 ;
++  fun:arityMin "2"^^xsd:nonNegativeInteger ;
+   fun:argumentTypes ( rdfs:Resource rdfs:Container ) ;
+   rdfs:comment "The first argument is of type rdfs:Resource. It is referring to an element of the intent. The second and remaining arguments have type rdfs:Container. They define the set of vocabulary the function is checking against."@en 
+ .
+@@ -290,7 +290,7 @@
+   rdfs:comment "<xsd:boolean> = insp:valueSelected ( <insp:ObjectTemplate> <rdfs:Container> ... )"@en ;
+   rdf:type fun:Function ;
+   fun:resultType xsd:boolean ;
+-  fun:arityMin 2 ;
++  fun:arityMin "2"^^xsd:nonNegativeInteger ;
+   fun:argumentTypes ( insp:ObjectTemplate insp:ContentTemplate ) ; 
+   rdfs:comment "The first argument is of type insp:ObjectTemplate. The second and remaining arguments have type insp:ContentTemplate."@en 
+ .
+@@ -301,7 +301,7 @@
+   rdfs:comment "<xsd:boolean> = insp:valueSelectedFor ( <intent element> <insp:ObjectTemplate> <rdfs:Container> ... )"@en ;
+   rdf:type fun:Function ;
+   fun:resultType xsd:boolean ;
+-  fun:arityMin 3 ; 
++  fun:arityMin "3"^^xsd:nonNegativeInteger ; 
+   fun:argumentTypes ( rdfs:Resource insp:ObjectTemplate insp:ContentTemplate ) ;
+   rdfs:comment "The first argument is of type rdfs:Resource. It is referring to an element of the intent. The second argument is of type insp:ObjectTemplate. The third and remaining arguments have type insp:ContentTemplate."@en 
+ .
+--- a/IntentValidityOntology.ttl
++++ b/IntentValidityOntology.ttl
+@@ -43,20 +43,23 @@
+   rdfs:label "Is Valid Property"@en ;
+   rdfs:comment "The property iv:isValid is used to state the validity status of its object. It is used in intent reports. This means it states the validity at the time of report generation. The range of iv:isValid contains a Boolean literal value. It is set to true, if the object is valid and false if not."@en ;
+   rdf:type rdf:Property ;
+-  rdfs:range xsd:Boolean
++  rdfs:range xsd:boolean
+ .
+ 
++# NOTE: No rdfs:range defined - validation is handled by SPARQL constraint in SHACL shape
++# This allows validation that the value must be icm:Intent or icm:Expectation (which can have validity),
++# excluding other IntentElement subclasses like icm:Target that cannot have validity
+ iv:sameValidityAs
+   rdfs:label "Same Validity As Property"@en ;
+   rdfs:comment "The property iv:sameValidityAs specifies that the validity of the subject shall be the same as the validity of the object."@en ;
+-  rdf:type rdf:Property 
++  rdf:type rdf:Property
+ .
+ 
+ iv:validIf
+   rdfs:label "Valid If Property"@en ;
+   rdfs:comment "The property iv:validIf assigns validity context to objects."@en ;
+   rdf:type rdf:Property ;
+-  rdf:subPropertyOf: icm:context ;
++  rdfs:subPropertyOf icm:context ;
+   rdfs:range iv:Validity
+ .
+ 
+@@ -93,8 +96,8 @@
+   rdfs:label "Validity Of Function"@en ;
+   rdfs:comment "The property iv:validityOf is a function that states the validity status of its arguments. If all arguments are valid, then the result of iv:validityOf is true, if any resource used as argument is not valid the result of iv:validityOf is false."@en ;
+   rdf:type fun:Function ;
+-  fun:resultType xsd:Boolean ;
+-  fun:argumentTypes ( rdf:Resource )
++  fun:resultType xsd:boolean ;
++  fun:argumentTypes ( rdfs:Resource )
+ .
+ 
+ iv:ValidityReport
+@@ -114,7 +117,7 @@
+ iv:validityStatus
+   rdfs:label "Validity Status Class"@en ;
+   rdfs:comment "If an intent report is generated for a validity reporting expectation it can contain iv:validityStatus properties associated with dedicated reports for intent elements. It provides the validity status at the time of report generation and regarding the intent element referred to with the property icm:about. The property iv:validityStatus assigns a boolean value. The value true means the intent element is valid and false means invalid."@en ;
+-  rdf:type rdf:Class ;
++  rdf:type rdfs:Class ;
+   rdfs:range xsd:boolean
+ .
+ 
+--- a/LogicalOperators.ttl
++++ b/LogicalOperators.ttl
+@@ -1,6 +1,7 @@
+ # Conditions and Logic Operators Ontology version 3.6.0
+ 
+ @prefix log:  <http://tio.models.tmforum.org/tio/v3.6.0/LogicalOperators/> .
++@prefix icm:  <http://tio.models.tmforum.org/tio/v3.6.0/IntentCommonModel/> .
+ @prefix quan: <http://tio.models.tmforum.org/tio/v3.6.0/QuantityOntology/> .
+ @prefix fun:  <http://tio.models.tmforum.org/tio/v3.6.0/FunctionOntology/> .
+ @prefix imo:  <http://tio.models.tmforum.org/tio/v3.6.0/IntentManagementOntology/> .
+@@ -43,6 +44,8 @@
+   rdfs:comment "The function log:allOf represents a logical conjunction also known as AND logical operator. It evaluates to boolean true if all arguments are individually true, otherwise the result is false. If the list of arguments is empty the result is also false."@en ;
+   rdf:type fun:Function ;
+   fun:resultType xsd:boolean ;
++  # Variadic function requires at least 1 argument for meaningful evaluation
++  fun:arityMin "1"^^xsd:nonNegativeInteger ;
+   fun:argumentTypes ( xsd:boolean )
+ .
+ 
+@@ -51,6 +54,8 @@
+   rdfs:comment "The function log:anyOf represents a logical disjunction also known as OR logical operator if there are only two arguments. It evaluates to boolean true if any (at least one) of the arguments are true, otherwise the result is false. If the list of arguments is empty the result is also false."@en ;
+   rdf:type fun:Function ;
+   fun:resultType xsd:boolean ;
++  # Variadic function requires at least 1 argument for meaningful evaluation
++  fun:arityMin "1"^^xsd:nonNegativeInteger ;
+   fun:argumentTypes ( xsd:boolean )
+ .
+ 
+@@ -66,8 +71,8 @@
+   rdfs:comment "The function log:match represents the boolean truth value of the statement triple in the function arguments. The first argument represents the subject, the second argument represents the predicate and the third argument represents the object of a statement. It is true, if and only if the statement represented by this triple is true in the current knowledge base. Closed world assumption applies. If no statement is given as arguments or if it is incomplete, the result is false."@en ;
+   rdf:type fun:Function ;
+   fun:resultType xsd:boolean ;
+-  fun:arityMin 3 ;
+-  fun:arityMax 3 ;
++  fun:arityMin "3"^^xsd:nonNegativeInteger ;
++  fun:arityMax "3"^^xsd:nonNegativeInteger ;
+   fun:argumentTypes ( rdfs:Resource rdf:Property rdfs:Resource )
+ .
+ 
+@@ -76,8 +81,8 @@
+   rdfs:comment "The function log:matchAll represents a boolean truth value from multiple statement triples. A constituent statement is formed by using a member of the container in the first function argument as subject. The constituent statement is completed with the predicate from the second argument and the resource from the third argument. Therefore, the function needs to evaluate as many statements as there are members in the subject container. The function is evaluated with a logical conjunction of constituent statements. The result is boolean true, if all the constituent statements is true. Closed world assumption applies. If no complete statement is given by the function arguments, the result is false. This is also the case if the subject container in the first argument is empty, thus no subject is specified."@en ;
+   rdf:type fun:Function ;
+   fun:resultType xsd:boolean ;
+-  fun:arityMin 3 ;
+-  fun:arityMax 3 ;
++  fun:arityMin "3"^^xsd:nonNegativeInteger ;
++  fun:arityMax "3"^^xsd:nonNegativeInteger ;
+   fun:argumentTypes ( rdfs:Container rdf:Property rdfs:Resource )
+ .
+ 
+@@ -86,8 +91,8 @@
+   rdfs:comment "The function log:matchAny represents a boolean truth value from multiple statement triples. A constituent statement is formed by using a member of the container in the first function argument as subject. The constituent statement is completed with the predicate from the second argument and the resource from the third argument. Therefore, the function needs to evaluate as many statements as there are members in the subject container. The function is evaluated with a logical disjunction of constituent statements. The result is boolean true, if any of the constituent statements is true. Closed world assumption applies. If no complete statement is given by the function arguments, the result is false. This is also the case if the subject container in the first argument is empty, thus no subject is specified."@en ;
+   rdf:type fun:Function ;
+   fun:resultType xsd:boolean ;
+-  fun:arityMin 3 ;
+-  fun:arityMax 3 ;
++  fun:arityMin "3"^^xsd:nonNegativeInteger ;
++  fun:arityMax "3"^^xsd:nonNegativeInteger ;
+   fun:argumentTypes ( rdfs:Container rdf:Property rdfs:Resource )
+ .
+ 
+@@ -96,8 +101,8 @@
+   rdfs:comment "The function log:matchNone represents a boolean truth value from multiple statement triples. A constituent statement is formed by using a member of the container in the first function argument as subject. The constituent statement is completed with the predicate from the second argument and the resource from the third argument. Therefore, the function needs to evaluate as many statements as there are members in the subject container. The function is evaluated with a logical negation of constituent statements. The result is boolean true, if none of the constituent statements are true. Closed world assumption applies. If no complete statement is given by the function arguments, the result is false. This is also the case if the subject container in the first argument is empty, thus no subject is specified."@en ;
+   rdf:type fun:Function ;
+   fun:resultType xsd:boolean ;
+-  fun:arityMin 3 ;
+-  fun:arityMax 3 ;
++  fun:arityMin "3"^^xsd:nonNegativeInteger ;
++  fun:arityMax "3"^^xsd:nonNegativeInteger ;
+   fun:argumentTypes ( rdfs:Container rdf:Property rdfs:Resource )
+ .
+ 
+@@ -106,8 +111,8 @@
+   rdfs:comment "The function log:matchOne represents a boolean truth value from multiple statement triples. A constituent statement is formed by using a member of the container in the first function argument as subject. The constituent statement is completed with the predicate from the second argument and the resource from the third argument. Therefore, the function needs to evaluate as many statements as there are members in the subject container. The function is evaluated with a logical exclusive disjunction of constituent statements. The result is boolean true, if exactly one of the constituent statements is true. Closed world assumption applies. If no complete statement is given by the function arguments, the result is false. This is also the case if the subject container in the first argument is empty, thus no subject is specified."@en ;
+   rdf:type fun:Function ;
+   fun:resultType xsd:boolean ;
+-  fun:arityMin 3 ;
+-  fun:arityMax 3 ;
++  fun:arityMin "3"^^xsd:nonNegativeInteger ;
++  fun:arityMax "3"^^xsd:nonNegativeInteger ;
+   fun:argumentTypes ( rdfs:Container rdf:Property rdfs:Resource )
+ .
+ 
+@@ -116,6 +121,8 @@
+   rdfs:comment "The function log:matchStatement represents the boolean truth value of the statement in the function argument. It is true, if and only if all statements in its arguments are true in the current knowledge base. Closed world assumption applies. If no statement is given as argument, the result is false."@en ;
+   rdf:type fun:Function ;
+   fun:resultType xsd:boolean ;
++  # Variadic function requires at least 1 argument for meaningful evaluation
++  fun:arityMin "1"^^xsd:nonNegativeInteger ;
+   fun:argumentTypes ( rdf:Statement )
+ .
+ 
+@@ -124,6 +131,8 @@
+   rdfs:comment "The function log:noneOf represents an evaluation similar to logical negation. It evaluates to boolean true if all the arguments are false and to false is any of the arguments are true. If the list of arguments is empty the result is true."@en ;
+   rdf:type fun:Function ;
+   fun:resultType xsd:boolean ;
++  # Variadic function requires at least 1 argument for meaningful evaluation
++  fun:arityMin "1"^^xsd:nonNegativeInteger ;
+   fun:argumentTypes ( xsd:boolean )
+ .
+ 
+@@ -132,6 +141,8 @@
+   rdfs:comment "The function log:oneOf represents an exclusive disjunction also known as XOR logical operator if there are only two arguments. It evaluates to boolean true if exactly one of the arguments is true, otherwise the result is false. If the list of arguments is empty the result is also false."@en ;
+   rdf:type fun:Function ;
+   fun:resultType xsd:boolean ;
++  # Variadic function requires at least 1 argument for meaningful evaluation
++  fun:arityMin "1"^^xsd:nonNegativeInteger ;
+   fun:argumentTypes ( xsd:boolean )
+ .
+ 
+--- a/MathFunctions.ttl
++++ b/MathFunctions.ttl
+@@ -1,6 +1,6 @@
+ # Mathematical Functions Definition and Collection Ontology version 3.6.0
+ 
+-@prefix mf:   <http://tio.models.tmforum.org/tio/v3.6.0/MathFunctions> .
++@prefix mf:   <http://tio.models.tmforum.org/tio/v3.6.0/MathFunctions/> .
+ @prefix fun:  <http://tio.models.tmforum.org/tio/v3.6.0/FunctionOntology/> .
+ @prefix quan: <http://tio.models.tmforum.org/tio/v3.6.0/QuantityOntology/> .
+ @prefix dct:  <http://purl.org/dc/terms/> .
+@@ -9,6 +9,7 @@
+ @prefix t:    <http://www.w3.org/2006/time#> .
+ @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+ @prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
++@prefix imo:  <http://tio.models.tmforum.org/tio/v3.6.0/IntentManagementOntology/> .
+ 
+ <http://tio.models.tmforum.org/tio/v3.6.0/MathFunctions/>
+   rdf:type imo:BaseOntologyModel ;
+@@ -79,11 +80,11 @@
+ mf:logistic
+   rdfs:label "Logistic Function"@en ;
+   rdfs:comment "The property mf:logistic represents a logistic function."@en ;
+-  rdf:type fun:Function
+-  fun:argumentNames ( _x mf:k mf:l mf:c ) ;
++  rdf:type fun:Function ;
++  fun:argumentNames ( _:x mf:k mf:l mf:c ) ;
+   fun:argumentTypes ( quan:Quantity ) ;
+   fun:resultType quan:Quantity ;
+-  fun:arityMin 1 
++  fun:arityMin "1"^^xsd:nonNegativeInteger 
+ .
+ 
+ mf:map
+@@ -97,27 +98,27 @@
+ mf:mapping
+   rdfs:label "Mapping Function"@en ;
+   rdfs:comment "The property mf:mapping represents a mapping function."@en ;
+-  rdf:type fun:Function
+-  fun:argumentNames ( _x mf:map ) ;
+-  fun:argumentTypes ( rdf:Resource rdf:List ) ;
+-  fun:resultType rdf:Resource ;
+-  fun:arityMin 1 
++  rdf:type fun:Function ;
++  fun:argumentNames ( _:x mf:map ) ;
++  fun:argumentTypes ( rdfs:Resource rdf:List ) ;
++  fun:resultType rdfs:Resource ;
++  fun:arityMin "1"^^xsd:nonNegativeInteger 
+ .
+ 
+ mf:poly
+   rdfs:label "Polynomial Function"@en ;
+   rdfs:comment "The property mf:poly represents a polynomial function."@en ;
+-  rdf:type fun:Function
+-  fun:argumentNames ( _x mf:coefficients mf:l mf:c ) ;
++  rdf:type fun:Function ;
++  fun:argumentNames ( _:x mf:coefficients mf:l mf:c ) ;
+   fun:argumentTypes ( quan:Quantity ) ;
+   fun:resultType quan:Quantity ;
+-  fun:arityMin 1 
++  fun:arityMin "1"^^xsd:nonNegativeInteger 
+ .
+ 
+ mf:Vocabulary
+   rdfs:label "Math Function Vocabulary"@en ;
+   rdfs:comment "The object mf:Vocabulary is a container of all model elements."@en ;
+-  rdf:type rdfs:Container
++  rdf:type rdfs:Container ;
+   rdfs:member mf:c ,
+               mf:coefficients ,
+               mf:input ,
+--- a/MetricsAndObservations.ttl
++++ b/MetricsAndObservations.ttl
+@@ -10,6 +10,7 @@
+ @prefix t:    <http://www.w3.org/2006/time#> .
+ @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+ @prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
++@prefix imo:  <http://tio.models.tmforum.org/tio/v3.6.0/IntentManagementOntology/> .
+ 
+ <http://tio.models.tmforum.org/tio/v3.6.0/MetricsAndObservations/>
+   rdf:type imo:BaseOntologyModel ;
+@@ -41,19 +42,18 @@
+ met:lastObserved
+   rdfs:label "Last Observed Function"@en ;
+   rdfs:comment "The function met:lastObserved refers to the newest individual observation created for the metrics that are provided as function arguments. For example, it refers to latest measurement obtained for a latency."@en ;
+-  rdf:type fun:function ;
++  rdf:type fun:Function ;
+   fun:resultType met:Observation ;
+-  fun:arityMin 1 ;
+-  fun:argumentTypes ( rdfs:Metric )
+-.
++  fun:arityMin "1"^^xsd:nonNegativeInteger ;
++  fun:argumentTypes ( met:Metric ) .
+ 
+ met:lastValue
+   rdfs:label "Last Value Function"@en ;
+   rdfs:comment "The function met:lastValue refers to the newest observed value for a metric and provides the value as result."@en ;
+-  rdf:type fun:function ;
+-  fun:resultType rdf:Resource ;
+-  fun:arityMin 1 ;
+-  fun:argumentTypes ( rdfs:Metric )
++  rdf:type fun:Function ;
++  fun:resultType rdfs:Resource ;
++  fun:arityMin "1"^^xsd:nonNegativeInteger ;
++  fun:argumentTypes ( met:Metric )
+ .
+ 
+ met:metric
+@@ -68,6 +68,12 @@
+   rdf:type rdfs:Class
+ .
+ 
++met:Metric
++  rdfs:label "Metric Class"@en ;
++  rdfs:comment "A metric is an observable and measurable item. This class is used to type metric properties and resources that represent metrics."@en ;
++  rdf:type rdfs:Class
++.
++
+ met:observed
+   rdfs:label "Observed Property"@en ;
+   rdfs:comment "The property met:observed can be used to assign an instance of class met:Observation to other objects."@en ;
+@@ -86,10 +92,10 @@
+ met:observedValue
+   rdfs:label "Observed Value Function"@en ;
+   rdfs:comment "The function met:observedValue refers to the value of an individual observation and provides this value as function result."@en ;
+-  rdf:type fun:function ;
+-  fun:resultType rdf:Resource ;
+-  fun:arityMin 1 ;  
+-  fun:arityMax 1 ;  
++  rdf:type fun:Function ;
++  fun:resultType rdfs:Resource ;
++  fun:arityMin "1"^^xsd:nonNegativeInteger ;  
++  fun:arityMax "1"^^xsd:nonNegativeInteger ;  
+   fun:argumentTypes ( met:Observation ) 
+ .
+ 
+@@ -103,7 +109,7 @@
+ met:Vocabulary
+   rdfs:label "Metrics and Observation Vocabulary"@en ;
+   rdfs:comment "The object met:Vocabulary is a container of all model elements."@en ;
+-  rdf:type rdfs:Container
++  rdf:type rdfs:Container ;
+   rdfs:member met:lastObserved ,
+               met:lastValue ,
+               met:metric ,
+@@ -111,6 +117,7 @@
+               met:observed ,
+               met:observedMetric ,
+               met:observedValue ,
+-              met:obtainedAt
++              met:obtainedAt ,
++              met:Metric
+ .
+ 
+--- a/QuantityOntology.ttl
++++ b/QuantityOntology.ttl
+@@ -32,26 +32,26 @@
+   rdfs:seeAlso <https://www.tmforum.org/resources/how-to-guide/ig1253-intent-in-autonomous-networks-v1-3-0/> ;
+   rdfs:seeAlso <https://www.tmforum.org/resources/introductory-guide/tr292d-quantity-ontology-v3-6-0/> ;
+   rdfs:seeAlso <https://www.tmforum.org/resources/standard/ig1358-intent-based-operation-user-guide-v1-0-0/> ;
+-  skos:changeNote "2024-10-09 - initial draft of turtle file"@en ;
++  skos:changeNote "2024-10-09 - initial draft of turtle file"@en 
+ .
+ 
+ quan:atLeast
+   rdfs:label "At Least Function"@en ;
+-  rdfs:comment "The function quan:atLeast defines a comparison of quantities. It provides a boolean result and is evaluated as "true" if the quantity of the first argument is equal to or bigger than the quantity of the second argument. Unit prefixes are considered."@en ;
++  rdfs:comment "The function quan:atLeast defines a comparison of quantities. It provides a boolean result and is evaluated as true if the quantity of the first argument is equal to or bigger than the quantity of the second argument. Unit prefixes are considered."@en ;
+   rdf:type fun:Function ;
+-  fun:resultTtype xsd:boolean ;
+-  fun:arityMin 2 ;
+-  fun:arityMax 2 ;
++  fun:resultType xsd:boolean ;
++  fun:arityMin "2"^^xsd:nonNegativeInteger ;
++  fun:arityMax "2"^^xsd:nonNegativeInteger ;
+   fun:argumentTypes ( quan:Quantity )
+ .
+ 
+ quan:atMost
+   rdfs:label "At Most Function"@en ;
+-  rdfs:comment "The function quan:atMost defines a comparison of quantities. It provides a boolean result and is evaluated as "true" if the quantity of the first argument is equal to or smaller than the quantity of the second argument. Unit prefixes are considered."@en ;
++  rdfs:comment "The function quan:atMost defines a comparison of quantities. It provides a boolean result and is evaluated as true if the quantity of the first argument is equal to or smaller than the quantity of the second argument. Unit prefixes are considered."@en ;
+   rdf:type fun:Function ;
+-  fun:resultTtype xsd ;
+-  fun:arityMin 2 ;
+-  fun:arityMax 2 ;
++  fun:resultType xsd:boolean ;
++  fun:arityMin "2"^^xsd:nonNegativeInteger ;
++  fun:arityMax "2"^^xsd:nonNegativeInteger ;
+   fun:argumentTypes ( quan:Quantity )
+ .
+ 
+@@ -59,9 +59,9 @@
+   rdfs:label "Difference Function"@en ;
+   rdfs:comment "The function quan:difference defines a mathematical operation that provides the numerical difference between two quantities. It has two arguments, and it evaluates to the difference of the first argument value minus the second argument value. Unit prefixes are considered in the calculation. The unit expression of the first argument is used for the result."@en ;
+   rdf:type fun:Function ;
+-  fun:resultTtype quan:Quantity ;
+-  fun:arityMin 2 ;
+-  fun:arityMax 2 ;
++  fun:resultType quan:Quantity ;
++  fun:arityMin "2"^^xsd:nonNegativeInteger ;
++  fun:arityMax "2"^^xsd:nonNegativeInteger ;
+   fun:argumentTypes ( quan:Quantity )
+ .
+ 
+@@ -69,18 +69,18 @@
+   rdfs:label "Division Function"@en ;
+   rdfs:comment "The function quan:division defines a mathematical operation that provides the result of a division of two quantities. The first argument is the numerator and the second the denominator of the division. The function therefore has exactly two arguments. Unit prefixes are considered in the calculation. Both arguments can have different units and the unit expression of the result is generated based on the units of the arguments."@en ;
+   rdf:type fun:Function ;
+-  fun:resultTtype xsd:boolean ;
+-  fun:arityMin 2 ;
+-  fun:arityMax 2 ;
++  fun:resultType xsd:boolean ;
++  fun:arityMin "2"^^xsd:nonNegativeInteger ;
++  fun:arityMax "2"^^xsd:nonNegativeInteger ;
+   fun:argumentTypes ( quan:Quantity )
+ .
+ 
+ quan:exactly
+   rdfs:label "Exactly Function"@en ;
+-  rdfs:comment "The function quan:exactly defines a comparison of quantities. It provides a boolean result and is evaluated as "true" if the quantity of all arguments are the same. Unit prefixes are considered."@en ;
++  rdfs:comment "The function quan:exactly defines a comparison of quantities. It provides a boolean result and is evaluated as true if the quantity of all arguments are the same. Unit prefixes are considered."@en ;
+   rdf:type fun:Function ;
+-  fun:resultTtype xsd:boolean ;
+-  fun:arityMin 2 ;
++  fun:resultType xsd:boolean ;
++  fun:arityMin "2"^^xsd:nonNegativeInteger ;
+   fun:argumentTypes ( quan:Quantity )
+ .
+ 
+@@ -88,9 +88,9 @@
+   rdfs:label "Greater Function"@en ;
+   rdfs:comment "The function quan:greater defines a comparison of quantities. It provides a boolean result and is evaluated as true if the quantity of the first argument is greater than the quantity of the second argument. Unit prefixes are considered."@en ;
+   rdf:type fun:Function ;
+-  fun:resultTtype xsd:boolean ;
+-  fun:arityMin 2 ;
+-  fun:arityMax 2 ; 
++  fun:resultType xsd:boolean ;
++  fun:arityMin "2"^^xsd:nonNegativeInteger ;
++  fun:arityMax "2"^^xsd:nonNegativeInteger ; 
+   fun:argumentTypes ( quan:Quantity )
+ .
+ 
+@@ -98,7 +98,9 @@
+   rdfs:label "Greatest Function"@en ;
+   rdfs:comment "The function quan:greatest provides a result that is the largest quantity across all quantities provided as arguments. If no argument is provided the result has value 0 without unit. Units and unit prefixes are considered."@en ;
+   rdf:type fun:Function ;
+-  fun:resultTtype quan:Quantity ;
++  fun:resultType quan:Quantity ;
++  # Variadic aggregation function requires at least 1 argument for meaningful evaluation
++  fun:arityMin "1"^^xsd:nonNegativeInteger ;
+   fun:argumentTypes ( quan:Quantity )
+ .
+ 
+@@ -106,17 +108,19 @@
+   rdfs:label "Greatest In Set Function"@en ;
+   rdfs:comment "The function quan:greatestInSet provides a result that is the largest quantity across all quantities across member elements of the union of all containers that are provided as arguments. If no argument is provided the result has value 0 without unit. Units and unit prefixes are considered."@en ;
+   rdf:type fun:Function ;
+-  fun:resultTtype quan:Quantity ;
++  fun:resultType quan:Quantity ;
++  # Variadic aggregation function requires at least 1 argument for meaningful evaluation
++  fun:arityMin "1"^^xsd:nonNegativeInteger ;
+   fun:argumentTypes ( rdfs:Container )
+ .
+ 
+ quan:inRange
+   rdfs:label "In Range Function"@en ;
+-  rdfs:comment "The function quan:inRange defines a comparison of quantities. It provides a boolean result and is evaluated as "true" if the value of the quantity of the first argument is equal to or greater than the quantity of the second argument and if it is equal to or smaller than the quantity of the third argument. Unit prefixes are considered."@en ;
++  rdfs:comment "The function quan:inRange defines a comparison of quantities. It provides a boolean result and is evaluated as true if the value of the quantity of the first argument is equal to or greater than the quantity of the second argument and if it is equal to or smaller than the quantity of the third argument. Unit prefixes are considered."@en ;
+   rdf:type fun:Function ;
+-  fun:resultTtype xsd:boolean ;
+-  fun:arityMin 3 ;
+-  fun:arityMax 3 ;
++  fun:resultType xsd:boolean ;
++  fun:arityMin "3"^^xsd:nonNegativeInteger ;
++  fun:arityMax "3"^^xsd:nonNegativeInteger ;
+   fun:argumentTypes ( quan:Quantity )
+ .
+ 
+@@ -124,15 +128,15 @@
+   rdfs:label "Monetary Quantity Class"@en ;
+   rdfs:comment "The class quan:MonetaryQuantity refers to a quantity with currency based units."@en ;
+   rdf:type rdfs:Class ;
+-  rdfs:subClassOf quan:quantity
++  rdfs:subClassOf quan:Quantity
+ .
+ 
+ quan:mean
+   rdfs:label "Mean Function"@en ;
+   rdfs:comment "The function quan:mean defines a mathematical operation that provides the arithmetic mean of quantities. The function can have any number of arguments of type quan:Quantity and the result is the arithmetic mean across all of them. The result is 0 with no unit if no argument is provided. If only one argument is given, then the result is identical with the argument. Units and unit prefixes are considered in the calculation. The arguments must have units that are of the same dimension and the unit assigned to the result is the unit of the first argument."@en ;
+   rdf:type fun:Function ;
+-  fun:resultTtype quan:Quantity ;
+-  fun:arityMin 2 ;
++  fun:resultType quan:Quantity ;
++  fun:arityMin "2"^^xsd:nonNegativeInteger ;
+   fun:argumentTypes ( quan:Quantity )
+ .
+ 
+@@ -140,8 +144,8 @@
+   rdfs:label "Mean Of Set Function"@en ;
+   rdfs:comment "The function quan:meanOfSet defines a mathematical operation that provides the arithmetic mean of quantities. The function can have any number of arguments of type rdfs:Container and the result is the arithmetic mean across all member elements of the union of these containers. The result is 0 with no unit if no member element of type quan:quantity is provided by any of the argument containers. Units and unit prefixes are considered in the calculation. The arguments must have units that are of the same dimension and the unit assigned to the result is the unit of the first member element processed from the first argument container."@en ;
+   rdf:type fun:Function ;
+-  fun:resultTtype quan:Quantity ;
+-  fun:arityMin 1 ;
++  fun:resultType quan:Quantity ;
++  fun:arityMin "1"^^xsd:nonNegativeInteger ;
+   fun:argumentTypes ( rdfs:Container )
+ .
+ 
+@@ -149,8 +153,8 @@
+   rdfs:label "Median Function"@en ;
+   rdfs:comment "The function quan:median defines a mathematical operation that provides the median value of quantities. The function can have any number of arguments of type quan:Quantity and the result is the arithmetic median value across all of them. The result is 0 with no unit if no argument is provided. If only one argument is given, then the result is identical with the argument. Units and unit prefixes are considered in the calculation. The arguments must have units that are of the same dimension and the unit assigned to the result is the unit of the first argument."@en ;
+   rdf:type fun:Function ;
+-  fun:resultTtype quan:Quantity ;
+-  fun:arityMin 2 ;
++  fun:resultType quan:Quantity ;
++  fun:arityMin "2"^^xsd:nonNegativeInteger ;
+   fun:argumentTypes ( quan:Quantity )
+ .
+ 
+@@ -158,8 +162,8 @@
+   rdfs:label "Median Of Set Function"@en ;
+   rdfs:comment "The function quan:medianOfSet defines a mathematical operation that provides the median value of quantities. The function can have any number of arguments of type rdfs:Container and the result is the median value across all member elements of the union of these containers. The result is 0 with no unit if no member element of type quan:quantity is provided by any of the argument containers. Units and unit prefixes are considered in the calculation. The arguments must have units that are of the same dimension and the unit assigned to the result is the unit of the first member element processed from the first argument container."@en ;
+   rdf:type fun:Function ;
+-  fun:resultTtype quan:Quantity ;
+-  fun:arityMin 1 ;
++  fun:resultType quan:Quantity ;
++  fun:arityMin "1"^^xsd:nonNegativeInteger ;
+   fun:argumentTypes ( rdfs:Container )
+ .
+ 
+@@ -167,8 +171,8 @@
+   rdfs:label "Multiplication Function"@en ;
+   rdfs:comment "The function quan:multiplication defines a mathematical operation that provides the result of a multiplication of quantities. The function can have any number of arguments of type quan:Quantity and the result is the multiplication of all of them. The result is 0 with no unit if no argument is provided. If only one argument is given, then the result is identical with the argument. Units and unit prefixes are considered in the calculation. The result unit depends on the unit of contributing quantities and a suitable unit will be assigned."@en ;
+   rdf:type fun:Function ;
+-  fun:resultTtype quan:Quantity ;
+-  fun:arityMin 2 ;
++  fun:resultType quan:Quantity ;
++  fun:arityMin "2"^^xsd:nonNegativeInteger ;
+   fun:argumentTypes ( quan:Quantity )
+ .
+ 
+@@ -176,8 +180,8 @@
+   rdfs:label "Multiplication Of Set Function"@en ;
+   rdfs:comment "The function quan:multiplicationOfSet defines a mathematical operation that provides the result of a multiplication of quantities. The function can have any number of arguments of type rdfs:Container and the result is the multiplication of all member elements of the union of these containers. The result is 0 with no unit if no member element of type quan:Quantity is provided by any of the argument containers. Units and unit prefixes are considered in the calculation. The result unit depends on the unit of contributing quantities and a suitable unit will be assigned."@en ;
+   rdf:type fun:Function ;
+-  fun:resultTtype quan:Quantity ;
+-  fun:arityMin 1 ;
++  fun:resultType quan:Quantity ;
++  fun:arityMin "1"^^xsd:nonNegativeInteger ;
+   fun:argumentTypes ( rdfs:Container )
+ .
+ 
+@@ -197,10 +201,10 @@
+ quan:smaller
+   rdfs:label "Smaller Function"@en ;
+   rdfs:comment "The function quan:smaller defines a comparison of quantities. It provides a boolean result and is evaluated as true if the quantity of the first argument is smaller than the quantity of the second argument. Unit prefixes are considered."@en ;
+-  rdf:type fun:Function
+-  fun:resultTtype xsd:boolean
+-  fun:arityMin 2 ;
+-  fun:arityMax 2 ;
++  rdf:type fun:Function ;
++  fun:resultType xsd:boolean ;
++  fun:arityMin "2"^^xsd:nonNegativeInteger ;
++  fun:arityMax "2"^^xsd:nonNegativeInteger ;
+   fun:argumentTypes ( quan:Quantity )
+ .
+ 
+@@ -208,15 +212,19 @@
+   rdfs:label "Smallest Function"@en ;
+   rdfs:comment "The function quan:smallestInSet provides a result that is the smallest quantity across all quantities provided as arguments. If no argument is provided the result has value 0 without unit. Units and unit prefixes are considered."@en ;
+   rdf:type fun:Function ;
+-  fun:resultTtype quan:Quantity ;
+-  fun:argumentTypes ( quan:Quantity ) 
++  fun:resultType quan:Quantity ;
++  # Variadic aggregation function requires at least 1 argument for meaningful evaluation
++  fun:arityMin "1"^^xsd:nonNegativeInteger ;
++  fun:argumentTypes ( quan:Quantity )
+ .
+ 
+ quan:smallestInSet
+   rdfs:label "Smallest In Set Function"@en ;
+   rdfs:comment "The function quan:smallestInSet provides a result that is the smallest quantity across all quantities across member elements of the union of all containers that are provided as arguments. If no argument is provided the result has value 0 without unit. Units and unit prefixes are considered."@en ;
+   rdf:type fun:Function ;
+-  fun:resultTtype quan:Quantity ;
++  fun:resultType quan:Quantity ;
++  # Variadic aggregation function requires at least 1 argument for meaningful evaluation
++  fun:arityMin "1"^^xsd:nonNegativeInteger ;
+   fun:argumentTypes ( rdfs:Container )
+ .
+ 
+@@ -224,8 +232,8 @@
+   rdfs:label "Sum Function"@en ;
+   rdfs:comment "The function quan:sum defines a mathematical operation that provides the result of an addition of quantities. The function can have any number of arguments of type quan:Quantity and the result is the sum of all of them. The result is 0 with no unit if no argument is provided. If only one argument is given, then the result is identical with the argument. Units and unit prefixes are considered in the calculation. The arguments must have units that are of the same dimension and the unit assigned to the result is the unit of the first argument."@en ;
+   rdf:type fun:Function ;
+-  fun:resultTtype quan:Quantity ;
+-  fun:arityMin 2 ;
++  fun:resultType quan:Quantity ;
++  fun:arityMin "2"^^xsd:nonNegativeInteger ;
+   fun:argumentTypes ( quan:Quantity )
+ .
+ 
+@@ -233,16 +241,16 @@
+   rdfs:label "Sum Of Set Function"@en ;
+   rdfs:comment "The function quan:sumOfSet defines a mathematical operation that provides the result of an addition of quantities. The function can have any number of arguments of type rdfs:Container and the result is the sum of all member elements of the union of these containers. The result is 0 with no unit if no member element of type quan:quantity is provided by any of the argument containers. Units and unit prefixes are considered in the calculation. The arguments must have units that are of the same dimension and the unit assigned to the result is the unit of the first member element processed from the first argument container."@en ;
+   rdf:type fun:Function ;
+-  fun:resultTtype quan:Quantity ;
+-  fun:arityMin 1 ;
++  fun:resultType quan:Quantity ;
++  fun:arityMin "1"^^xsd:nonNegativeInteger ;
+   fun:argumentTypes ( rdfs:Container )
+ .
+ 
+ quan:unit
+   rdfs:label "Unit Property"@en ;
+   rdfs:comment "The property quan:unit assigns a unit to a quantity."@en ;
+-  rdf:type rdf:Property
+-  rdfs:domain quan:Quantity
++  rdf:type rdf:Property ;
++  rdfs:domain quan:Quantity ;
+   rdfs:range xsd:string
+ .
+ 
+--- a/SetOperators.ttl
++++ b/SetOperators.ttl
+@@ -8,6 +8,7 @@
+ @prefix t:    <http://www.w3.org/2006/time#> .
+ @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+ @prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
++@prefix imo:  <http://tio.models.tmforum.org/tio/v3.6.0/IntentManagementOntology/> .
+ 
+ <http://tio.models.tmforum.org/tio/v3.6.0/SetOperators/>
+   rdf:type imo:BaseOntologyModel ;
+@@ -49,7 +50,7 @@
+   rdfs:comment "The function set:elementOf represents the result of an evaluation. It assumes the boolean type result value true, if the resource given in the first argument is a member of all the containers given by the remaining arguments."@en ;
+   rdf:type fun:Function ;
+   fun:resultType xsd:boolean ;
+-  fun:arityMin 2 ;
++  fun:arityMin "2"^^xsd:nonNegativeInteger ;
+   fun:argumentTypes ( rdfs:Resource rdfs:Container )
+ .
+ 
+@@ -58,7 +59,7 @@
+   rdfs:comment "The function set:empty represents the result of an evaluation. It assumes the boolean type result value true, if none of the containers given as arguments has any members."@en ;
+   rdf:type fun:Function ;
+   fun:resultType xsd:boolean ;
+-  fun:arityMin 1 ;
++  fun:arityMin "1"^^xsd:nonNegativeInteger ;
+   fun:argumentTypes ( rdfs:Container )
+ .
+ 
+@@ -67,8 +68,8 @@
+   rdfs:comment "The function set:forAll has at least three arguments. The first argument represents any individual member from the container provided in the second argument. The third and all following arguments are resources with Boolean value. This can for example be a function that evaluates to a Boolean result. The function set:forAll has a Boolean type result directly derived from the third argument. The set:forAll function replicates the evaluation of the third argument for every member of the second argument. This allows to express that a condition set by the third argument needs to be met by every member of the provided container. The first argument is a resource use do represent individual members of the container. It can be used in the expression of the condition or evaluation specified by the third argument."@en ;
+   rdf:type fun:Function ;
+   fun:resultType xsd:boolean ;
+-  fun:arityMin 3 ;
+-  fun:argumentTypes ( rdf:Resource rdfs:Container rdf:Resource)
++  fun:arityMin "3"^^xsd:nonNegativeInteger ;
++  fun:argumentTypes ( rdfs:Resource rdfs:Container rdfs:Resource)
+ .
+ 
+ set:includedIn
+@@ -76,7 +77,7 @@
+   rdfs:comment "The function set:includedIn represents the result of an evaluation. It assumes the boolean type result value true, if all members of the container in the first argument are also members of each container given by the remaining arguments."@en ;
+   rdf:type fun:Function ;
+   fun:resultType xsd:boolean ;
+-  fun:arityMin 2 ;
++  fun:arityMin "2"^^xsd:nonNegativeInteger ;
+   fun:argumentTypes ( rdfs:Container )
+ .
+ 
+@@ -93,7 +94,7 @@
+   rdfs:comment "The function set:intersectsWith represents the result of an evaluation. It assumes the boolean type result value true, if there are member objects in the first argument container that are also members in all other containers given as arguments."@en ;
+   rdf:type fun:Function ;
+   fun:resultType xsd:boolean ;
+-  fun:arityMin 2 ; 
++  fun:arityMin "2"^^xsd:nonNegativeInteger ; 
+   fun:argumentTypes ( rdfs:Container ) 
+ .
+ 
+@@ -102,8 +103,8 @@
+   rdfs:comment "The function set:isMember has at least two arguments. It provides the result true if the resource provided as first argument is a member of any container provided by the remaining arguments."@en ;
+   rdf:type fun:Function ;
+   fun:resultType xsd:boolean ;
+-  fun:arityMin 2 ; 
+-  fun:argumentTypes ( rdf:Resource rdfs:Container ) 
++  fun:arityMin "2"^^xsd:nonNegativeInteger ; 
++  fun:argumentTypes ( rdfs:Resource rdfs:Container ) 
+ .
+ 
+ set:membersAfter
+@@ -111,7 +112,7 @@
+   rdfs:comment "The function set:membersAfter represents the result of a time based container member filtering. The first parameter refers to the property of a member that assigns a time-stamp to a member object. This is the timestamp to be used in the evaluation of this function. The second parameter specifies a point in time expressed as individual of the class t:Instant defined in the time ontology in OWL [owltime]. The third and all remaining parameters are containers. The function provides a container as result. The members of this result container are members of the union of all containers provided as parameters, which meet the condition that their time stamp is after the time stamp provided as second parameter. The property provided as first parameter is the one used to evaluate the condition. This property needs to be used for a member of the input containers for the member object to be considered in the evaluation and included in the result."@en ;
+   rdf:type fun:Function ;
+   fun:resultType rdfs:Container ;
+-  fun:arityMin 3 ;
++  fun:arityMin "3"^^xsd:nonNegativeInteger ;
+   fun:argumentTypes ( rdf:Property t:Instance rdfs:Container )
+ .
+ 
+@@ -120,7 +121,7 @@
+   rdfs:comment "The function set:membersBefore represents the result of a time based container member filtering. The first parameter refers to the property of a member that assigns a time-stamp to a member object. This is the timestamp to be used in the evaluation of this function. The second parameter specifies a point in time expressed as individual of the class t:Instant defined in the time ontology in OWL [owltime]. The third and all remaining parameters are containers. The function provides a container as result. The members of this result container are members of the union of all containers provided as parameters, which meet the condition that their time stamp is before the time stamp provided as second parameter. The property provided as first parameter is the one used to evaluate the condition. This property needs to be used for a member of the input containers for the member object to be considered in the evaluation and included in the result."@en ;
+   rdf:type fun:Function ;
+   fun:resultType rdfs:Container ;
+-  fun:arityMin 3 ;
++  fun:arityMin "3"^^xsd:nonNegativeInteger ;
+   fun:argumentTypes ( rdf:Property t:Instance rdfs:Container ) 
+ .
+ 
+@@ -129,7 +130,7 @@
+   rdfs:comment "The function set:membersSameTime represents the result of a time based container member filtering. The first parameter refers to the property of a member that assigns a time-stamp to a member object. This is the timestamp to be used in the evaluation of this function. The second parameter specifies a point in time expressed as individual of the class t:Instant defined in the time ontology in OWL [owltime]. The third and all remaining parameters are containers. The function provides a container as result. The members of this result container are members of the union of all containers provided as parameters, which meet the condition that their time-stamp shows the same time as the time-stamp provided as second parameter. The property provided as first parameter is the one used to evaluate the condition. This property needs to be used for a member of the input containers for the member object to be considered in the evaluation and included in the result."@en ;
+   rdf:type fun:Function ;
+   fun:resultType rdfs:Container ;
+-  fun:arityMin 3 ;
++  fun:arityMin "3"^^xsd:nonNegativeInteger ;
+   fun:argumentTypes ( rdf:Property t:Instance rdfs:Container )
+ .
+ 
+@@ -138,7 +139,7 @@
+   rdfs:comment "The function set:membersWhile represents the result of a time based container member filtering. The first parameter refers to the property of a member that assigns a time-stamp to a member object. This is the time-stamp to be used in the evaluation of this function. The second parameter specifies time interval in time expressed as individual of the class t:Interval defined in the time ontology in OWL [owltime]. The third and all remaining parameters are containers. The function provides a container as result. The members of this result container are members of the union of all containers provided as parameters, which meet the condition that their time-stamp lies within the time interval provided as second parameter. The property provided as first parameter is the one used to evaluate the condition. This property needs to be used for a member of the input containers for the member object to be considered in the evaluation and included in the result."@en ;
+   rdf:type fun:Function ;
+   fun:resultType rdfs:Container ;
+-  fun:arityMin 3 ;
++  fun:arityMin "3"^^xsd:nonNegativeInteger ;
+   fun:argumentTypes ( rdf:Property t:Interval rdfs:Container )
+ .
+ 
+@@ -146,8 +147,8 @@
+   rdfs:label "Newest Member Function"@en ;
+   rdfs:comment "The function set:newestMember selects the newest member of the container according to a time-stamp property of the member object. The first parameter refers to the property of a member that assigns a time-stamp. This is the time-stamp to be used in the evaluation of this function. The third and all remaining parameters are containers. The function provides the resource as result that is the newest member object within the union of all containers provided as parameters as indicated by the property of the member object that was specified as first function parameter."@en ;
+   rdf:type fun:Function ;
+-  fun:resultType rdf:Resource ;
+-  fun:arityMin 2 ;
++  fun:resultType rdfs:Resource ;
++  fun:arityMin "2"^^xsd:nonNegativeInteger ;
+   fun:argumentTypes ( rdf:Property rdfs:Container ) 
+ .
+ 
+@@ -155,8 +156,8 @@
+   rdfs:label "Oldest Member Function"@en ;
+   rdfs:comment "The function set:oldestMember selects the oldest member of the container according to a time-stamp property of the member object. The first parameter refers to the property of a member that assigns a time-stamp. This is the time-stamp to be used in the evaluation of this function. The third and all remaining parameters are containers. The function provides the resource as result that is the oldest member object within the union of all containers provided as parameters as indicated by the property of the member object that was specified as first function parameter."@en ;
+   rdf:type fun:Function ;
+-  fun:resultType rdf:Resource ;
+-  fun:arityMin 2 ;
++  fun:resultType rdfs:Resource ;
++  fun:arityMin "2"^^xsd:nonNegativeInteger ;
+   fun:argumentTypes ( rdf:Property rdfs:Container )
+ .
+ 
+@@ -181,7 +182,7 @@
+   rdfs:comment "The function set:resourcesWithPropertyObject represents a container of all resources, to which the property specified in the first argument is used to assign any of the objects of the remaining arguments. Closed world assumption applies."@en ;
+   rdf:type fun:Function ;
+   fun:resultType rdfs:Container ;
+-  fun:arityMin 2 ;
++  fun:arityMin "2"^^xsd:nonNegativeInteger ;
+   fun:argumentTypes ( rdfs:Property rdfs:Resource ) 
+ .
+ 
+@@ -206,7 +207,7 @@
+   rdfs:comment "The function set:valuesOfObjectProperty represents a container of all values that are assigned with the property given as first argument to the objects provided by the remaining arguments. If and object has multiple values assigned with this property, or if multiple objects are specified, the result is a superset of all values assigned to provided objects with this property."@en ;
+   rdf:type fun:Function ;
+   fun:resultType rdfs:Container ;
+-  fun:arityMin 2 ;
++  fun:arityMin "2"^^xsd:nonNegativeInteger ;
+   fun:argumentTypes ( rdf:Property rdfs:Resource )
+ .
+ 

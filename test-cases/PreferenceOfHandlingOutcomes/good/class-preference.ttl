@@ -1,0 +1,157 @@
+# Test: Valid instances and property usage of preference classes
+# Concepts covered: JudgementRequest, Preference, PreferenceScore, ScoreInterpretation,
+#                   pre:about, pre:preferenceDeadline, pre:preferred, pre:neutral, pre:objected,
+#                   pre:score, pre:scoreInterpretation, pre:aboutOption, pre:scoreValue,
+#                   pre:minScore, pre:maxScore, pre:preferredThreshold, pre:objectedThreshold
+# This test validates the complete preference workflow for solution selection.
+
+@prefix ex: <http://example.org/> .
+@prefix pre: <http://tio.models.tmforum.org/tio/v3.6.0/PreferenceOfHandlingOutcomes/> .
+@prefix icm: <http://tio.models.tmforum.org/tio/v3.6.0/IntentCommonModel/> .
+@prefix t: <http://www.w3.org/2006/time#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+################################################################################
+# Basic class instances
+################################################################################
+
+# === JudgementRequest class ===
+ex:test_judgementrequest a pre:JudgementRequest .
+
+# === Preference class ===
+ex:test_preference a pre:Preference .
+
+# === PreferenceScore class ===
+ex:test_preferencescore a pre:PreferenceScore .
+
+# === ScoreInterpretation class ===
+ex:test_scoreinterpretation a pre:ScoreInterpretation .
+
+################################################################################
+# Supporting instances (IntentReports as solution options)
+################################################################################
+
+ex:option_report_1 a icm:IntentReport ;
+    rdfs:label "Solution Option 1 - High Performance" .
+
+ex:option_report_2 a icm:IntentReport ;
+    rdfs:label "Solution Option 2 - Balanced" .
+
+ex:option_report_3 a icm:IntentReport ;
+    rdfs:label "Solution Option 3 - Cost Optimized" .
+
+################################################################################
+# pre:preferenceDeadline property - time:Instant deadline
+################################################################################
+
+ex:judgement_with_deadline a pre:JudgementRequest ;
+    pre:preferenceDeadline [
+        a t:Instant ;
+        t:inXSDDateTimeStamp "2024-12-31T23:59:59Z"^^xsd:dateTimeStamp
+    ] .
+
+################################################################################
+# pre:about property - links Preference to JudgementRequest
+################################################################################
+
+ex:preference_with_about a pre:Preference ;
+    pre:about ex:judgement_with_deadline .
+
+################################################################################
+# pre:preferred, pre:neutral, pre:objected - categorize IntentReports
+################################################################################
+
+ex:preference_with_categories a pre:Preference ;
+    pre:about ex:judgement_with_deadline ;
+    pre:preferred ex:option_report_1 ;
+    pre:neutral ex:option_report_2 ;
+    pre:objected ex:option_report_3 .
+
+################################################################################
+# pre:score property - links to PreferenceScore
+################################################################################
+
+ex:score_for_option_1 a pre:PreferenceScore ;
+    pre:aboutOption ex:option_report_1 ;
+    pre:scoreValue "9"^^xsd:decimal .
+
+ex:score_for_option_2 a pre:PreferenceScore ;
+    pre:aboutOption ex:option_report_2 ;
+    pre:scoreValue "5"^^xsd:decimal .
+
+ex:score_for_option_3 a pre:PreferenceScore ;
+    pre:aboutOption ex:option_report_3 ;
+    pre:scoreValue "2"^^xsd:decimal .
+
+ex:preference_with_scores a pre:Preference ;
+    pre:about ex:judgement_with_deadline ;
+    pre:score ex:score_for_option_1 ,
+              ex:score_for_option_2 ,
+              ex:score_for_option_3 .
+
+################################################################################
+# pre:scoreInterpretation property - defines score thresholds
+################################################################################
+
+ex:ten_point_scale a pre:ScoreInterpretation ;
+    pre:minScore "0"^^xsd:decimal ;
+    pre:maxScore "10"^^xsd:decimal ;
+    pre:preferredThreshold "7"^^xsd:decimal ;
+    pre:objectedThreshold "3"^^xsd:decimal .
+
+ex:preference_with_interpretation a pre:Preference ;
+    pre:about ex:judgement_with_deadline ;
+    pre:score ex:score_for_option_1 ,
+              ex:score_for_option_2 ,
+              ex:score_for_option_3 ;
+    pre:scoreInterpretation ex:ten_point_scale .
+
+################################################################################
+# Complete preference workflow example
+################################################################################
+
+ex:network_upgrade_judgement a pre:JudgementRequest ;
+    rdfs:label "Network Upgrade Options"@en ;
+    pre:preferenceDeadline [
+        a t:Instant ;
+        t:inXSDDateTimeStamp "2024-06-15T17:00:00Z"^^xsd:dateTimeStamp
+    ] .
+
+ex:network_option_premium a icm:IntentReport ;
+    rdfs:label "Premium Network Package" .
+
+ex:network_option_standard a icm:IntentReport ;
+    rdfs:label "Standard Network Package" .
+
+ex:network_option_basic a icm:IntentReport ;
+    rdfs:label "Basic Network Package" .
+
+ex:premium_score a pre:PreferenceScore ;
+    pre:aboutOption ex:network_option_premium ;
+    pre:scoreValue "95"^^xsd:decimal .
+
+ex:standard_score a pre:PreferenceScore ;
+    pre:aboutOption ex:network_option_standard ;
+    pre:scoreValue "70"^^xsd:decimal .
+
+ex:basic_score a pre:PreferenceScore ;
+    pre:aboutOption ex:network_option_basic ;
+    pre:scoreValue "30"^^xsd:decimal .
+
+ex:hundred_point_scale a pre:ScoreInterpretation ;
+    pre:minScore "0"^^xsd:decimal ;
+    pre:maxScore "100"^^xsd:decimal ;
+    pre:preferredThreshold "80"^^xsd:decimal ;
+    pre:objectedThreshold "40"^^xsd:decimal .
+
+ex:network_preference a pre:Preference ;
+    pre:about ex:network_upgrade_judgement ;
+    pre:preferred ex:network_option_premium ;
+    pre:neutral ex:network_option_standard ;
+    pre:objected ex:network_option_basic ;
+    pre:score ex:premium_score ,
+              ex:standard_score ,
+              ex:basic_score ;
+    pre:scoreInterpretation ex:hundred_point_scale .

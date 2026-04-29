@@ -1,0 +1,73 @@
+# Test: Valid usage of iv:Validity with W3C Time temporal window
+# This test validates that temporal validity constraints using W3C Time ontology
+# work correctly with log:match.
+# Based on TR292C Function Definition Ontology example
+
+@prefix ex:   <http://example.org/> .
+@prefix icm:  <http://tio.models.tmforum.org/tio/v3.6.0/IntentCommonModel/> .
+@prefix iv:   <http://tio.models.tmforum.org/tio/v3.6.0/IntentValidityOntology/> .
+@prefix log:  <http://tio.models.tmforum.org/tio/v3.6.0/LogicalOperators/> .
+@prefix imo:  <http://tio.models.tmforum.org/tio/v3.6.0/IntentManagementOntology/> .
+@prefix t:    <http://www.w3.org/2006/time#> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+################################################################################
+# Validity with temporal window using W3C Time Ontology
+#
+# This example shows an Intent that is only valid during a specific time window
+# (July 5th, 2024 from 17:00 to 18:00 GMT+1).
+#
+# Key aspects tested:
+# - iv:Validity class instantiation
+# - log:match with W3C Time properties (t:inside, t:hasBeginning, t:hasXSDDuration)
+# - Integration with Intent via iv:validIf
+################################################################################
+
+# Time interval: July 5th, 2024, 17:00-18:00 (GMT+1)
+ex:TimeInterval1
+  a rdfs:Resource ;
+  t:hasBeginning [ t:inXSDDateTimeStamp "2024-07-05T17:00:00+01:00"^^xsd:dateTimeStamp ] ;
+  t:hasXSDDuration "PT1H"^^xsd:duration
+  .
+
+# Validity: Valid only during the time interval
+ex:V1
+  a iv:Validity ;
+  log:match ( imo:Now
+              t:inside
+              ex:TimeInterval1 )
+  .
+
+# Intent with temporal validity
+ex:I1
+  a icm:Intent ;
+  log:allOf ( ex:E1 ) ;
+  iv:validIf ex:V1
+  .
+
+# PropertyExpectation
+ex:E1
+  a icm:PropertyExpectation ;
+  icm:target ex:T1 ;
+  log:allOf ( ex:C1 )
+  .
+
+# Target
+ex:T1
+  a icm:Target ;
+  rdfs:member ex:Resource1
+  .
+
+# Simple condition
+ex:C1
+  a log:Condition ;
+  log:allOf ( "true"^^xsd:boolean )
+  .
+
+# Target resource
+ex:Resource1
+  a rdfs:Resource ;
+  rdfs:label "Example Resource"@en
+  .

@@ -1,0 +1,59 @@
+# Test: ReportingExpectationPropertiesShape violations
+# Tests: reportTriggers and reportDestinations must be rdfs:Container
+# Should FAIL with: "icm:reportTriggers must be an rdfs:Container" and
+#                   "icm:reportDestinations must be an rdfs:Container"
+
+@prefix ex:   <http://example.org/> .
+@prefix icm:  <http://tio.models.tmforum.org/tio/v3.6.0/IntentCommonModel/> .
+@prefix imo:  <http://tio.models.tmforum.org/tio/v3.6.0/IntentManagementOntology/> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+################################################################################
+# VIOLATION 1: reportTriggers without Container type
+#
+# Common mistake: Using blank node without declaring it as rdfs:Container
+# The icm:reportTriggers property MUST point to a Container instance
+################################################################################
+
+# WRONG - reportTriggers blank node missing Container type
+ex:RE1
+  a icm:ReportingExpectation ;
+  icm:target ex:T1 ;
+  icm:reportTriggers [
+    # WRONG: Missing "a rdfs:Container ;"
+    rdfs:member imo:IntentRejected ;
+    rdfs:member imo:Complies
+  ]
+  .
+
+################################################################################
+# VIOLATION 2: reportDestinations without Container type
+#
+# Common mistake: Using blank node without declaring it as rdfs:Container
+# The icm:reportDestinations property MUST point to a Container instance
+################################################################################
+
+# WRONG - reportDestinations blank node missing Container type
+ex:RE2
+  a icm:ReportingExpectation ;
+  icm:target ex:T1 ;
+  icm:reportDestinations [
+    # WRONG: Missing "a rdfs:Container ;"
+    rdfs:member ex:destination1 ;
+    rdfs:member ex:destination2
+  ]
+  .
+
+ex:T1
+  a icm:Target
+  .
+
+ex:destination1
+  a rdfs:Resource
+  .
+
+ex:destination2
+  a rdfs:Resource
+  .

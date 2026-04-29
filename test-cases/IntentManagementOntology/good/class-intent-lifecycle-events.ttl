@@ -1,0 +1,184 @@
+# Test: Valid instances and property usage of Intent lifecycle event classes
+# Concepts covered: IntentHandlingEvent, IntentAccepted, IntentRejected, IntentReceived, IntentRemoval,
+#                   Degrades, HandlingEnded, Complies, IntentManager,
+#                   imo:eventIssuedBy, imo:eventIssuedFor, imo:handler, imo:owner
+# This test validates that event classes and properties can be used correctly.
+
+@prefix ex: <http://example.org/> .
+@prefix fun: <http://tio.models.tmforum.org/tio/v3.6.0/FunctionOntology/> .
+@prefix icm: <http://tio.models.tmforum.org/tio/v3.6.0/IntentCommonModel/> .
+@prefix imo: <http://tio.models.tmforum.org/tio/v3.6.0/IntentManagementOntology/> .
+@prefix log: <http://tio.models.tmforum.org/tio/v3.6.0/LogicalOperators/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+################################################################################
+# Basic class instances
+################################################################################
+
+# === IntentAccepted ===
+ex:test_intentaccepted
+  a imo:IntentAccepted .
+
+# === IntentRejected ===
+ex:test_intentrejected
+  a imo:IntentRejected .
+
+# === IntentReceived ===
+ex:test_intentreceived
+  a imo:IntentReceived .
+
+# === IntentRemoval ===
+ex:test_intentremoval
+  a imo:IntentRemoval .
+
+# === Degrades (compliance degradation event) ===
+ex:test_degrades
+  a imo:Degrades .
+
+# === HandlingEnded (end of intent handling) ===
+ex:test_handlingended
+  a imo:HandlingEnded .
+
+# === Complies (compliance achieved) ===
+ex:test_complies
+  a imo:Complies .
+
+# === IntentHandlingEvent (base class for handling events) ===
+ex:test_intenthandlingevent
+  a imo:IntentHandlingEvent .
+
+################################################################################
+# IntentManager instances
+################################################################################
+
+ex:network_intent_manager a imo:IntentManager ;
+    rdfs:label "Network Intent Manager"@en .
+
+ex:service_intent_manager a imo:IntentManager ;
+    rdfs:label "Service Intent Manager"@en .
+
+ex:orchestration_manager a imo:IntentManager ;
+    rdfs:label "Orchestration Manager"@en .
+
+################################################################################
+# Supporting instances (Intents and Expectations)
+################################################################################
+
+ex:target1 a icm:Target .
+
+ex:network_expectation a icm:PropertyExpectation ;
+    icm:target ex:target1 ;
+    log:allOf ( "true"^^xsd:boolean ) .
+
+ex:network_intent a icm:Intent ;
+    rdfs:label "Network Service Intent"@en ;
+    log:allOf ( ex:network_expectation ) .
+
+ex:service_intent a icm:Intent ;
+    rdfs:label "Service Delivery Intent"@en ;
+    log:allOf ( ex:network_expectation ) .
+
+################################################################################
+# imo:eventIssuedBy property - must reference imo:IntentManager
+################################################################################
+
+ex:intent_received_with_issuer a imo:IntentReceived ;
+    imo:eventIssuedBy ex:network_intent_manager .
+
+ex:intent_accepted_with_issuer a imo:IntentAccepted ;
+    imo:eventIssuedBy ex:service_intent_manager .
+
+ex:intent_rejected_with_issuer a imo:IntentRejected ;
+    imo:eventIssuedBy ex:orchestration_manager .
+
+################################################################################
+# imo:eventIssuedFor property - must be IRI (resource reference)
+################################################################################
+
+ex:intent_received_for_network a imo:IntentReceived ;
+    imo:eventIssuedBy ex:network_intent_manager ;
+    imo:eventIssuedFor ex:network_intent .
+
+ex:intent_accepted_for_service a imo:IntentAccepted ;
+    imo:eventIssuedBy ex:service_intent_manager ;
+    imo:eventIssuedFor ex:service_intent .
+
+# Event for an expectation (not just Intent)
+ex:compliance_event_for_expectation a imo:Complies ;
+    imo:eventIssuedBy ex:network_intent_manager ;
+    imo:eventIssuedFor ex:network_expectation .
+
+################################################################################
+# imo:handler property - IntentManager processing the event
+################################################################################
+
+ex:intent_with_handler a imo:IntentReceived ;
+    imo:eventIssuedBy ex:orchestration_manager ;
+    imo:eventIssuedFor ex:network_intent ;
+    imo:handler ex:network_intent_manager .
+
+ex:delegated_event a imo:IntentAccepted ;
+    imo:eventIssuedBy ex:orchestration_manager ;
+    imo:eventIssuedFor ex:service_intent ;
+    imo:handler ex:service_intent_manager .
+
+################################################################################
+# imo:owner property - IntentManager owning the resource
+################################################################################
+
+ex:owned_expectation a icm:PropertyExpectation ;
+    icm:target ex:target1 ;
+    log:allOf ( "true"^^xsd:boolean ) ;
+    imo:owner ex:service_intent_manager .
+
+ex:owned_intent a icm:Intent ;
+    rdfs:label "Owned Intent"@en ;
+    log:allOf ( ex:owned_expectation ) ;
+    imo:owner ex:network_intent_manager .
+
+################################################################################
+# Complete event lifecycle examples
+################################################################################
+
+# Intent submission and acceptance flow
+ex:submission_event a imo:IntentReceived ;
+    rdfs:label "Intent Submission Event"@en ;
+    imo:eventIssuedBy ex:orchestration_manager ;
+    imo:eventIssuedFor ex:network_intent ;
+    imo:handler ex:network_intent_manager .
+
+ex:validation_accepted_event a imo:IntentAccepted ;
+    rdfs:label "Intent Validation Accepted"@en ;
+    imo:eventIssuedBy ex:network_intent_manager ;
+    imo:eventIssuedFor ex:network_intent .
+
+# Compliance monitoring flow
+ex:compliance_achieved_event a imo:Complies ;
+    rdfs:label "Compliance Achieved"@en ;
+    imo:eventIssuedBy ex:network_intent_manager ;
+    imo:eventIssuedFor ex:network_intent .
+
+ex:compliance_degraded_event a imo:Degrades ;
+    rdfs:label "Compliance Degraded"@en ;
+    imo:eventIssuedBy ex:network_intent_manager ;
+    imo:eventIssuedFor ex:network_intent .
+
+# Intent removal flow
+ex:intent_removal_event a imo:IntentRemoval ;
+    rdfs:label "Intent Removal Requested"@en ;
+    imo:eventIssuedBy ex:orchestration_manager ;
+    imo:eventIssuedFor ex:network_intent ;
+    imo:handler ex:network_intent_manager .
+
+ex:handling_ended_event a imo:HandlingEnded ;
+    rdfs:label "Intent Handling Ended"@en ;
+    imo:eventIssuedBy ex:network_intent_manager ;
+    imo:eventIssuedFor ex:network_intent .
+
+# Rejection flow
+ex:intent_rejection_event a imo:IntentRejected ;
+    rdfs:label "Intent Rejected - Insufficient Resources"@en ;
+    imo:eventIssuedBy ex:network_intent_manager ;
+    imo:eventIssuedFor ex:service_intent .

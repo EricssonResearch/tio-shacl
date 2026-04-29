@@ -1,0 +1,94 @@
+# Test: ReportingExpectation with reportTriggers and reportDestinations
+# This test validates the ReportingExpectation pattern with triggers and destinations
+# Based on TR290A Intent Common Model example 2
+
+@prefix ex:   <http://example.org/> .
+@prefix icm:  <http://tio.models.tmforum.org/tio/v3.6.0/IntentCommonModel/> .
+@prefix imo:  <http://tio.models.tmforum.org/tio/v3.6.0/IntentManagementOntology/> .
+@prefix log:  <http://tio.models.tmforum.org/tio/v3.6.0/LogicalOperators/> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+################################################################################
+# ReportingExpectation with Triggers and Destinations
+#
+# This example shows how to define a ReportingExpectation:
+# - icm:reportTriggers specifies when to generate reports (Container)
+# - icm:reportDestinations specifies where to send reports (Container)
+# - Triggers are typically imo:IntentHandlingState instances or events
+# - Destinations are typically intent management function (IMF) instances
+#
+# Key aspects tested:
+# - icm:ReportingExpectation class usage
+# - icm:reportTriggers property with Container
+# - icm:reportDestinations property with Container
+# - Integration with IntentManagementOntology states
+################################################################################
+
+# Intent with ReportingExpectation
+ex:Intent1
+  a icm:Intent ;
+  rdfs:label "Monitored Intent"@en ;
+  log:allOf ( ex:E1 ex:E2 )
+  .
+
+# Regular PropertyExpectation
+ex:E1
+  a icm:PropertyExpectation ;
+  rdfs:label "Performance Expectation"@en ;
+  icm:target ex:T1 ;
+  log:allOf ( ex:C1 )
+  .
+
+# ReportingExpectation: Specifies when and where to report
+ex:E2
+  a icm:ReportingExpectation ;
+  rdfs:label "Reporting Expectation"@en ;
+  icm:target ex:T1 ;
+  icm:reportDestinations [
+    a rdfs:Container ;
+    rdfs:member ex:IMF1
+  ] ;
+  icm:reportTriggers [
+    a rdfs:Container ;
+    rdfs:member imo:IntentRejected ;
+    rdfs:member imo:IntentAccepted ;
+    rdfs:member imo:Degrades ;
+    rdfs:member imo:Complies
+  ]
+  .
+
+# Target
+ex:T1
+  a icm:Target ;
+  rdfs:member ex:Resource1
+  .
+
+ex:Resource1
+  a ex:NetworkResource ;
+  rdfs:label "Network Resource 1"@en
+  .
+
+ex:NetworkResource
+  a rdfs:Class ;
+  rdfs:label "Network Resource"@en
+  .
+
+# Condition
+ex:C1
+  a log:Condition ;
+  rdfs:label "Performance Condition"@en ;
+  log:allOf ( "true"^^xsd:boolean )
+  .
+
+# Intent Management Function (destination)
+ex:IMF1
+  a ex:IntentManagementFunction ;
+  rdfs:label "Intent Management Function 1"@en
+  .
+
+ex:IntentManagementFunction
+  a rdfs:Class ;
+  rdfs:label "Intent Management Function"@en
+  .

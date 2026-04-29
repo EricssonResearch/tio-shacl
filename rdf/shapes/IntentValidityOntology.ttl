@@ -1,0 +1,112 @@
+# TMF IntentValidityOntology SHACL Shapes
+#
+# Domain-specific validation for IntentValidityOntology.
+# Global validation (function usage, vocabulary) handled by lib/GlobalShapes.ttl
+#
+# Ontology URI: http://tio.models.tmforum.org/tio/v3.6.0/IntentValidityOntology/
+
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# TMF namespaces
+@prefix iv: <http://tio.models.tmforum.org/tio/v3.6.0/IntentValidityOntology/> .
+@prefix icm: <http://tio.models.tmforum.org/tio/v3.6.0/IntentCommonModel/> .
+@prefix fun: <http://tio.models.tmforum.org/tio/v3.6.0/FunctionOntology/> .
+@prefix imo: <http://tio.models.tmforum.org/tio/v3.6.0/IntentManagementOntology/> .
+
+# Shape namespaces
+@prefix iv-shapes: <http://tio.models.tmforum.org/tio/v3.6.0/shapes/IntentValidityOntology/> .
+@prefix tio-lib: <http://tio.models.tmforum.org/tio/v3.6.0/shapes/lib/> .
+@prefix tio-targets: <http://tio.models.tmforum.org/tio/v3.6.0/shapes/lib/targets/> .
+@prefix tio-constraints: <http://tio.models.tmforum.org/tio/v3.6.0/shapes/lib/constraints/> .
+
+# Note: Vocabulary validation handled globally by tio-lib:VocabularyUsageShape in GlobalShapes.ttl
+
+# =============================================================================
+# PROPERTY VALIDATION
+# =============================================================================
+
+# Validate isValid datatype
+iv-shapes:IsValidShape
+    a sh:NodeShape ;
+    rdfs:label "Is Valid Property Validation" ;
+    rdfs:comment "Validates that iv:isValid has correct datatype" ;
+    sh:target [
+        a tio-targets:SubjectsOfPropertyTargetType ;
+        tio-lib:property iv:isValid ;
+    ] ;
+
+    sh:property [
+        sh:path iv:isValid ;
+        sh:description "isValid must be xsd:boolean" ;
+        sh:datatype xsd:boolean ;
+        sh:name "isValid" ;
+        sh:message "[iv/is_valid_type] iv:isValid must be of datatype xsd:boolean" ;
+    ] ;
+
+    sh:severity sh:Violation .
+
+# Validate validIf class range
+iv-shapes:ValidIfShape
+    a sh:NodeShape ;
+    rdfs:label "Valid If Property Validation" ;
+    rdfs:comment "Validates that iv:validIf values are instances of iv:Validity" ;
+    sh:target [
+        a tio-targets:SubjectsOfPropertyTargetType ;
+        tio-lib:property iv:validIf ;
+    ] ;
+
+    sh:property [
+        sh:path iv:validIf ;
+        sh:description "validIf must be an iv:Validity instance" ;
+        sh:class iv:Validity ;
+        sh:name "validIf" ;
+        sh:message "[iv/valid_if_not_validity] iv:validIf must reference an instance of iv:Validity. For temporal constraints, create a Validity that is also a log:Condition: [ a iv:Validity, log:Condition ; log:allOf ( ... ) ]. Use W3C Time ontology (t:inDateTime, t:dayOfWeek, t:inTimeInterval) with imo:Now to express time constraints. Do NOT invent properties like icm:validDuring, icm:dayMask, icm:startTime - these do not exist in TIO v3.6.0." ;
+    ] ;
+
+    sh:severity sh:Violation .
+
+# Validate sameValidityAs class range
+# Must be Intent or Expectation (which can have validity), not other IntentElements like Target
+# Uses ValidityCandidate extension - RDFS inference handles subclass checking
+# Simplified from SPARQL to sh:class (requires inference='rdfs' in PySHACL)
+iv-shapes:SameValidityAsShape
+    a sh:NodeShape ;
+    rdfs:label "Same Validity As Property Validation" ;
+    rdfs:comment "Validates that iv:sameValidityAs values are instances of iv:ValidityCandidate (Intent or Expectation)" ;
+    sh:target [
+        a tio-targets:SubjectsOfPropertyTargetType ;
+        tio-lib:property iv:sameValidityAs ;
+    ] ;
+    sh:property [
+        sh:path iv:sameValidityAs ;
+        sh:class iv:ValidityCandidate ;
+        sh:message "[iv/same_validity_as_type] iv:sameValidityAs must reference a ValidityCandidate (Intent or Expectation)" ;
+    ] ;
+    sh:severity sh:Violation .
+
+# Note: Function usage validation handled globally by tio-lib:FunctionUsageShape in GlobalShapes.ttl
+
+# =============================================================================
+# INTENT VALIDITY VALIDATION
+# =============================================================================
+
+# Validate Intent Validity classes and functions
+iv-shapes:IntentValidityShape
+    a sh:NodeShape ;
+    rdfs:label "Intent Validity Shape" ;
+    rdfs:comment "Validates Intent Validity ontology elements" ;
+    sh:target [
+        a tio-targets:OntologyClassTargetType ;
+        tio-lib:ontologyNamespace "http://tio.models.tmforum.org/tio/v3.6.0/IntentValidityOntology/" ;
+        tio-lib:targetClass rdfs:Class ;
+    ] ;
+
+    # Apply shared constraints for intent validity class documentation
+    sh:sparql tio-constraints:ClassDocumentationConstraint ;
+
+    sh:severity sh:Warning .
+
+# Note: Global validation (vocabulary, function usage) handled by lib/GlobalShapes.ttl

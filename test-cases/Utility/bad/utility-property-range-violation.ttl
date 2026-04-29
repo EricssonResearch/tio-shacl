@@ -1,0 +1,36 @@
+# Test: Invalid ut:utility range
+# This test validates that ut:utility must reference a ut:UtilityInformation instance
+# Should FAIL with: "ut:utility must reference a ut:UtilityInformation instance"
+
+@prefix ex:  <http://example.org/> .
+@prefix ut:  <http://tio.models.tmforum.org/tio/v3.6.0/Utility/> .
+@prefix fun: <http://tio.models.tmforum.org/tio/v3.6.0/FunctionOntology/> .
+@prefix icm: <http://tio.models.tmforum.org/tio/v3.6.0/IntentCommonModel/> .
+@prefix log: <http://tio.models.tmforum.org/tio/v3.6.0/LogicalOperators/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+################################################################################
+# VIOLATION: ut:utility with literal value
+#
+# ut:utility MUST reference a ut:UtilityInformation instance
+################################################################################
+
+# WRONG - using literal string instead of UtilityInformation
+ex:intent_literal_utility
+  a icm:Intent ;
+  log:allOf ( "true"^^xsd:boolean ) ;
+  ut:utility "high" .
+
+################################################################################
+# VIOLATION: ut:utility with wrong class
+################################################################################
+
+# WRONG - referencing a Function instead of UtilityInformation
+ex:intent_wrong_utility
+  a icm:Intent ;
+  log:allOf ( "true"^^xsd:boolean ) ;
+  ut:utility ex:notUtilInfo .
+
+ex:notUtilInfo
+  a fun:Function .

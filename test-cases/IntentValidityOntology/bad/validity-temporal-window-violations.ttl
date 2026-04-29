@@ -1,0 +1,33 @@
+# Test: Invalid usage of iv:Validity with W3C Time temporal window
+# This test validates that violations are caught for malformed temporal validity
+
+@prefix ex:   <http://example.org/> .
+@prefix iv:   <http://tio.models.tmforum.org/tio/v3.6.0/IntentValidityOntology/> .
+@prefix log:  <http://tio.models.tmforum.org/tio/v3.6.0/LogicalOperators/> .
+@prefix imo:  <http://tio.models.tmforum.org/tio/v3.6.0/IntentManagementOntology/> .
+@prefix t:    <http://www.w3.org/2006/time#> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+################################################################################
+# VIOLATION: Validity is not an instance of iv:Validity class
+# A resource used with iv:validIf must be typed as iv:Validity
+################################################################################
+
+# Missing iv:Validity type declaration
+ex:InvalidV1
+  log:match ( imo:Now
+              t:inside
+              ex:TimeInterval1 )
+  .
+
+ex:TimeInterval1
+  t:hasBeginning [ t:inXSDDateTimeStamp "2024-07-05T17:00:00+01:00"^^xsd:dateTimeStamp ] ;
+  t:hasXSDDuration "PT1H"^^xsd:duration
+  .
+
+# This should fail because InvalidV1 is not declared as iv:Validity
+ex:TestIntent
+  a rdf:Resource ;
+  iv:validIf ex:InvalidV1
+  .

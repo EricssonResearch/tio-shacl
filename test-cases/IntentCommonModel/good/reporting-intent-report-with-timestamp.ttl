@@ -1,0 +1,97 @@
+# Test: IntentReport with reportGenerated timestamp and reportNumber
+# This test validates IntentReport with temporal and sequencing properties
+# Based on TR290B example and IG1358 User Guide example
+
+@prefix ex:   <http://example.org/> .
+@prefix icm:  <http://tio.models.tmforum.org/tio/v3.6.0/IntentCommonModel/> .
+@prefix imo:  <http://tio.models.tmforum.org/tio/v3.6.0/IntentManagementOntology/> .
+@prefix log:  <http://tio.models.tmforum.org/tio/v3.6.0/LogicalOperators/> .
+@prefix t:    <http://www.w3.org/2006/time#> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+################################################################################
+# IntentReport with Timestamp and Sequence Number
+#
+# This example shows IntentReport properties:
+# - icm:reportGenerated: W3C Time Instant indicating when report was created
+# - icm:reportNumber: Positive integer for report sequencing
+# - icm:intentHandlingState: Current state of intent handling
+# - icm:intentUpdateState: State of any updates
+# - imo:event: Event that triggered this report
+#
+# Key aspects tested:
+# - icm:IntentReport class usage
+# - icm:reportGenerated property with time:Instant
+# - icm:reportNumber property with xsd:positiveInteger
+# - icm:intentHandlingState and icm:intentUpdateState
+# - Integration with IntentManagementOntology
+################################################################################
+
+# Intent Definition
+ex:I1
+  a icm:Intent ;
+  rdfs:label "Slice Performance Intent"@en ;
+  log:allOf ( ex:E1 )
+  .
+
+ex:E1
+  a icm:PropertyExpectation ;
+  rdfs:label "Latency Expectation"@en ;
+  icm:target ex:T1 ;
+  log:allOf ( ex:C1 )
+  .
+
+ex:T1
+  a icm:Target ;
+  rdfs:member ex:Slice1
+  .
+
+ex:Slice1
+  a ex:NetworkSlice ;
+  rdfs:label "Network Slice 1"@en
+  .
+
+ex:NetworkSlice
+  a rdfs:Class ;
+  rdfs:label "Network Slice"@en
+  .
+
+ex:C1
+  a log:Condition ;
+  rdfs:label "Latency Condition"@en ;
+  log:allOf ( "true"^^xsd:boolean )
+  .
+
+################################################################################
+# IntentReport with full properties
+################################################################################
+
+ex:IR1
+  a icm:IntentReport ;
+  rdfs:label "Intent Report #4"@en ;
+  # Timestamp when report was generated
+  icm:reportGenerated [
+    a t:Instant ;
+    t:inXSDDateTimeStamp "2023-02-06T13:30:10+01:00"^^xsd:dateTimeStamp
+  ] ;
+  # Report sequence number
+  icm:reportNumber "4"^^xsd:positiveInteger ;
+  # What intent this report is about
+  icm:about ex:I1 ;
+  # Current handling state
+  icm:intentHandlingState imo:StateCompliant ;
+  # Update state
+  icm:intentUpdateState imo:StateNoUpdate ;
+  # Event that triggered this report
+  imo:event ex:Complies001 ;
+  # Overall result
+  icm:result true
+  .
+
+# Event instance
+ex:Complies001
+  a imo:Complies ;
+  rdfs:label "Complies Event 001"@en
+  .

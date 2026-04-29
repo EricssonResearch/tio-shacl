@@ -1,0 +1,35 @@
+# Test: Valid usage of math functions
+# Concepts covered: logistic, mapping, poly
+# This test validates that math functions can be used correctly.
+
+@prefix ex: <http://example.org/> .
+@prefix mth: <http://tio.models.tmforum.org/tio/v3.6.0/MathFunctions/> .
+@prefix quan: <http://tio.models.tmforum.org/tio/v3.6.0/QuantityOntology/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# === logistic function: (Quantity) ===
+ex:test_logistic
+  a rdfs:Resource ;
+  mth:logistic ( ex:input1 ) .
+
+# === mapping function: (Quantity, rdf:List of mappings) ===
+ex:test_mapping
+  a rdfs:Resource ;
+  mth:mapping ( ex:input1 ex:map_list ) .
+
+# === poly function: (Quantity, coefficients) ===
+ex:test_poly
+  a rdfs:Resource ;
+  mth:poly ( ex:input1 ex:coeffs1 ) .
+
+# Supporting instances
+ex:input1 a quan:Quantity ;
+    rdf:value "50"^^xsd:decimal ;
+    quan:unit "%" .
+
+# Map list must be rdf:List
+ex:map_list a rdf:List .
+
+ex:coeffs1 a rdfs:Resource .

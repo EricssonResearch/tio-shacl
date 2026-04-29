@@ -1,0 +1,88 @@
+# Test: Valid usage of iv:Validity with metric-based condition
+# This test validates that validity can be based on metric value comparisons
+# Based on TR291A Intent Validity Extension Model example 3
+
+@prefix ex:   <http://example.org/> .
+@prefix icm:  <http://tio.models.tmforum.org/tio/v3.6.0/IntentCommonModel/> .
+@prefix iv:   <http://tio.models.tmforum.org/tio/v3.6.0/IntentValidityOntology/> .
+@prefix log:  <http://tio.models.tmforum.org/tio/v3.6.0/LogicalOperators/> .
+@prefix quan: <http://tio.models.tmforum.org/tio/v3.6.0/QuantityOntology/> .
+@prefix met:  <http://tio.models.tmforum.org/tio/v3.6.0/MetricsAndObservations/> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+################################################################################
+# Validity with metric-based condition
+#
+# This example shows an Intent that is only valid when the number of users
+# served is smaller than 1000. This is a common pattern for conditional
+# requirements based on measurable metrics.
+#
+# Key aspects tested:
+# - iv:Validity with quan:smaller function
+# - Integration with QuantityOntology
+# - Metric definition and usage
+################################################################################
+
+# Metric: Number of Users
+ex:NumberOfUsers
+  a rdf:Property, met:Metric ;
+  rdfs:label "Number of Users"@en ;
+  rdfs:comment "Metric tracking the number of users served"@en ;
+  rdfs:range quan:Quantity
+  .
+
+# Current number of users quantity
+ex:NumberOfUsersQuantity
+  a quan:Quantity ;
+  rdf:value "500"^^xsd:decimal ;
+  quan:unit "users"
+  .
+
+# Validity: Valid only when NumberOfUsers < 1000
+ex:V1
+  a iv:Validity ;
+  quan:smaller ( ex:NumberOfUsersQuantity
+                 [ a quan:Quantity ;
+                   rdf:value "1000"^^xsd:decimal ;
+                   quan:unit "users" ]
+  )
+  .
+
+# Intent with metric-based validity
+ex:I1
+  a icm:Intent ;
+  log:allOf ( ex:E1 ) ;
+  iv:validIf ex:V1
+  .
+
+# PropertyExpectation
+ex:E1
+  a icm:PropertyExpectation ;
+  icm:target ex:T1 ;
+  log:allOf ( ex:C1 )
+  .
+
+# Target
+ex:T1
+  a icm:Target ;
+  rdfs:member ex:Slice1
+  .
+
+# Condition
+ex:C1
+  a log:Condition ;
+  log:allOf ( "true"^^xsd:boolean )
+  .
+
+# Network slice example
+ex:Slice1
+  a ex:NetworkSlice ;
+  rdfs:label "Network Slice 1"@en
+  .
+
+ex:NetworkSlice
+  a rdfs:Class ;
+  rdfs:label "Network Slice"@en
+  .

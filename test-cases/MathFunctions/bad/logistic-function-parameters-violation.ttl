@@ -1,0 +1,24 @@
+# Test: Missing required mf:k parameter on logistic function instances
+# This test validates that mf:logistic instances must have mf:k parameter
+# Should FAIL with: "Logistic function missing required mf:k parameter"
+
+@prefix ex:  <http://example.org/> .
+@prefix mf:  <http://tio.models.tmforum.org/tio/v3.6.0/MathFunctions/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+################################################################################
+# VIOLATION: Logistic function missing required mf:k parameter
+#
+# Instances of mf:logistic MUST have mf:k to define the steepness
+################################################################################
+
+# WRONG - logistic function without k parameter
+ex:logistic_no_k
+  a mf:logistic .
+
+# WRONG - logistic with empty k value (still missing valid k)
+ex:logistic_other_params_only
+  a mf:logistic ;
+  mf:l "1.0"^^xsd:decimal ;
+  mf:x0 "0.0"^^xsd:decimal .

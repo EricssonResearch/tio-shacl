@@ -1,0 +1,90 @@
+# TMF IntentGuaranteeOntology SHACL Shapes
+#
+# Domain-specific validation for IntentGuaranteeOntology.
+# Global validation (function usage, vocabulary) handled by lib/GlobalShapes.ttl
+#
+# Ontology URI: http://tio.models.tmforum.org/tio/v3.6.0/IntentGuaranteeOntology/
+
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# TMF namespaces
+@prefix ig: <http://tio.models.tmforum.org/tio/v3.6.0/IntentGuaranteeOntology/> .
+@prefix fun: <http://tio.models.tmforum.org/tio/v3.6.0/FunctionOntology/> .
+@prefix imo: <http://tio.models.tmforum.org/tio/v3.6.0/IntentManagementOntology/> .
+
+# Shape namespaces  
+@prefix ig-shapes: <http://tio.models.tmforum.org/tio/v3.6.0/shapes/IntentGuaranteeOntology/> .
+@prefix tio-lib: <http://tio.models.tmforum.org/tio/v3.6.0/shapes/lib/> .
+@prefix tio-targets: <http://tio.models.tmforum.org/tio/v3.6.0/shapes/lib/targets/> .
+@prefix tio-constraints: <http://tio.models.tmforum.org/tio/v3.6.0/shapes/lib/constraints/> .
+
+# Note: Vocabulary validation handled globally by tio-lib:VocabularyUsageShape in GlobalShapes.ttl
+
+# =============================================================================
+# PROPERTY VALIDATION
+# =============================================================================
+
+# Validate confidenceLevel datatype
+ig-shapes:ConfidenceLevelShape
+    a sh:NodeShape ;
+    rdfs:label "Confidence Level Property Validation" ;
+    rdfs:comment "Validates that ig:confidenceLevel has correct datatype" ;
+    sh:target [
+        a tio-targets:SubjectsOfPropertyTargetType ;
+        tio-lib:property ig:confidenceLevel ;
+    ] ;
+
+    sh:property [
+        sh:path ig:confidenceLevel ;
+        sh:description "confidenceLevel must be xsd:decimal" ;
+        sh:datatype xsd:decimal ;
+        sh:name "confidenceLevel" ;
+        sh:message "[ig/confidence_level_type] ig:confidenceLevel must be xsd:decimal datatype. In TIO v3.6.0, confidence levels are numeric values (0.0 to 1.0 typical range). Add: ig:confidenceLevel \"0.95\"^^xsd:decimal" ;
+    ] ;
+
+    sh:severity sh:Violation .
+
+# Validate guaranteePeriod datatype
+ig-shapes:GuaranteePeriodShape
+    a sh:NodeShape ;
+    rdfs:label "Guarantee Period Property Validation" ;
+    rdfs:comment "Validates that ig:guaranteePeriod has correct datatype" ;
+    sh:target [
+        a tio-targets:SubjectsOfPropertyTargetType ;
+        tio-lib:property ig:guaranteePeriod ;
+    ] ;
+
+    sh:property [
+        sh:path ig:guaranteePeriod ;
+        sh:description "guaranteePeriod must be xsd:duration" ;
+        sh:datatype xsd:duration ;
+        sh:name "guaranteePeriod" ;
+        sh:message "[ig/guarantee_period_type] ig:guaranteePeriod must be xsd:duration datatype. In TIO v3.6.0, use ISO 8601 duration format. Examples: \"P1D\" (1 day), \"PT1H\" (1 hour), \"P1M\" (1 month), \"PT30M\" (30 minutes). Add: ig:guaranteePeriod \"P1D\"^^xsd:duration" ;
+    ] ;
+
+    sh:severity sh:Violation .
+
+# Validate guaranteePeriodUpdateInterval datatype
+ig-shapes:GuaranteePeriodUpdateIntervalShape
+    a sh:NodeShape ;
+    rdfs:label "Guarantee Period Update Interval Property Validation" ;
+    rdfs:comment "Validates that ig:guaranteePeriodUpdateInterval has correct datatype" ;
+    sh:target [
+        a tio-targets:SubjectsOfPropertyTargetType ;
+        tio-lib:property ig:guaranteePeriodUpdateInterval ;
+    ] ;
+
+    sh:property [
+        sh:path ig:guaranteePeriodUpdateInterval ;
+        sh:description "guaranteePeriodUpdateInterval must be xsd:duration" ;
+        sh:datatype xsd:duration ;
+        sh:name "guaranteePeriodUpdateInterval" ;
+        sh:message "[ig/guarantee_period_update_type] ig:guaranteePeriodUpdateInterval must be xsd:duration datatype. In TIO v3.6.0, use ISO 8601 duration format for update intervals. Examples: \"PT5M\" (5 minutes), \"PT1H\" (1 hour), \"P1D\" (1 day). Add: ig:guaranteePeriodUpdateInterval \"PT5M\"^^xsd:duration" ;
+    ] ;
+
+    sh:severity sh:Violation .
+
+# Note: Global validation (vocabulary, function usage) handled by lib/GlobalShapes.ttl

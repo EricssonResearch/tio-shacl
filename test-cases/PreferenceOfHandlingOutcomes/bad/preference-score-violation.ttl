@@ -1,0 +1,38 @@
+# Test: Invalid PreferenceScore property values
+# This test validates PreferenceScore aboutOption and scoreValue constraints
+# Should FAIL with: "must be an icm:IntentReport instance" or "must be a literal value"
+
+@prefix ex:  <http://example.org/> .
+@prefix pre: <http://tio.models.tmforum.org/tio/v3.6.0/PreferenceOfHandlingOutcomes/> .
+@prefix icm: <http://tio.models.tmforum.org/tio/v3.6.0/IntentCommonModel/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+################################################################################
+# VIOLATION: pre:aboutOption with wrong class
+#
+# pre:aboutOption MUST reference an icm:IntentReport instance
+################################################################################
+
+# WRONG - referencing an Expectation instead of IntentReport
+ex:score_wrong_option
+  a pre:PreferenceScore ;
+  pre:aboutOption ex:notReport2 ;
+  pre:scoreValue 90 .
+
+ex:notReport2
+  a icm:Expectation .
+
+################################################################################
+# VIOLATION: pre:scoreValue with object instead of literal
+#
+# pre:scoreValue MUST be a literal value (typically numeric)
+################################################################################
+
+# WRONG - using an object/resource instead of literal
+ex:score_object_value
+  a pre:PreferenceScore ;
+  pre:scoreValue ex:someObject .
+
+ex:someObject
+  a rdf:Resource .

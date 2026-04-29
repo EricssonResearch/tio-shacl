@@ -1,0 +1,789 @@
+# TMF SHACL Reusable Constraint Library
+#
+# This file is part of the modular constraint library.
+# Based on SHACL Advanced Features constraint patterns
+
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix fun: <http://tio.models.tmforum.org/tio/v3.6.0/FunctionOntology/> .
+@prefix icm: <http://tio.models.tmforum.org/tio/v3.6.0/IntentCommonModel/> .
+@prefix tio-constraints: <http://tio.models.tmforum.org/tio/v3.6.0/shapes/lib/constraints/> .
+@prefix tio-lib: <http://tio.models.tmforum.org/tio/v3.6.0/shapes/lib/> .
+
+# =============================================================================
+# FUNCTION AND OPERATOR VALIDATION CONSTRAINTS
+# =============================================================================
+
+# Constraint for functions that should return boolean
+# Usage: "Give me all the things that are functions, but only if they don't have boolean as their resultType."
+tio-constraints:FunctionBooleanResultTypeConstraint
+    a sh:SPARQLConstraint ;
+    rdfs:label "Function Boolean Result Type Constraint" ;
+    rdfs:comment "Validates that functions have boolean result type. Used with parameterized target types." ;
+    sh:message "[function/boolean_resulttype] Function {?this} must have boolean result type. Found: {?resultType}. Fix: Add or correct the declaration: fun:resultType xsd:boolean. Logical operators (log:and, log:or, log:not, log:allOf, etc.) always return boolean values in TIO v3.6.0." ;
+    sh:select """
+        PREFIX fun: <http://tio.models.tmforum.org/tio/v3.6.0/FunctionOntology/>
+        PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+        SELECT $this ?resultType
+        WHERE {
+            $this a fun:Function .
+            OPTIONAL { $this fun:resultType ?resultType }
+            FILTER(BOUND(?resultType) && ?resultType != xsd:boolean)
+        }
+    """ .
+
+# Constraint for set membership functions that should return boolean
+# Usage: "Give me all the things that are set membership functions (elementOf, includedIn, intersectsWith), but only if they don't have boolean as their resultType."
+tio-constraints:SetMembershipFunctionBooleanResultTypeConstraint
+    a sh:SPARQLConstraint ;
+    rdfs:label "Set Membership Function Boolean Result Type Constraint" ;
+    rdfs:comment "Validates that set membership functions return boolean. Used with parameterized target types." ;
+    sh:message "[function/set_membership_resulttype] Set membership function {?this} must return boolean type. Found: {?resultType}. Set membership tests (set:elementOf, set:includedIn, set:intersectsWith) always return boolean in TIO v3.6.0. Fix: Add or correct the declaration: fun:resultType xsd:boolean" ;
+    sh:select """
+        PREFIX fun: <http://tio.models.tmforum.org/tio/v3.6.0/FunctionOntology/>
+        PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+        SELECT $this ?resultType
+        WHERE {
+            $this a fun:Function .
+            FILTER(REGEX(STR($this), "(elementOf|includedIn|intersectsWith)$"))
+            OPTIONAL { $this fun:resultType ?resultType }
+            FILTER(BOUND(?resultType) && ?resultType != xsd:boolean)
+        }
+    """ .
+
+# =============================================================================
+# FUNCTION VALIDATION CONSTRAINTS
+# =============================================================================
+
+# Validate that arityMin ≤ arityMax for functions
+# Usage: "Give me all the things that are functions, but only if their arityMin is greater than their arityMax."
+tio-constraints:FunctionArityConsistencyConstraint
+    a sh:SPARQLConstraint ;
+    rdfs:label "Function Arity Consistency Constraint" ;
+    rdfs:comment "Validates that arityMin is less than or equal to arityMax for functions" ;
+    sh:message "[function/arity_inconsistent] Function {?this} arity inconsistent: arityMin ({?min}) must be ≤ arityMax ({?max})" ;
+    sh:select """
+        PREFIX fun: <http://tio.models.tmforum.org/tio/v3.6.0/FunctionOntology/>
+        SELECT $this ?min ?max
+        WHERE {
+            $this fun:arityMin ?min ;
+                  fun:arityMax ?max .
+            FILTER(?min > ?max)
+        }
+    """ .
+
+# Validate that argumentTypes list is properly structured
+# Usage: "Give me all the things that are functions, but only if their argumentTypes is not a well-formed RDF list."
+tio-constraints:ArgumentTypeCountConstraint
+    a sh:SPARQLConstraint ;
+    rdfs:label "Argument Type List Structure Constraint" ;
+    rdfs:comment "Validates that argumentTypes is a well-formed RDF list" ;
+    sh:message "[function/argument_types_list] Function argumentTypes must be a well-formed list starting with {?typeList}" ;
+    sh:select """
+        PREFIX fun: <http://tio.models.tmforum.org/tio/v3.6.0/FunctionOntology/>
+        PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+        PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+        SELECT $this ?typeList
+        WHERE {
+            $this fun:argumentTypes ?typeList .
+            # Check that it's not a proper list (either not rdfs:List or malformed)
+            FILTER NOT EXISTS {
+                { ?typeList a rdfs:List } UNION 
+                { ?typeList rdf:first ?first }
+            }
+        }
+    """ .
+
+# =============================================================================
+# FUNCTION USAGE VALIDATION CONSTRAINTS
+# =============================================================================
+
+# Constraint to detect and reject ambiguous unwrapped function syntax in RDF lists
+# The pattern `func ( args )` inside a list parses as two separate list elements,
+# not as a function invocation. Correct syntax requires blank nodes: `[ func ( args ) ]`
+tio-constraints:UnwrappedFunctionSyntaxConstraint
+    a sh:SPARQLConstraint ;
+    rdfs:label "Unwrapped Function Syntax Constraint" ;
+    rdfs:comment "Rejects ambiguous unwrapped function syntax. Use [ func ( args ) ] instead of func ( args ) in lists." ;
+    sh:message "[function/unwrapped_syntax] Invalid unwrapped function syntax: '{?func}' followed by argument list in list position. RDF parses this as two separate list elements, not a function call. Fix: wrap in blank node as [ {?func} ( ... ) ]" ;
+    sh:select """
+        PREFIX fun: <http://tio.models.tmforum.org/tio/v3.6.0/FunctionOntology/>
+        PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+
+        SELECT $this ?func
+        WHERE {
+            # Find list elements where $this is a node in the argument list
+            $this rdf:rest* ?node .
+            ?node rdf:first ?func .
+            ?node rdf:rest ?nextNode .
+            ?nextNode rdf:first ?nextItem .
+
+            # Check if current element is a function IRI
+            ?func a fun:Function .
+            FILTER(isIRI(?func))
+
+            # Check if next element is a list (has rdf:first, meaning it's the function's arguments)
+            ?nextItem rdf:first ?anything .
+        }
+    """ .
+
+# Validate that function arguments are RDF lists (not literals or plain resources)
+# Usage: "Give me all the things that use a function, but only if the argument is not an RDF list."
+tio-constraints:FunctionArgumentMustBeListConstraint
+    a sh:SPARQLConstraint ;
+    rdfs:label "Function Argument Must Be List Constraint" ;
+    rdfs:comment "Validates that function properties have RDF List values (not literals or plain resources)" ;
+    sh:message "[function/args_not_list] Function {?func} requires RDF List as arguments, got {?valueType}: {?value}. Use parentheses: {?func} ( arg1 arg2 ... )" ;
+    sh:select """
+        PREFIX fun: <http://tio.models.tmforum.org/tio/v3.6.0/FunctionOntology/>
+        PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+
+        SELECT $this ?func ?value ?valueType
+        WHERE {
+            # Find function usage: $this ?func ?value where ?func is a function
+            $this ?func ?value .
+            ?func a fun:Function .
+
+            # Check if value is NOT a valid RDF list node
+            # Valid list nodes have rdf:first property (including rdf:nil which is empty list)
+            FILTER(
+                
+                isLiteral(?value) ||
+                
+                # Exception: rdf:nil is a valid empty list
+                (!isLiteral(?value) && ?value != rdf:nil && NOT EXISTS { ?value rdf:first ?anything })
+            )
+
+            # Bind descriptive value type for error message
+            BIND(
+                IF(isLiteral(?value),
+                   "Literal",
+                   IF(?value = rdf:nil,
+                      "Empty list (rdf:nil)",
+                      "Non-list resource"
+                   )
+                ) AS ?valueType
+            )
+        }
+    """ .
+
+# Validate that function usage has correct number of arguments (arity)
+# Usage: "Give me all the things that use a function, but only if the number of arguments doesn't match the function's arityMin/arityMax."
+tio-constraints:FunctionUsageArityMinConstraint
+    a sh:SPARQLConstraint ;
+    rdfs:label "Function Usage Arity Min Constraint" ;
+    rdfs:comment "Validates that function usage has at least arityMin arguments." ;
+    sh:message "[function/arity_min] Function {?func} requires at least {?arityMin} arguments, got {?actualCount}." ;
+    sh:select """
+        PREFIX fun: <http://tio.models.tmforum.org/tio/v3.6.0/FunctionOntology/>
+        PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+
+        SELECT $this ?func ?arityMin ?actualCount
+        WHERE {
+            $this ?func ?argList .
+            ?func a fun:Function .
+            ?func fun:arityMin ?arityMin .
+
+            OPTIONAL {
+                SELECT $this ?argList (COUNT(?item) AS ?countFromList)
+                WHERE {
+                    $this ?func2 ?argList .
+                    ?argList rdf:rest* ?node .
+                    ?node rdf:first ?item .
+                }
+                GROUP BY $this ?argList
+            }
+
+            BIND(IF(?argList = rdf:nil, 0, ?countFromList) AS ?actualCount)
+            FILTER(?actualCount < ?arityMin)
+        }
+    """ .
+
+tio-constraints:FunctionUsageArityMaxConstraint
+    a sh:SPARQLConstraint ;
+    rdfs:label "Function Usage Arity Max Constraint" ;
+    rdfs:comment "Validates that function usage has at most arityMax arguments." ;
+    sh:message "[function/arity_max] Function {?func} requires at most {?arityMax} arguments, got {?actualCount}." ;
+    sh:select """
+        PREFIX fun: <http://tio.models.tmforum.org/tio/v3.6.0/FunctionOntology/>
+        PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+
+        SELECT $this ?func ?arityMax ?actualCount
+        WHERE {
+            $this ?func ?argList .
+            ?func a fun:Function .
+            ?func fun:arityMax ?arityMax .
+
+            OPTIONAL {
+                SELECT $this ?argList (COUNT(?item) AS ?countFromList)
+                WHERE {
+                    $this ?func2 ?argList .
+                    ?argList rdf:rest* ?node .
+                    ?node rdf:first ?item .
+                }
+                GROUP BY $this ?argList
+            }
+
+            BIND(IF(?argList = rdf:nil, 0, ?countFromList) AS ?actualCount)
+            FILTER(?actualCount > ?arityMax)
+        }
+    """ .
+
+# =============================================================================
+# FUNCTION ARGUMENT TYPE VALIDATION (Split into focused constraints)
+# =============================================================================
+# The original monolithic FunctionUsageArgumentTypeConstraint (160+ lines) has been
+# split into focused constraints by type category for improved readability and maintainability.
+
+# Boolean Type Validation Constraint
+# Handles arguments where expectedType = xsd:boolean
+tio-constraints:FunctionUsageArgumentTypeBooleanConstraint
+    a sh:SPARQLConstraint ;
+    rdfs:label "Function Argument Boolean Type Constraint" ;
+    rdfs:comment "Validates arguments at positions expecting xsd:boolean. A value is boolean-compatible if: (1) literal with xsd:boolean datatype, (2) instance of class with boolean resultType, (3) instance of fun:Evaluable subclass, (4) Function with boolean resultType." ;
+    sh:message "[function/arg_type_boolean] Function {?func} expects boolean at position but got {?arg}. Value must be: boolean literal, Evaluable instance, or Function returning boolean." ;
+    sh:select """
+        PREFIX fun: <http://tio.models.tmforum.org/tio/v3.6.0/FunctionOntology/>
+        PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+        PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+        PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+        PREFIX tio-ext: <http://tio.models.tmforum.org/tio/v3.6.0/shapes/lib/external/>
+
+        SELECT $this ?func ?arg
+        WHERE {
+            # Find function usage with boolean argument type
+            $this ?func ?argList .
+            ?func a fun:Function .
+            ?func fun:argumentTypes ?typeList .
+
+            # Match argument and type at same position (explicit positions 0-5)
+            {
+                ?argList rdf:first ?arg .
+                ?typeList rdf:first ?expectedType .
+            } UNION {
+                ?argList rdf:rest/rdf:first ?arg .
+                ?typeList rdf:rest/rdf:first ?expectedType .
+            } UNION {
+                ?argList rdf:rest/rdf:rest/rdf:first ?arg .
+                ?typeList rdf:rest/rdf:rest/rdf:first ?expectedType .
+            } UNION {
+                ?argList rdf:rest/rdf:rest/rdf:rest/rdf:first ?arg .
+                ?typeList rdf:rest/rdf:rest/rdf:rest/rdf:first ?expectedType .
+            } UNION {
+                ?argList rdf:rest/rdf:rest/rdf:rest/rdf:rest/rdf:first ?arg .
+                ?typeList rdf:rest/rdf:rest/rdf:rest/rdf:rest/rdf:first ?expectedType .
+            } UNION {
+                ?argList rdf:rest/rdf:rest/rdf:rest/rdf:rest/rdf:rest/rdf:first ?arg .
+                ?typeList rdf:rest/rdf:rest/rdf:rest/rdf:rest/rdf:rest/rdf:first ?expectedType .
+            }
+
+            # Only handle boolean expected types in this constraint
+            FILTER(?expectedType = xsd:boolean)
+
+            # Skip external ontology resources (data-driven whitelist)
+            FILTER NOT EXISTS {
+                tio-ext:ExternalOntologyWhitelist tio-ext:namespace ?ns .
+                FILTER(STRSTARTS(STR(?arg), ?ns))
+            }
+
+            # Boolean compatibility check - value is INVALID if ALL conditions fail
+            FILTER(!(
+                # Case 1: Literal with xsd:boolean datatype
+                (isLiteral(?arg) && SAMETERM(datatype(?arg), xsd:boolean)) ||
+                # Case 2: Instance of class with fun:resultType xsd:boolean in hierarchy
+                EXISTS {
+                    ?arg a ?argClass .
+                    ?argClass rdfs:subClassOf* ?classWithResultType .
+                    ?classWithResultType fun:resultType xsd:boolean .
+                } ||
+                # Case 3: Instance of fun:Evaluable subclass (implicit boolean)
+                # Need explicit rdfs:subClassOf* because TopBraid doesn't do transitive subclass inference
+                EXISTS {
+                    ?arg a ?argClass .
+                    ?argClass rdfs:subClassOf* fun:Evaluable .
+                } ||
+                # Case 4: Function with xsd:boolean resultType
+                EXISTS {
+                    ?arg a fun:Function .
+                    ?arg fun:resultType xsd:boolean .
+                } ||
+                # Case 5: Blank node with function property returning boolean
+                # Handles [ quan:greater ( ... ) ] where quan:greater returns boolean
+                EXISTS {
+                    ?arg ?funcProp ?funcArgs .
+                    ?funcProp a fun:Function .
+                    ?funcProp fun:resultType xsd:boolean .
+                }
+            ))
+        }
+    """ .
+
+# Object Type Validation Constraint
+# Handles non-boolean object type arguments (class instances, function results)
+tio-constraints:FunctionUsageArgumentTypeObjectConstraint
+    a sh:SPARQLConstraint ;
+    rdfs:label "Function Argument Object Type Constraint" ;
+    rdfs:comment "Validates arguments at positions expecting object types (non-boolean). Checks type compatibility via: direct instance, subclass hierarchy, or function resultType." ;
+    sh:message "[function/arg_type_mismatch] Function {?func} expects type {?expectedType} but got {?arg}. Ensure the argument is an instance of the expected type or a compatible subclass." ;
+    sh:select """
+        PREFIX fun: <http://tio.models.tmforum.org/tio/v3.6.0/FunctionOntology/>
+        PREFIX met: <http://tio.models.tmforum.org/tio/v3.6.0/MetricsAndObservations/>
+        PREFIX quan: <http://tio.models.tmforum.org/tio/v3.6.0/QuantityOntology/>
+        PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+        PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+        PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+        PREFIX tio-ext: <http://tio.models.tmforum.org/tio/v3.6.0/shapes/lib/external/>
+
+        SELECT $this ?func ?arg ?expectedType
+        WHERE {
+            # Find function usage with argument types
+            $this ?func ?argList .
+            ?func a fun:Function .
+            ?func fun:argumentTypes ?typeList .
+
+            # Match argument and type at same position (explicit positions 0-5)
+            {
+                ?argList rdf:first ?arg .
+                ?typeList rdf:first ?expectedType .
+            } UNION {
+                ?argList rdf:rest/rdf:first ?arg .
+                ?typeList rdf:rest/rdf:first ?expectedType .
+            } UNION {
+                ?argList rdf:rest/rdf:rest/rdf:first ?arg .
+                ?typeList rdf:rest/rdf:rest/rdf:first ?expectedType .
+            } UNION {
+                ?argList rdf:rest/rdf:rest/rdf:rest/rdf:first ?arg .
+                ?typeList rdf:rest/rdf:rest/rdf:rest/rdf:first ?expectedType .
+            } UNION {
+                ?argList rdf:rest/rdf:rest/rdf:rest/rdf:rest/rdf:first ?arg .
+                ?typeList rdf:rest/rdf:rest/rdf:rest/rdf:rest/rdf:first ?expectedType .
+            } UNION {
+                ?argList rdf:rest/rdf:rest/rdf:rest/rdf:rest/rdf:rest/rdf:first ?arg .
+                ?typeList rdf:rest/rdf:rest/rdf:rest/rdf:rest/rdf:rest/rdf:first ?expectedType .
+            }
+
+            # Handle non-boolean types only (boolean handled by separate constraint)
+            FILTER(?expectedType != xsd:boolean)
+            # Skip polymorphic/fundamental types (accept any value)
+            # rdf:Resource/rdfs:Resource - accept any resource
+            # rdf:Property - accept any property (including from external ontologies)
+            FILTER(?expectedType != rdf:Resource && ?expectedType != rdfs:Resource && ?expectedType != rdf:Property)
+            # Skip literal validation (handled separately)
+            FILTER(!isLiteral(?arg) ||
+                   (?expectedType = quan:Quantity && SAMETERM(datatype(?arg), quan:quantity)))
+
+            # Skip external ontology resources (data-driven whitelist)
+            FILTER NOT EXISTS {
+                tio-ext:ExternalOntologyWhitelist tio-ext:namespace ?ns .
+                FILTER(STRSTARTS(STR(?arg), ?ns))
+            }
+
+            # Get actual type of argument
+            OPTIONAL { ?arg a ?actualType }
+
+            # Type compatibility check - value is INVALID if ALL conditions fail
+            FILTER(!(
+                # Direct type match
+                (BOUND(?actualType) && ?actualType = ?expectedType) ||
+                # Subclass relationship
+                (BOUND(?actualType) && EXISTS { ?actualType rdfs:subClassOf+ ?expectedType }) ||
+                # Direct instance check with inference
+                EXISTS { ?arg a ?expectedType } ||
+                # met:lastValue type inference (metric range determines type)
+                EXISTS {
+                    ?arg met:lastValue ?lvArgs .
+                    ?lvArgs rdf:first ?metric .
+                    ?metric rdfs:range ?metricRange .
+                    ?metricRange rdfs:subClassOf* ?expectedType .
+                } ||
+                # Blank node with function property - infer type from function's resultType
+                # Handles cases like [ met:lastValue ( ex:metric ) ] where the blank node
+                # is not typed but has a function property whose resultType determines the type
+                EXISTS {
+                    ?arg ?funcProp ?funcArgs .
+                    ?funcProp a fun:Function .
+                    ?funcProp fun:resultType ?funcResultType .
+                    FILTER(?funcResultType != rdf:Resource)
+                    FILTER(
+                        ?funcResultType = ?expectedType ||
+                        EXISTS { ?funcResultType rdfs:subClassOf+ ?expectedType }
+                    )
+                } ||
+                # Blank node with polymorphic function property - infer type from arg's range
+                # Handles [ met:lastValue ( ex:metric ) ] where met:lastValue has resultType rdf:Resource
+                # and actual type comes from metric's rdfs:range
+                EXISTS {
+                    ?arg ?funcProp ?funcArgs .
+                    ?funcProp a fun:Function .
+                    ?funcProp fun:resultType rdf:Resource .
+                    ?funcArgs rdf:first ?funcFirstArg .
+                    ?funcFirstArg rdfs:range ?argRange .
+                    ?argRange rdfs:subClassOf* ?expectedType .
+                } ||
+                # Function resultType compatibility (when arg IS typed as Function)
+                EXISTS {
+                    ?arg a fun:Function .
+                    ?arg fun:resultType ?funcResultType .
+                    FILTER(
+                        ?funcResultType = ?expectedType ||
+                        EXISTS { ?funcResultType rdfs:subClassOf+ ?expectedType }
+                    )
+                } ||
+                # Polymorphic function resultType (rdf:Resource) - accept for any object type
+                # The actual type comes from the function's argument metadata (e.g., metric rdfs:range)
+                # Type compatibility is validated by FunctionUsageArgumentTypePolymorphicConstraint
+                EXISTS {
+                    ?arg a fun:Function .
+                    ?arg fun:resultType rdf:Resource .
+                }
+            ))
+        }
+    """ .
+
+# Literal Where Resource Expected Constraint
+# Catches the specific error where a literal is passed where a resource type is expected
+tio-constraints:FunctionUsageArgumentLiteralWhereResourceConstraint
+    a sh:SPARQLConstraint ;
+    rdfs:label "Function Argument Literal Where Resource Constraint" ;
+    rdfs:comment "Validates that literal values are not passed to functions expecting resource types (rdf:Resource, rdfs:Resource, rdf:Property, or other class types)." ;
+    sh:message "[function/arg_type_literal] Function {?func} expects a resource (type {?expectedType}) but got literal value {?arg}. Use an IRI or blank node instead of a literal." ;
+    sh:select """
+        PREFIX fun: <http://tio.models.tmforum.org/tio/v3.6.0/FunctionOntology/>
+        PREFIX quan: <http://tio.models.tmforum.org/tio/v3.6.0/QuantityOntology/>
+        PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+        PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+        PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+        SELECT $this ?func ?arg ?expectedType
+        WHERE {
+            # Find function usage with argument types
+            $this ?func ?argList .
+            ?func a fun:Function .
+            ?func fun:argumentTypes ?typeList .
+
+            # Match argument and type at same position (explicit positions 0-5)
+            {
+                ?argList rdf:first ?arg .
+                ?typeList rdf:first ?expectedType .
+            } UNION {
+                ?argList rdf:rest/rdf:first ?arg .
+                ?typeList rdf:rest/rdf:first ?expectedType .
+            } UNION {
+                ?argList rdf:rest/rdf:rest/rdf:first ?arg .
+                ?typeList rdf:rest/rdf:rest/rdf:first ?expectedType .
+            } UNION {
+                ?argList rdf:rest/rdf:rest/rdf:rest/rdf:first ?arg .
+                ?typeList rdf:rest/rdf:rest/rdf:rest/rdf:first ?expectedType .
+            } UNION {
+                ?argList rdf:rest/rdf:rest/rdf:rest/rdf:rest/rdf:first ?arg .
+                ?typeList rdf:rest/rdf:rest/rdf:rest/rdf:rest/rdf:first ?expectedType .
+            } UNION {
+                ?argList rdf:rest/rdf:rest/rdf:rest/rdf:rest/rdf:rest/rdf:first ?arg .
+                ?typeList rdf:rest/rdf:rest/rdf:rest/rdf:rest/rdf:rest/rdf:first ?expectedType .
+            }
+
+            # Only validate when argument IS a literal
+            FILTER(isLiteral(?arg))
+
+            # Only apply when expected type is a resource type (not a datatype)
+            # Skip xsd:boolean (handled by boolean constraint)
+            # Skip quan:Quantity with quan:quantity datatype (valid literal usage)
+            FILTER(?expectedType != xsd:boolean)
+            FILTER(!(?expectedType = quan:Quantity && SAMETERM(datatype(?arg), quan:quantity)))
+
+            # Resource types should not accept literals
+            # This includes rdf:Resource, rdfs:Resource, rdf:Property, and class types
+            FILTER(
+                ?expectedType = rdf:Resource ||
+                ?expectedType = rdfs:Resource ||
+                ?expectedType = rdf:Property ||
+                # Also reject literals for any class type (non-XSD types)
+                !STRSTARTS(STR(?expectedType), STR(xsd:))
+            )
+        }
+    """ .
+
+# Polymorphic Function Type Validation Constraint
+# Handles special case of polymorphic functions (resultType = rdf:Resource)
+# where actual type is inferred from function's argument metadata
+tio-constraints:FunctionUsageArgumentTypePolymorphicConstraint
+    a sh:SPARQLConstraint ;
+    rdfs:label "Function Argument Polymorphic Type Constraint" ;
+    rdfs:comment "Validates polymorphic function arguments where type is inferred from argument metadata (e.g., met:lastValue where result type comes from metric's rdfs:range)." ;
+    sh:message "[function/polymorphic_range] Polymorphic function {?arg} used where {?expectedType} is expected, but metric range is incompatible." ;
+    sh:select """
+        PREFIX fun: <http://tio.models.tmforum.org/tio/v3.6.0/FunctionOntology/>
+        PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+        PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+        PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+        PREFIX tio-ext: <http://tio.models.tmforum.org/tio/v3.6.0/shapes/lib/external/>
+
+        SELECT $this ?func ?arg ?expectedType
+        WHERE {
+            # Find function usage
+            $this ?func ?argList .
+            ?func a fun:Function .
+            ?func fun:argumentTypes ?typeList .
+
+            # Match argument and type at same position (explicit positions 0-5)
+            # Also capture the argNode for finding the next element
+            {
+                ?argList rdf:first ?arg .
+                ?typeList rdf:first ?expectedType .
+                BIND(?argList AS ?argNode)
+            } UNION {
+                ?argList rdf:rest/rdf:first ?arg .
+                ?typeList rdf:rest/rdf:first ?expectedType .
+                ?argList rdf:rest ?argNode .
+            } UNION {
+                ?argList rdf:rest/rdf:rest/rdf:first ?arg .
+                ?typeList rdf:rest/rdf:rest/rdf:first ?expectedType .
+                ?argList rdf:rest/rdf:rest ?argNode .
+            }
+
+            # Only process non-polymorphic expected types
+            FILTER(?expectedType != xsd:boolean)
+            FILTER(?expectedType != rdf:Resource && ?expectedType != rdfs:Resource)
+            FILTER(!STRSTARTS(STR(?expectedType), STR(xsd:)))
+
+            # Skip external ontology resources
+            FILTER NOT EXISTS {
+                tio-ext:ExternalOntologyWhitelist tio-ext:namespace ?ns .
+                FILTER(STRSTARTS(STR(?arg), ?ns))
+            }
+
+            # Target: polymorphic functions used as arguments
+            ?arg a fun:Function .
+            ?arg fun:resultType rdf:Resource .
+
+            # For polymorphic functions, find their argument list and check range compatibility
+            # The function's arguments immediately follow it in the parent argList
+            ?argNode rdf:rest ?nextNode .
+            ?nextNode rdf:first ?funcArgList .
+            ?funcArgList rdf:first ?funcFirstArg .
+
+            # Validate that function's first arg has range compatible with expected type
+            FILTER NOT EXISTS {
+                ?funcFirstArg rdfs:range ?argRange .
+                ?argRange rdfs:subClassOf* ?expectedType .
+            }
+        }
+    """ .
+
+# Note: FunctionUsageArgumentTypeConstraint has been split into three focused constraints:
+# - tio-constraints:FunctionUsageArgumentTypeBooleanConstraint
+# - tio-constraints:FunctionUsageArgumentTypeObjectConstraint
+# - tio-constraints:FunctionUsageArgumentTypePolymorphicConstraint
+# These are now referenced directly in GlobalShapes.ttl
+
+# =============================================================================
+# PROPERTY VALIDATION CONSTRAINTS
+# =============================================================================
+
+# Validate that properties have required rdfs:domain
+# Usage: "Give me all the things that are quantity comparison functions (atLeast, atMost, equals, lessThan, greaterThan), but only if they don't have boolean as their resultType."
+tio-constraints:QuantityComparisonFunctionBooleanResultTypeConstraint
+    a sh:SPARQLConstraint ;
+    rdfs:label "Quantity Comparison Function Boolean Result Type Constraint" ;
+    rdfs:comment "Validates that quantity comparison functions have boolean result type. Used with parameterized target types." ;
+    sh:message "[function/quantity_comparison_resulttype] Quantity comparison function {?this} should have boolean result type, found {?resultType}" ;
+    sh:select """
+        PREFIX fun: <http://tio.models.tmforum.org/tio/v3.6.0/FunctionOntology/>
+        PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+        SELECT $this ?resultType
+        WHERE {
+            $this a fun:Function .
+            # Check if it's a comparison function (atLeast, atMost, equals, etc.)
+            FILTER(REGEX(STR($this), "(atLeast|atMost|equals|lessThan|greaterThan)$"))
+            # Should have boolean result type for comparison functions
+            OPTIONAL { $this fun:resultType ?resultType }
+            FILTER(BOUND(?resultType) && ?resultType != xsd:boolean)
+        }
+    """ .
+
+# =============================================================================
+# CLASS RELATIONSHIP CONSTRAINTS
+# =============================================================================
+# Note: These constraints work with parameterized target types (tio-constraints:OntologyClassTargetType)
+# The target type scopes which classes are validated, so these constraints don't need namespace filtering
+
+# Constraint for checking that fun:Error is a subclass of imo:Error
+# Used with parameterized target types to scope validation
+# Usage: "Give me all the things that are fun:Error instances, but only if fun:Error is not a subclass of imo:Error."
+tio-constraints:ErrorSubclassConstraint
+    a sh:SPARQLConstraint ;
+    rdfs:label "Error Subclass Constraint" ;
+    rdfs:comment "Validates that fun:Error is a subclass of imo:Error. Used with parameterized target types." ;
+    sh:message "[domain/function_subclass] fun:Error should be a subclass of imo:Error" ;
+    sh:select """
+        PREFIX fun: <http://tio.models.tmforum.org/tio/v3.6.0/FunctionOntology/>
+        PREFIX imo: <http://tio.models.tmforum.org/tio/v3.6.0/IntentManagementOntology/>
+        PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+        SELECT $this
+        WHERE {
+            $this a fun:Error .
+            # Check that this error relates to the IMO error hierarchy
+            FILTER NOT EXISTS { 
+                fun:Error rdfs:subClassOf* imo:Error 
+            }
+        }
+    """ .
+
+# Constraint for checking that fun:Warning is a subclass of imo:Warning
+# Used with parameterized target types to scope validation
+# Usage: "Give me all the things that are fun:Warning instances, but only if fun:Warning is not a subclass of imo:Warning."
+tio-constraints:WarningSubclassConstraint
+    a sh:SPARQLConstraint ;
+    rdfs:label "Warning Subclass Constraint" ;
+    rdfs:comment "Validates that fun:Warning is a subclass of imo:Warning. Used with parameterized target types." ;
+    sh:message "[domain/function_subclass] fun:Warning should be a subclass of imo:Warning" ;
+    sh:select """
+        PREFIX fun: <http://tio.models.tmforum.org/tio/v3.6.0/FunctionOntology/>
+        PREFIX imo: <http://tio.models.tmforum.org/tio/v3.6.0/IntentManagementOntology/>
+        PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+        SELECT $this
+        WHERE {
+            $this a fun:Warning .
+            # Check that this warning relates to the IMO warning hierarchy
+            FILTER NOT EXISTS { 
+                fun:Warning rdfs:subClassOf* imo:Warning 
+            }
+        }
+    """ .
+
+# Constraint for checking that imo:IntentHandlingEvent is a subclass of imo:Event
+# Used with parameterized target types to scope validation
+
+# =============================================================================
+# ACTIONABLE BOOLEAN-EVALUABLE VALIDATION
+# =============================================================================
+# Usage: "Give me all instances of Actionable classes that don't relate to a BooleanFunction."
+# Uses explicit rdfs:subClassOf* traversal since TopBraid doesn't do RDFS inference
+tio-constraints:ActionableBooleanEvaluableConstraint
+    a sh:SPARQLConstraint ;
+    rdfs:label "Actionable Constraint" ;
+    rdfs:comment "Validates that Actionable instances must relate to a BooleanFunction" ;
+    sh:message "[icm/actionable_missing_function] Actionable instance {$this} of class {?class} missing BooleanFunction property. Add a property like log:condition, log:allOf, etc." ;
+    sh:select """
+        PREFIX fun: <http://tio.models.tmforum.org/tio/v3.6.0/FunctionOntology/>
+        PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+        SELECT $this ?class
+        WHERE {
+            # Explicit subclass traversal since TopBraid doesn't do RDFS inference
+            $this a ?class .
+            ?class rdfs:subClassOf* fun:Actionable .
+
+            # Check that instance does NOT have a BooleanFunction property
+            FILTER NOT EXISTS {
+                $this ?function ?value .
+                ?function a fun:BooleanFunction .
+            }
+        }
+    """ .
+
+
+# =============================================================================
+# UNUSED ACTIONABLE VALIDATION (non-Expectation)
+# =============================================================================
+# Usage: "Give me all non-Expectation Actionable instances (e.g., log:Condition) that have
+# BooleanFunction properties but are never used/referenced."
+# Note: Expectation instances are handled by UnreferencedExpectationConstraint instead,
+# avoiding duplicate warnings on PropertyExpectation (which is both Actionable and Expectation).
+tio-constraints:UnusedBooleanEvaluableConstraint
+    a sh:SPARQLConstraint ;
+    rdfs:label "Unused Actionable Constraint" ;
+    rdfs:comment "Warns about non-Expectation Actionable instances (e.g., log:Condition) that are properly defined but never referenced. Expectations are covered by UnreferencedExpectationConstraint." ;
+    sh:message "[icm/unused_actionable] Unused {?class}: {$this} is defined but never referenced. Either use it in an Intent/Expectation via log:allOf/log:anyOf, or remove it to keep the model clean." ;
+    sh:select """
+        PREFIX icm: <http://tio.models.tmforum.org/tio/v3.6.0/IntentCommonModel/>
+        PREFIX insp: <http://tio.models.tmforum.org/tio/v3.6.0/IntentSpecification/>
+        PREFIX fun: <http://tio.models.tmforum.org/tio/v3.6.0/FunctionOntology/>
+        PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+        PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+
+        SELECT $this ?class
+        WHERE {
+            # Explicit subclass traversal (pyshacl runs with inference=None)
+            $this a ?class .
+            ?class rdfs:subClassOf* fun:Actionable .
+            # Exclude Intents (entry points) and Expectations (handled by UnreferencedExpectationConstraint)
+            FILTER NOT EXISTS { $this a icm:Intent . }
+            FILTER NOT EXISTS { $this a ?expType . ?expType rdfs:subClassOf* icm:Expectation . }
+
+            # Instance has a BooleanFunction property (is actionable)
+            $this ?function ?value .
+            ?function a fun:BooleanFunction .
+
+            # Check that instance is NOT used/referenced anywhere
+            FILTER NOT EXISTS {
+                { ?subject ?func ?argList . ?argList rdf:rest*/rdf:first $this . }
+                UNION
+                { ?intent a icm:Intent . ?intent ?prop $this . }
+                UNION
+                # Template applicability conditions (insp:applicableIf/applicableIfNot)
+                { ?template insp:applicableIf $this . }
+                UNION
+                { ?template insp:applicableIfNot $this . }
+                UNION
+                # Template content (insp:content references Intent/Expectation)
+                { ?template insp:content $this . }
+            }
+        }
+    """ .
+
+
+# =============================================================================
+# UNREFERENCED EXPECTATION VALIDATION
+# =============================================================================
+# Usage: "Give me all Expectation instances that are defined but never referenced by any Intent."
+# Note: This is different from UnusedBooleanEvaluableConstraint which only checks Actionable
+# instances that HAVE a BooleanFunction. This constraint catches ALL unreferenced Expectations
+# (including DeliveryExpectation which is Evaluable, not Actionable).
+tio-constraints:UnreferencedExpectationConstraint
+    a sh:SPARQLConstraint ;
+    rdfs:label "Unreferenced Expectation Constraint" ;
+    rdfs:comment "Warns about Expectation instances that are defined but never referenced by any Intent or other Expectation" ;
+    sh:message "[icm/unreferenced_expectation] Unreferenced Expectation: {$this} is defined but never used. Either reference it from an Intent via log:allOf/log:anyOf, or remove it to keep the model clean." ;
+    sh:select """
+        PREFIX icm: <http://tio.models.tmforum.org/tio/v3.6.0/IntentCommonModel/>
+        PREFIX insp: <http://tio.models.tmforum.org/tio/v3.6.0/IntentSpecification/>
+        PREFIX fun: <http://tio.models.tmforum.org/tio/v3.6.0/FunctionOntology/>
+        PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+        PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+
+        SELECT $this
+        WHERE {
+            # Target is an Expectation
+            $this a ?expType .
+            ?expType rdfs:subClassOf* icm:Expectation .
+
+            # Check that instance is NOT used/referenced anywhere
+            FILTER NOT EXISTS {
+                # Referenced in a function argument list (log:allOf/anyOf)
+                { ?subject ?func ?argList . ?argList rdf:rest*/rdf:first $this . }
+                UNION
+                # Directly referenced by an Intent property
+                { ?intent a icm:Intent . ?intent ?prop $this . }
+                UNION
+                # Template applicability conditions
+                { ?template insp:applicableIf $this . }
+                UNION
+                { ?template insp:applicableIfNot $this . }
+                UNION
+                # Template content
+                { ?template insp:content $this . }
+            }
+        }
+    """ .
+
+# =============================================================================
+# CONTAINER TYPED VALIDATION
+# =============================================================================
+# Note: ContainerTyped validation uses the fun:ContainerTyped mixin class
+# defined in ContainerTypedExtension.ttl. With RDFS inference enabled,
+# we can use direct type checks: ?value a fun:ContainerTyped
+# (inference adds superclass types automatically)
+# =============================================================================

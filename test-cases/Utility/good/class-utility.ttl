@@ -1,0 +1,97 @@
+# Test: Valid instances and property usage of utility classes
+# Concepts covered: UtilityInformation, UtilityProfile, ut:function, ut:forMetric, ut:withArgument, ut:withArguments, ut:utility
+# This test validates that utility classes and properties can be used correctly.
+
+@prefix ex: <http://example.org/> .
+@prefix fun: <http://tio.models.tmforum.org/tio/v3.6.0/FunctionOntology/> .
+@prefix mf: <http://tio.models.tmforum.org/tio/v3.6.0/MathFunctions/> .
+@prefix met: <http://tio.models.tmforum.org/tio/v3.6.0/MetricsAndObservations/> .
+@prefix ut: <http://tio.models.tmforum.org/tio/v3.6.0/Utility/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+################################################################################
+# Basic class instances
+################################################################################
+
+# === UtilityInformation class ===
+ex:test_utilityinformation a ut:UtilityInformation .
+
+# === UtilityProfile class ===
+ex:test_utilityprofile a ut:UtilityProfile .
+
+################################################################################
+# ut:function property - must reference fun:Function
+################################################################################
+
+ex:utility_function a fun:Function ;
+    fun:resultType xsd:decimal ;
+    fun:arityMin "2"^^xsd:nonNegativeInteger ;
+    fun:arityMax "2"^^xsd:nonNegativeInteger ;
+    fun:argumentNames ( "bandwidth" "weight" ) .
+
+ex:utility_with_function a ut:UtilityInformation ;
+    ut:function ex:utility_function .
+
+################################################################################
+# ut:forMetric property - maps arguments to metrics
+################################################################################
+
+ex:bandwidth_metric a met:Metric ;
+    rdfs:label "Bandwidth Metric" .
+
+ex:latency_metric a met:Metric ;
+    rdfs:label "Latency Metric" .
+
+# forMetric with single argument-metric binding
+ex:utility_with_metric_binding a ut:UtilityInformation ;
+    ut:function ex:utility_function ;
+    ut:forMetric ( [ ] ex:bandwidth_metric ) .
+
+# forMetric with multiple bindings
+ex:utility_with_multiple_bindings a ut:UtilityInformation ;
+    ut:function ex:utility_function ;
+    ut:forMetric ( [ ] ex:bandwidth_metric ) ,
+                 ( [ ] ex:latency_metric ) .
+
+################################################################################
+# ut:withArgument property - single argument value assignment
+################################################################################
+
+ex:utility_with_single_arg a ut:UtilityInformation ;
+    ut:function ex:utility_function ;
+    ut:withArgument ( "weight" "0.75"^^xsd:decimal ) .
+
+################################################################################
+# ut:withArguments property - complete argument list
+################################################################################
+
+ex:utility_with_all_args a ut:UtilityInformation ;
+    ut:function ex:utility_function ;
+    ut:withArguments ( "100"^^xsd:decimal "0.5"^^xsd:decimal ) .
+
+################################################################################
+# ut:utility property - links to UtilityInformation
+################################################################################
+
+ex:entity_with_utility
+    a rdfs:Resource ;
+    ut:utility ex:utility_with_function .
+
+################################################################################
+# Complete utility calculation example
+################################################################################
+
+ex:logistic_function a mf:logistic, fun:Function ;
+    fun:resultType xsd:decimal ;
+    mf:k "0.1"^^xsd:decimal .
+
+ex:complete_utility_calculation a ut:UtilityInformation ;
+    ut:function ex:logistic_function ;
+    ut:forMetric ( [ ] ex:bandwidth_metric ) ;
+    ut:withArgument ( "k" "0.1"^^xsd:decimal ) .
+
+ex:utility_profile_with_utilities a ut:UtilityProfile ;
+    ut:utility ex:complete_utility_calculation ,
+               ex:utility_with_function .

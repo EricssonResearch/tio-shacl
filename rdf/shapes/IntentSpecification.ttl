@@ -1,0 +1,120 @@
+# TMF IntentSpecification SHACL Shapes
+#
+# Domain-specific validation for IntentSpecification.
+# Global validation (function usage, vocabulary) handled by lib/GlobalShapes.ttl
+#
+# Ontology URI: http://tio.models.tmforum.org/tio/v3.6.0/IntentSpecification/
+
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# TMF namespaces
+@prefix insp: <http://tio.models.tmforum.org/tio/v3.6.0/IntentSpecification/> .
+@prefix fun: <http://tio.models.tmforum.org/tio/v3.6.0/FunctionOntology/> .
+@prefix imo: <http://tio.models.tmforum.org/tio/v3.6.0/IntentManagementOntology/> .
+
+# Shape namespaces  
+@prefix insp-shapes: <http://tio.models.tmforum.org/tio/v3.6.0/shapes/IntentSpecification/> .
+@prefix tio-lib: <http://tio.models.tmforum.org/tio/v3.6.0/shapes/lib/> .
+@prefix tio-targets: <http://tio.models.tmforum.org/tio/v3.6.0/shapes/lib/targets/> .
+@prefix tio-constraints: <http://tio.models.tmforum.org/tio/v3.6.0/shapes/lib/constraints/> .
+
+# =============================================================================
+# CONTENT TEMPLATE VALIDATION
+# =============================================================================
+
+# Validates ContentTemplate properties
+insp-shapes:ContentTemplatePropertiesShape
+    a sh:NodeShape ;
+    rdfs:label "ContentTemplate Properties Validation" ;
+    rdfs:comment "Validates ContentTemplate instances have correct property types." ;
+    sh:targetClass insp:ContentTemplate ;
+    sh:property [
+        sh:path insp:applicableIf ;
+        sh:nodeKind sh:BlankNodeOrIRI ;
+        sh:message "[insp/applicable_if_literal] insp:applicableIf must not be a literal." ;
+    ] ;
+    sh:property [
+        sh:path insp:applicableIf ;
+        sh:class <http://tio.models.tmforum.org/tio/v3.6.0/LogicalOperators/Condition> ;
+        sh:message "[insp/applicable_if_wrong_class] insp:applicableIf must be a log:Condition instance." ;
+    ] ;
+    sh:property [
+        sh:path insp:applicableIfNot ;
+        sh:class <http://tio.models.tmforum.org/tio/v3.6.0/LogicalOperators/Condition> ;
+        sh:message "[insp/applicable_if_not_type] insp:applicableIfNot must be a log:Condition instance. In TIO v3.6.0, use logical operators to define conditions: [ a log:Condition ; log:allOf ( ... ) ] or [ a log:Condition ; log:match ( ... ) ]. Example: insp:applicableIfNot [ a log:Condition ; log:match ( property value ) ]" ;
+    ] ;
+    sh:property [
+        sh:path insp:content ;
+        sh:nodeKind sh:BlankNodeOrIRI ;
+        sh:message "[insp/content_literal] insp:content must be a resource (blank node or IRI), not a literal value. In TIO v3.6.0, insp:content references Intent or Expectation templates as structured resources. Use blank nodes [ ... ] or named URIs, not strings." ;
+    ] ;
+    sh:property [
+        sh:path insp:contentUsing ;
+        sh:class insp:VocabularyTemplate ;
+        sh:message "[insp/content_using_not_vocab_template] insp:contentUsing must be an insp:VocabularyTemplate instance. In TIO v3.6.0, use VocabularyTemplate to define custom vocabularies for template content. Add: a insp:VocabularyTemplate to the referenced resource." ;
+    ] ;
+    sh:severity sh:Violation .
+
+# =============================================================================
+# INTENT SPECIFICATION VALIDATION
+# =============================================================================
+
+# Validates IntentSpecification properties
+insp-shapes:IntentSpecificationPropertiesShape
+    a sh:NodeShape ;
+    rdfs:label "IntentSpecification Properties Validation" ;
+    rdfs:comment "Validates IntentSpecification instances have correct property types." ;
+    sh:targetClass insp:IntentSpecification ;
+    sh:property [
+        sh:path insp:mandatoryIntent ;
+        sh:class <http://tio.models.tmforum.org/tio/v3.6.0/IntentCommonModel/Intent> ;
+        sh:message "[insp/mandatory_not_intent] insp:mandatoryIntent must be an icm:Intent instance. In TIO v3.6.0, IntentSpecification templates reference actual Intent instances (icm:Intent or subclasses like icm:AtomicIntent). Ensure the referenced resource has: a icm:Intent or a icm:AtomicIntent." ;
+    ] ;
+    sh:property [
+        sh:path insp:mandatorySpecification ;
+        sh:class insp:IntentSpecification ;
+        sh:message "[insp/mandatory_spec_type] insp:mandatorySpecification must be an insp:IntentSpecification instance. In TIO v3.6.0, IntentSpecifications can be nested to create hierarchical templates. Ensure the referenced resource has: a insp:IntentSpecification." ;
+    ] ;
+    sh:property [
+        sh:path insp:optionalIntent ;
+        sh:class <http://tio.models.tmforum.org/tio/v3.6.0/IntentCommonModel/Intent> ;
+        sh:message "[insp/optional_not_intent] insp:optionalIntent must be an icm:Intent instance. In TIO v3.6.0, IntentSpecification templates can include optional Intent components. Ensure the referenced resource has: a icm:Intent or a icm:AtomicIntent." ;
+    ] ;
+    sh:property [
+        sh:path insp:optionalSpecification ;
+        sh:class insp:IntentSpecification ;
+        sh:message "[insp/optional_spec_type] insp:optionalSpecification must be an insp:IntentSpecification instance. In TIO v3.6.0, IntentSpecifications can include optional nested specifications for flexible template composition. Ensure the referenced resource has: a insp:IntentSpecification." ;
+    ] ;
+    sh:severity sh:Violation .
+
+# =============================================================================
+# OBJECT TEMPLATE VALIDATION
+# =============================================================================
+
+# Validates ObjectTemplate properties
+insp-shapes:ObjectTemplatePropertiesShape
+    a sh:NodeShape ;
+    rdfs:label "ObjectTemplate Properties Validation" ;
+    rdfs:comment "Validates ObjectTemplate instances have correct property types." ;
+    sh:targetClass insp:ObjectTemplate ;
+    sh:property [
+        sh:path insp:allowedValues ;
+        sh:class rdfs:Container ;
+        sh:message "[insp/allowed_values_type] insp:allowedValues must be an rdfs:Container (rdf:Bag, rdf:Seq, or rdf:Alt). In TIO v3.6.0, use RDF containers to enumerate valid values for template parameters. Example: insp:allowedValues [ a rdf:Bag ; rdf:_1 \"value1\" ; rdf:_2 \"value2\" ] or use RDF lists for simpler cases." ;
+    ] ;
+    sh:property [
+        sh:path insp:templateType ;
+        sh:nodeKind sh:IRI ;
+        sh:message "[insp/template_type_literal] insp:templateType must be an IRI (class reference), not a literal string. Got: {$value}. In TIO v3.6.0, templateType references the RDF class that template instances will belong to. Use IRI references like icm:PropertyExpectation, quan:Quantity, not string literals like \"PropertyExpectation\"." ;
+    ] ;
+    sh:severity sh:Violation .
+
+# =============================================================================
+# NOTES
+# =============================================================================
+# Universal validation (applies to all ontologies):
+# - Vocabulary: tio-lib:VocabularyUsageShape
+# - Function usage: tio-lib:FunctionUsageShape

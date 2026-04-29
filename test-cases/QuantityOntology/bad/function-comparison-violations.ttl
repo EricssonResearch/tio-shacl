@@ -1,0 +1,29 @@
+# Test: Invalid usage of comparison functions
+# Concepts covered: atLeast, atMost, greater, smaller, inRange, exactly
+# Constraints tested: Arity violations
+# This test validates that violations are caught for invalid comparison function usage.
+
+@prefix ex: <http://example.org/> .
+@prefix fun: <http://tio.models.tmforum.org/tio/v3.6.0/FunctionOntology/> .
+@prefix quan: <http://tio.models.tmforum.org/tio/v3.6.0/QuantityOntology/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# === atLeast violations (zero args) ===
+ex:invalid_atleast quan:atLeast ( ) .
+
+# === atMost violations (zero args) ===
+ex:invalid_atmost quan:atMost ( ) .
+
+# === greater violations (zero args) ===
+ex:invalid_greater quan:greater ( ) .
+
+# === smaller violations (zero args) ===
+ex:invalid_smaller quan:smaller ( ) .
+
+# === inRange violations (zero args) ===
+ex:invalid_inrange quan:inRange ( ) .
+
+# === exactly violations (zero args) ===
+ex:invalid_exactly quan:exactly ( ) .

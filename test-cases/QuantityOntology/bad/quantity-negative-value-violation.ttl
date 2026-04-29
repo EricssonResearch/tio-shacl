@@ -1,0 +1,26 @@
+# Test: Negative rdf:value on Quantity
+# This test validates that Quantity rdf:value must be non-negative
+# Should FAIL with: "Quantity value must be non-negative"
+
+@prefix ex:   <http://example.org/> .
+@prefix quan: <http://tio.models.tmforum.org/tio/v3.6.0/QuantityOntology/> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+################################################################################
+# VIOLATION: Quantity with negative rdf:value
+#
+# Quantity values MUST be non-negative (>= 0)
+################################################################################
+
+# WRONG - negative integer value
+ex:qty_negative
+  a quan:Quantity ;
+  rdf:value -5 ;
+  quan:unit "kg" .
+
+# WRONG - negative decimal value
+ex:qty_negative_decimal
+  a quan:Quantity ;
+  rdf:value "-0.5"^^xsd:decimal ;
+  quan:unit "m" .
