@@ -159,11 +159,11 @@ Order is driven by test dependencies: resource tests → validation tests → CL
 
 ### Phase 3: Extended Features
 
-- API server (FastAPI)
-- MCP server
-- Java validator backends (TopBraid, Jena)
+- Java validator backends (TopBraid, Jena) wired into the Python runner via `TIO_VALIDATOR`
 - HTML/JUnit report generation
 - Coverage report script
+
+**Dropped from scope:** REST API and MCP server. Users who need a service wrapper can build their own around `ValidationRunner` in a handful of lines.
 
 ### Phase 4: Documentation & Polish
 

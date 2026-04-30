@@ -25,19 +25,8 @@ dependencies = [
     "click>=8.0.0",
 ]
 
-[project.optional-dependencies]
-api = [
-    "fastapi>=0.115.0",
-    "uvicorn>=0.32.0",
-]
-mcp = [
-    "fastmcp>=0.2.0",
-]
-
 [project.scripts]
 tio-shacl = "tio_shacl.cli:main"
-tio-shacl-mcp = "tio_shacl.mcp_server:main"
-tio-shacl-api = "tio_shacl.api:main"
 
 [project.urls]
 Homepage = "https://www.tmforum.org/intent"

@@ -8,8 +8,8 @@ This repository contains:
 - **Ontology extensions** (`extensions/`) that cover gaps in the base TIO for real-world use.
 - **Test cases** (`test-cases/`) — 133 good/bad examples across the 16 TIO modules.
 - **A patch** (`patches/tio-3.6.0-fixes.patch`) that fixes known bugs in the upstream TIO 3.6.0.
-- **A Python package** (`tio_shacl`) with a CLI, REST API, and MCP server for running validation.
-- **Java CLI wrappers** (`java_wrappers/`) for running validation with TopBraid SHACL or Apache Jena as alternatives to pyshacl.
+- **A Python package** (`tio_shacl`) with a CLI for running validation through three interchangeable backends: **pyshacl** (default), **TopBraid SHACL**, and **Apache Jena**.
+- **Java CLI wrappers** (`java_wrappers/`) that the TopBraid and Jena backends drive.
 
 ---
 
@@ -68,6 +68,26 @@ tio-shacl/
 - **[docs/architecture.md](docs/architecture.md)** — how the validator is put together
 - **[CONTRIBUTING.md](CONTRIBUTING.md)** — development workflow, test layout, PR process
 - **[MIGRATION_PLAN.md](MIGRATION_PLAN.md)** — plan for the clean-room public rewrite
+
+---
+
+## Validator backends
+
+The Python runner can drive three SHACL implementations through a single interface. Select one with the `TIO_VALIDATOR` environment variable:
+
+| Backend | Value | Ships with | Notes |
+|---------|-------|------------|-------|
+| pyshacl | `pyshacl` *(default)* | Python package | No extra setup. |
+| TopBraid SHACL 1.4.3 | `topbraid` | `java_wrappers/topbraid-cli.jar` | Requires Java 17+ and `make java-build`. |
+| Apache Jena 5.2.0 | `jena` | `java_wrappers/jena-cli.jar` | Requires Java 17+. See limitation below. |
+
+```bash
+TIO_VALIDATOR=topbraid tio-shacl validate my_intent.ttl
+```
+
+### Jena limitation
+
+Apache Jena's SHACL implementation requires every `sh:SPARQLTargetType` instance to fully bind each declared parameter. TIO's shapes use parameterised target types where some parameters are bound implicitly; pyshacl and TopBraid tolerate this, Jena does not. As a result, the Jena backend errors out on most TIO cases with `Missing required parameter`. It is shipped for completeness and for benchmarking shapes that do not rely on parameterised targets, but it is not a drop-in replacement for the other two backends.
 
 ---
 

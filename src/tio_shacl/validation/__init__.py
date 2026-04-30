@@ -1,27 +1,34 @@
 """Validation runner + orchestrator for TIO SHACL."""
 
+from .backends import (
+    Backend,
+    BackendError,
+    JenaBackend,
+    PyshaclBackend,
+    TopbraidBackend,
+    get_backend,
+    list_backends,
+    resolve_backend,
+)
 from .runner import ValidationResult, ValidationRunner, Violation
 
 __all__ = [
     "ValidationResult",
     "ValidationRunner",
     "Violation",
+    # Backends
+    "Backend",
+    "BackendError",
+    "PyshaclBackend",
+    "TopbraidBackend",
+    "JenaBackend",
+    "get_backend",
+    "list_backends",
+    "resolve_backend",
 ]
 
 
-def _reexport_orchestrator() -> None:
-    """Re-export orchestrator types if the module is available.
-
-    The orchestrator lives in a separate module so tests can import
-    ``ValidationRunner`` without pulling in orchestration logic.
-    """
-    try:
-        from .orchestrator import TestOrchestrator, TestSuite, SuiteReport  # noqa: F401
-    except ImportError:
-        pass
-
-
-# Eager re-export for convenience (``from tio_shacl.validation import TestOrchestrator``).
+# Eagerly expose orchestrator types for convenience.
 try:
     from .orchestrator import SuiteReport, TestOrchestrator, TestSuite  # noqa: F401
 

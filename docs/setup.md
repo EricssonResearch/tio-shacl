@@ -49,8 +49,6 @@ This pulls in:
 
 - `rdflib`, `pyshacl` — RDF and SHACL engines
 - `click` — CLI framework
-- `fastapi`, `uvicorn` — optional REST API (extra `api`)
-- `fastmcp` — optional MCP server (extra `mcp`)
 - `pytest`, `ruff`, `mypy`, `pre-commit` — dev tools
 
 Verify:
@@ -133,7 +131,13 @@ This produces:
 - `java_wrappers/topbraid-cli/target/topbraid-shacl-cli.jar` (TopBraid SHACL 1.4.3)
 - `java_wrappers/jena-cli/target/jena-shacl-cli.jar` (Apache Jena 5.2.0)
 
-Without these, the Python package falls back to `pyshacl` for all validation.
+Without these, the Python package uses `pyshacl` for all validation. To pick a specific backend, set `TIO_VALIDATOR`:
+
+```bash
+TIO_VALIDATOR=topbraid tio-shacl validate my_intent.ttl
+TIO_VALIDATOR=jena     tio-shacl validate my_intent.ttl    # see README for limitations
+TIO_VALIDATOR=pyshacl  tio-shacl validate my_intent.ttl    # default
+```
 
 ---
 

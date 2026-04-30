@@ -34,6 +34,7 @@ coverage.xml
 # --- Java build artifacts ---
 java_wrappers/**/target/
 !java_wrappers/**/target/*.jar
+java_wrappers/**/dependency-reduced-pom.xml
 
 # --- IDE / editor ---
 .idea/

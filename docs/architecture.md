@@ -57,11 +57,8 @@ Two implementations exist in the ecosystem — `tio-shacl` (SHACL, Python) and `
 src/tio_shacl/
 ├── __init__.py          Path helpers (get_shapes_dir, get_ontologies_dir, …)
 ├── cli.py               click-based CLI entry point
-├── api.py               FastAPI REST endpoints (optional dep)
-├── mcp_server/          Model Context Protocol server (optional dep)
 ├── core/                Graph loading, path resolution
-│   ├── loader.py        Build union data / shapes graphs from disk
-│   └── resolver.py      Find ontology dir, shapes dir, test-cases dir
+│   └── loader.py        Build union data / shapes graphs from disk
 └── validation/
     ├── runner.py        Validate a single TTL file
     ├── orchestrator.py  Discover and run full test suites in parallel
@@ -74,10 +71,10 @@ src/tio_shacl/
 ### Responsibilities
 
 - **`__init__.py`** — Resolve paths for installed-package and dev-mode layouts. Single source of truth for where RDF assets live.
-- **`core/loader.py`** — Pure function: `load_graphs(inputs, ontology_dir, shapes_dirs) -> (data_graph, shapes_graph)`. No side effects.
-- **`validation/runner.py`** — Thin wrapper: call the backend, parse its report into a typed `ValidationResult`.
+- **`core/loader.py`** — Pure function: `load_graphs(...) -> GraphSet`. Caches the parsed graphs so repeated validations do not re-parse.
+- **`validation/runner.py`** — Thin wrapper: pick a backend via `TIO_VALIDATOR`, call it, return a typed `ValidationResult`.
 - **`validation/orchestrator.py`** — Walk `test-cases/`, fan out to a pool of workers, aggregate results.
-- **`validation/backends/`** — Each backend exports a single `validate(data_graph, shapes_graph) -> ValidationResult` function. Swapped via the `TIO_VALIDATOR` env var.
+- **`validation/backends/`** — Each backend exports a single `validate(data_graph, shapes_graph) -> ValidationResult`. The Java backends serialise the graphs to temp files and invoke the CLI jar; the pyshacl backend calls the library directly.
 
 ---
 
@@ -141,10 +138,10 @@ The orchestrator discovers every `*.ttl` under `test-cases/`, validates it, and 
 | Backend | How invoked | When to use |
 |---------|-------------|-------------|
 | `pyshacl` | Python library call | Default; no extra setup |
-| `topbraid` | `java -jar topbraid-shacl-cli.jar …` | Reference implementation |
-| `jena` | `java -jar jena-shacl-cli.jar …` | Reference implementation |
+| `topbraid` | `java -jar topbraid-shacl-cli.jar …` | Reference implementation; passes all TIO test cases |
+| `jena` | `java -jar jena-shacl-cli.jar …` | Benchmarking; errors on TIO's parameterised SPARQL targets (see README) |
 
-All three back ends must produce the same pass/fail verdict on every test case. This is enforced by the test suite when `TIO_VALIDATOR` cycles through each backend in CI.
+The pyshacl and TopBraid backends must produce the same pass/fail verdict on every test case. The Jena backend is best-effort. This is enforced by the test suite when `TIO_VALIDATOR` cycles through each backend in CI.
 
 ---
 
@@ -166,6 +163,7 @@ All three back ends must produce the same pass/fail verdict on every test case. 
 
 ## Non-goals
 
+- **No REST API or MCP server bundled.** Early prototypes shipped a FastAPI app and a Model Context Protocol server. Both were removed — users who need an HTTP/MCP interface can wrap :class:`ValidationRunner` in their own service, which is 20 lines of code.
 - **Not a TIO reasoner.** Validation produces a yes/no + violation list. Entailment, derivation, and intent composition are out of scope.
 - **Not a runtime intent engine.** Evaluating whether live telemetry meets an intent is `tio-reasoner`'s job.
-- **Not a TIO editor.** Authoring tools (`tio-writer`, `tio-lsp`) live in separate projects.
+- **Not a TIO editor.** Authoring tools live in separate projects.
