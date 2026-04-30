@@ -1,0 +1,26 @@
+{
+  "phase": 3,
+  "conforms": false,
+  "focusNodes": [
+    "http://example.org/RE1",
+    "http://example.org/RE2"
+  ],
+  "violations": [
+    {
+      "focusNode": "http://example.org/RE1",
+      "constraint": "icm/not_container"
+    },
+    {
+      "focusNode": "http://example.org/RE1",
+      "constraint": "icm/unreferenced_expectation"
+    },
+    {
+      "focusNode": "http://example.org/RE2",
+      "constraint": "icm/not_container"
+    },
+    {
+      "focusNode": "http://example.org/RE2",
+      "constraint": "icm/unreferenced_expectation"
+    }
+  ]
+}

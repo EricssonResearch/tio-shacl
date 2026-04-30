@@ -30,3 +30,4 @@ ex:test_combined_report
   a icm:IntentReport ;
   imo:handlingState imo:StateDegraded ;
   imo:updateState imo:StateFinalizing .
+

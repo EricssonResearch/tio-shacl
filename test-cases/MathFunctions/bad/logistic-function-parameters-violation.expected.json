@@ -1,0 +1,18 @@
+{
+  "phase": 3,
+  "conforms": false,
+  "focusNodes": [
+    "http://example.org/logistic_no_k",
+    "http://example.org/logistic_other_params_only"
+  ],
+  "violations": [
+    {
+      "focusNode": "http://example.org/logistic_no_k",
+      "constraint": "mf/logistic_missing_k"
+    },
+    {
+      "focusNode": "http://example.org/logistic_other_params_only",
+      "constraint": "mf/logistic_missing_k"
+    }
+  ]
+}

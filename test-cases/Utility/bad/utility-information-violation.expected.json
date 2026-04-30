@@ -1,0 +1,23 @@
+{
+  "phase": 3,
+  "conforms": false,
+  "focusNodes": [
+    "http://example.org/utilinfo_literal_formetric",
+    "http://example.org/utilinfo_literal_function",
+    "http://example.org/utilinfo_wrong_function_class"
+  ],
+  "violations": [
+    {
+      "focusNode": "http://example.org/utilinfo_literal_formetric",
+      "constraint": "ut/for_metric_literal"
+    },
+    {
+      "focusNode": "http://example.org/utilinfo_literal_function",
+      "constraint": "ut/function_literal"
+    },
+    {
+      "focusNode": "http://example.org/utilinfo_wrong_function_class",
+      "constraint": "ut/function_not_function"
+    }
+  ]
+}

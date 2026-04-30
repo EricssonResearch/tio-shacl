@@ -15,12 +15,11 @@
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix quan: <http://tio.models.tmforum.org/tio/v3.6.0/QuantityOntology/> .
 
 # === Core template properties ===
-ex:test_allowedvalues a isp:ObjectTemplate ; isp:allowedValues ( ex:val1 ) .
+ex:test_allowedvalues a isp:ObjectTemplate ; isp:allowedValues [ a rdfs:Container ; rdfs:member ex:val1 ] .
 ex:test_alternative a isp:Template ; isp:alternative ex:alt1 .
-ex:test_applicableif a isp:ContentTemplate ; isp:applicableIf ex:cond1 .
-ex:test_applicableifnot a isp:ContentTemplate ; isp:applicableIfNot ex:cond2 .
 ex:test_availablevocabulary a isp:Template ; isp:availableVocabulary ( ex:vocab1 ) .
 ex:test_chosenhandlingdomain
   a rdfs:Resource ;
@@ -60,9 +59,7 @@ ex:test_optionalspecification a isp:IntentSpecification ; isp:optionalSpecificat
 
 # === Supporting instances ===
 ex:val1 a rdfs:Resource .
-ex:alt1 a isp:Template .
-ex:cond1 a rdfs:Resource .
-ex:cond2 a rdfs:Resource .
+ex:alt1 a isp:ContentTemplate .
 ex:vocab1 a rdfs:Resource .
 ex:domain1 a rdfs:Resource .
 ex:handler1 a rdfs:Resource .
@@ -72,10 +69,10 @@ ex:owner1 a rdfs:Resource .
 ex:domain2 a rdfs:Resource .
 ex:vendor1 a rdfs:Resource .
 ex:vendor2 a rdfs:Resource .
-ex:mandatory_value a rdfs:Resource .
+ex:mandatory_value a isp:ContentTemplate .
 ex:intent1 a icm:Intent ; log:allOf ( "true"^^xsd:boolean ) .
 ex:intent2 a icm:Intent ; log:allOf ( "true"^^xsd:boolean ) .
 ex:spec1 a isp:IntentSpecification .
 ex:spec2 a isp:IntentSpecification .
-ex:option_value a rdfs:Resource .
+ex:option_value a isp:ContentTemplate .
 ex:type1 a rdfs:Resource .

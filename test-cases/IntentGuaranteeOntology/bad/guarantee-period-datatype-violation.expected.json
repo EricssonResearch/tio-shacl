@@ -1,0 +1,33 @@
+{
+  "phase": 3,
+  "conforms": false,
+  "focusNodes": [
+    "http://example.org/interval_hours",
+    "http://example.org/interval_wrongtype",
+    "http://example.org/period_date",
+    "http://example.org/period_integer",
+    "http://example.org/period_string"
+  ],
+  "violations": [
+    {
+      "focusNode": "http://example.org/interval_hours",
+      "constraint": "ig/guarantee_period_update_type"
+    },
+    {
+      "focusNode": "http://example.org/interval_wrongtype",
+      "constraint": "ig/guarantee_period_update_type"
+    },
+    {
+      "focusNode": "http://example.org/period_date",
+      "constraint": "ig/guarantee_period_type"
+    },
+    {
+      "focusNode": "http://example.org/period_integer",
+      "constraint": "ig/guarantee_period_type"
+    },
+    {
+      "focusNode": "http://example.org/period_string",
+      "constraint": "ig/guarantee_period_type"
+    }
+  ]
+}

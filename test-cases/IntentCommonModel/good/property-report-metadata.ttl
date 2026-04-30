@@ -17,22 +17,20 @@ ex:test_intent a icm:Intent ;
 
 # Sample reporting expectation for property tests
 # reportDestinations and reportTriggers must be rdfs:Container
-# Note: reportGenerated expects t:Instant, reportNumber expects xsd:positiveInteger
+# reportGenerated and reportNumber have domain IntentReport (not ReportingExpectation)
 ex:sample_reporting_expectation
   a icm:ReportingExpectation ;
   icm:target ex:sample_target ;
   icm:reportDestination ex:destination1 ;
   icm:reportDestinations ex:dest_container ;
-  
-  
   icm:reportTriggers ex:trigger_container .
-
 
 # IntentReport for report metadata properties (domain = IntentReport)
 ex:sample_report
   a icm:IntentReport ;
   icm:reportGenerated ex:report_timestamp ;
   icm:reportNumber "1"^^xsd:positiveInteger .
+
 # Proper time:Instant for reportGenerated
 ex:report_timestamp
   a t:Instant ;

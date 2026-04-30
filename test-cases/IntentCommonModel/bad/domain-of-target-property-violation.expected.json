@@ -1,0 +1,13 @@
+{
+  "phase": 3,
+  "conforms": false,
+  "focusNodes": [
+    "http://example.org/wrong_target_domain"
+  ],
+  "violations": [
+    {
+      "focusNode": "http://example.org/wrong_target_domain",
+      "constraint": "icm/target_domain"
+    }
+  ]
+}

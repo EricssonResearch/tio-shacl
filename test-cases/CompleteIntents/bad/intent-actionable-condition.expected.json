@@ -1,0 +1,13 @@
+{
+  "phase": 3,
+  "conforms": false,
+  "focusNodes": [
+    "http://example.org/validIntent"
+  ],
+  "violations": [
+    {
+      "focusNode": "http://example.org/validIntent",
+      "constraint": "icm/intent_references_condition"
+    }
+  ]
+}

@@ -32,3 +32,7 @@ ex:SummedMetricClass
   rdfs:label "Summed Metric Class"@en ;
   imo:associatedValueType xsd:decimal ;
   imo:associatedValueCombination mf:sum .
+
+# Function instances for associatedValueCombination range
+mf:avg a fun:Function ; fun:resultType xsd:decimal .
+mf:sum a fun:Function ; fun:resultType xsd:decimal .

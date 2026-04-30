@@ -1,0 +1,38 @@
+{
+  "phase": 3,
+  "conforms": false,
+  "focusNodes": [
+    "http://example.org/invalid_difference",
+    "http://example.org/invalid_division",
+    "http://example.org/invalid_multiplication",
+    "http://example.org/invalid_multiplicationofset",
+    "http://example.org/invalid_sum",
+    "http://example.org/invalid_sumofset"
+  ],
+  "violations": [
+    {
+      "focusNode": "http://example.org/invalid_difference",
+      "constraint": "function/arity_min"
+    },
+    {
+      "focusNode": "http://example.org/invalid_division",
+      "constraint": "function/arity_min"
+    },
+    {
+      "focusNode": "http://example.org/invalid_multiplication",
+      "constraint": "function/arity_min"
+    },
+    {
+      "focusNode": "http://example.org/invalid_multiplicationofset",
+      "constraint": "function/arity_min"
+    },
+    {
+      "focusNode": "http://example.org/invalid_sum",
+      "constraint": "function/arity_min"
+    },
+    {
+      "focusNode": "http://example.org/invalid_sumofset",
+      "constraint": "function/arity_min"
+    }
+  ]
+}

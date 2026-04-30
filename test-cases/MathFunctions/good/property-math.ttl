@@ -4,31 +4,40 @@
 
 @prefix ex: <http://example.org/> .
 @prefix mth: <http://tio.models.tmforum.org/tio/v3.6.0/MathFunctions/> .
+@prefix fun: <http://tio.models.tmforum.org/tio/v3.6.0/FunctionOntology/> .
+@prefix quan: <http://tio.models.tmforum.org/tio/v3.6.0/QuantityOntology/> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
 ex:test_c
-  a rdfs:Resource ;
+  a fun:Function ;
+  fun:resultType xsd:decimal ;
   mth:c "1.0"^^xsd:decimal .
 ex:test_coefficients
-  a rdfs:Resource ;
+  a fun:Function ;
+  fun:resultType xsd:decimal ;
   mth:coefficients ( "1.0"^^xsd:decimal "2.0"^^xsd:decimal ) .
 ex:test_input
-  a rdfs:Resource ;
+  a fun:Function ;
+  fun:resultType xsd:decimal ;
   mth:input ex:input1 .
 ex:test_k
-  a rdfs:Resource ;
+  a fun:Function ;
+  fun:resultType xsd:decimal ;
   mth:k "0.5"^^xsd:decimal .
 ex:test_l
-  a rdfs:Resource ;
+  a fun:Function ;
+  fun:resultType xsd:decimal ;
   mth:l "1.0"^^xsd:decimal .
 ex:test_map
-  a rdfs:Resource ;
+  a fun:Function ;
+  fun:resultType xsd:decimal ;
   mth:map ex:map1 .
 ex:test_x0
-  a rdfs:Resource ;
+  a fun:Function ;
+  fun:resultType xsd:decimal ;
   mth:x0 "0.0"^^xsd:decimal .
 
 ex:input1 a rdfs:Resource .
-ex:map1 a rdfs:Resource .
+ex:map1 a rdf:List .

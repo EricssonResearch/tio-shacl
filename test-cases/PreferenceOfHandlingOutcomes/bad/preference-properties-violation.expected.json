@@ -1,0 +1,13 @@
+{
+  "phase": 3,
+  "conforms": false,
+  "focusNodes": [
+    "http://example.org/notReport"
+  ],
+  "violations": [
+    {
+      "focusNode": "http://example.org/notReport",
+      "constraint": "icm/actionable_missing_function"
+    }
+  ]
+}

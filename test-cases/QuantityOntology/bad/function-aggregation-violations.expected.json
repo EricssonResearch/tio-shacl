@@ -1,0 +1,28 @@
+{
+  "phase": 3,
+  "conforms": false,
+  "focusNodes": [
+    "http://example.org/invalid_greatest",
+    "http://example.org/invalid_greatestinset",
+    "http://example.org/invalid_smallest",
+    "http://example.org/invalid_smallestinset"
+  ],
+  "violations": [
+    {
+      "focusNode": "http://example.org/invalid_greatest",
+      "constraint": "function/arity_min"
+    },
+    {
+      "focusNode": "http://example.org/invalid_greatestinset",
+      "constraint": "function/arity_min"
+    },
+    {
+      "focusNode": "http://example.org/invalid_smallest",
+      "constraint": "function/arity_min"
+    },
+    {
+      "focusNode": "http://example.org/invalid_smallestinset",
+      "constraint": "function/arity_min"
+    }
+  ]
+}

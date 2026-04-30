@@ -13,10 +13,10 @@ ex:test_elevatedmaxutility
   a rdfs:Resource ;
   utl:elevatedMaxUtility "100"^^xsd:decimal .
 ex:test_formetric
-  a rdfs:Resource ;
+  a utl:UtilityInformation ;
   utl:forMetric ex:metric1 .
 ex:test_function
-  a rdfs:Resource ;
+  a utl:UtilityInformation ;
   utl:function ex:func1 .
 ex:test_maxutility
   a rdfs:Resource ;
@@ -34,19 +34,19 @@ ex:test_utilityresult
   a rdfs:Resource ;
   utl:utilityResult ex:result1 .
 ex:test_withargument
-  a rdfs:Resource ;
+  a utl:UtilityInformation ;
   utl:withArgument ex:arg1 .
 ex:test_witharguments
-  a rdfs:Resource ;
+  a utl:UtilityInformation ;
   utl:withArguments ( ex:arg1 ex:arg2 ) .
 
 # Supporting instances
-ex:metric1 a rdfs:Resource .
+ex:metric1 a rdf:List .
 # utl:function must reference a fun:Function instance with resultType
 ex:func1 a fun:Function ;
     fun:resultType xsd:decimal .
 ex:utility_value a utl:UtilityInformation .
 ex:profile1 a utl:UtilityProfile .
-ex:result1 a rdfs:Resource .
-ex:arg1 a rdfs:Resource .
-ex:arg2 a rdfs:Resource .
+ex:result1 a utl:UtilityProfile .
+ex:arg1 a rdf:List .
+ex:arg2 a rdf:List .

@@ -1,0 +1,13 @@
+{
+  "phase": 3,
+  "conforms": false,
+  "focusNodes": [
+    "http://example.org/request_wrong_class"
+  ],
+  "violations": [
+    {
+      "focusNode": "http://example.org/request_wrong_class",
+      "constraint": "pre/deadline_not_instant"
+    }
+  ]
+}

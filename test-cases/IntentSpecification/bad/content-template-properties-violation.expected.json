@@ -1,0 +1,23 @@
+{
+  "phase": 3,
+  "conforms": false,
+  "focusNodes": [
+    "http://example.org/template_condition_wrong_class",
+    "http://example.org/template_literal_content",
+    "http://example.org/template_wrong_condition"
+  ],
+  "violations": [
+    {
+      "focusNode": "http://example.org/template_condition_wrong_class",
+      "constraint": "insp/applicable_if_wrong_class"
+    },
+    {
+      "focusNode": "http://example.org/template_literal_content",
+      "constraint": "insp/content_literal"
+    },
+    {
+      "focusNode": "http://example.org/template_wrong_condition",
+      "constraint": "insp/applicable_if_literal"
+    }
+  ]
+}

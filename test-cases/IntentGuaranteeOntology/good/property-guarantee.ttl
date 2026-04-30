@@ -1,41 +1,49 @@
 # Test: Valid usage of guarantee properties
 # Concepts covered: confidenceLevel, guaranteePeriod, guaranteePeriodUpdateInterval, hasGuarantee, state, until
-# This test validates that guarantee properties can be used correctly.
 
 @prefix ex: <http://example.org/> .
+@prefix icm: <http://tio.models.tmforum.org/tio/v3.6.0/IntentCommonModel/> .
 @prefix igo: <http://tio.models.tmforum.org/tio/v3.6.0/IntentGuaranteeOntology/> .
+@prefix log: <http://tio.models.tmforum.org/tio/v3.6.0/LogicalOperators/> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-# === confidenceLevel property ===
+# Wrapper intent
+ex:wrapper a icm:Intent ;
+    log:allOf ( ex:test_guaranteeperiod ex:test_updateinterval ) .
+ex:target a icm:Target .
+
+# === confidenceLevel property (no domain) ===
 ex:test_confidencelevel
   a rdfs:Resource ;
   igo:confidenceLevel "0.95"^^xsd:decimal .
 
-# === guaranteePeriod property (must be xsd:duration) ===
+# === guaranteePeriod property — domain ig:GuaranteeReportingExpectation ===
 ex:test_guaranteeperiod
-  a rdfs:Resource ;
+  a igo:GuaranteeReportingExpectation ;
+  icm:target ex:target ;
   igo:guaranteePeriod "P1D"^^xsd:duration .
 
-# === guaranteePeriodUpdateInterval property (must be xsd:duration) ===
+# === guaranteePeriodUpdateInterval property ===
 ex:test_updateinterval
-  a rdfs:Resource ;
+  a igo:GuaranteeReportingExpectation ;
+  icm:target ex:target ;
   igo:guaranteePeriodUpdateInterval "PT5M"^^xsd:duration .
 
-# === hasGuarantee property ===
+# === hasGuarantee property (no domain) ===
 ex:test_hasguarantee
   a rdfs:Resource ;
   igo:hasGuarantee ex:guarantee1 .
 
-# === state property ===
+# === state property — domain ig:GuaranteeReport ===
 ex:test_state
-  a rdfs:Resource ;
+  a igo:GuaranteeReport ;
   igo:state ex:state1 .
 
-# === until property ===
+# === until property — domain ig:GuaranteeReport ===
 ex:test_until
-  a rdfs:Resource ;
+  a igo:GuaranteeReport ;
   igo:until "2024-12-31T23:59:59"^^xsd:dateTime .
 
 # Supporting instances

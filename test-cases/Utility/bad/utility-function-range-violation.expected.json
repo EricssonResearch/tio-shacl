@@ -1,0 +1,23 @@
+{
+  "phase": 3,
+  "conforms": false,
+  "focusNodes": [
+    "http://example.org/notFunction",
+    "http://example.org/util_literal_func",
+    "http://example.org/util_wrong_class"
+  ],
+  "violations": [
+    {
+      "focusNode": "http://example.org/notFunction",
+      "constraint": "icm/actionable_missing_function"
+    },
+    {
+      "focusNode": "http://example.org/util_literal_func",
+      "constraint": "ut/function_literal"
+    },
+    {
+      "focusNode": "http://example.org/util_wrong_class",
+      "constraint": "ut/function_not_function"
+    }
+  ]
+}

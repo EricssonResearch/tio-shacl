@@ -1,0 +1,22 @@
+{
+  "phase": 3,
+  "conforms": false,
+  "focusNodes": [
+    "http://example.org/wrong_choosefrom",
+    "http://example.org/wrong_delivery_type"
+  ],
+  "violations": [
+    {
+      "focusNode": "http://example.org/wrong_choosefrom",
+      "constraint": "icm/unreferenced_expectation"
+    },
+    {
+      "focusNode": "http://example.org/wrong_delivery_type",
+      "constraint": "icm/delivery_type_must_be_iri"
+    },
+    {
+      "focusNode": "http://example.org/wrong_delivery_type",
+      "constraint": "icm/unreferenced_expectation"
+    }
+  ]
+}

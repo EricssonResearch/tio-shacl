@@ -1,0 +1,18 @@
+{
+  "phase": 3,
+  "conforms": false,
+  "focusNodes": [
+    "http://example.org/content_wrong_using",
+    "http://example.org/spec_wrong_mandatory"
+  ],
+  "violations": [
+    {
+      "focusNode": "http://example.org/content_wrong_using",
+      "constraint": "insp/content_using_not_vocab_template"
+    },
+    {
+      "focusNode": "http://example.org/spec_wrong_mandatory",
+      "constraint": "insp/mandatory_not_intent"
+    }
+  ]
+}

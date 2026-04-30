@@ -1,0 +1,28 @@
+{
+  "phase": 3,
+  "conforms": false,
+  "focusNodes": [
+    "http://example.org/score_interp_wrong_max",
+    "http://example.org/score_interp_wrong_min",
+    "http://example.org/score_interp_wrong_objected",
+    "http://example.org/score_interp_wrong_preferred"
+  ],
+  "violations": [
+    {
+      "focusNode": "http://example.org/score_interp_wrong_max",
+      "constraint": "pre/score_not_literal"
+    },
+    {
+      "focusNode": "http://example.org/score_interp_wrong_min",
+      "constraint": "pre/score_not_literal"
+    },
+    {
+      "focusNode": "http://example.org/score_interp_wrong_objected",
+      "constraint": "pre/score_not_literal"
+    },
+    {
+      "focusNode": "http://example.org/score_interp_wrong_preferred",
+      "constraint": "pre/score_not_literal"
+    }
+  ]
+}

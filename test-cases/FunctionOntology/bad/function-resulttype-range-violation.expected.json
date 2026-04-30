@@ -1,0 +1,18 @@
+{
+  "phase": 3,
+  "conforms": false,
+  "focusNodes": [
+    "http://example.org/func_with_literal_type",
+    "http://example.org/func_with_typed_literal"
+  ],
+  "violations": [
+    {
+      "focusNode": "http://example.org/func_with_literal_type",
+      "constraint": "function/resulttype_must_be_iri"
+    },
+    {
+      "focusNode": "http://example.org/func_with_typed_literal",
+      "constraint": "function/resulttype_must_be_iri"
+    }
+  ]
+}

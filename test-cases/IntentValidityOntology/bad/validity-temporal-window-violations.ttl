@@ -7,6 +7,7 @@
 @prefix imo:  <http://tio.models.tmforum.org/tio/v3.6.0/IntentManagementOntology/> .
 @prefix t:    <http://www.w3.org/2006/time#> .
 @prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
 
 ################################################################################
@@ -28,6 +29,6 @@ ex:TimeInterval1
 
 # This should fail because InvalidV1 is not declared as iv:Validity
 ex:TestIntent
-  a rdf:Resource ;
+  a rdfs:Resource ;
   iv:validIf ex:InvalidV1
   .

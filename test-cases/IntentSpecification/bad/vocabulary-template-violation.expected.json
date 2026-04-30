@@ -1,0 +1,23 @@
+{
+  "phase": 3,
+  "conforms": false,
+  "focusNodes": [
+    "http://example.org/someIntent",
+    "http://example.org/wrong_content_using",
+    "http://example.org/wrong_content_using_intent"
+  ],
+  "violations": [
+    {
+      "focusNode": "http://example.org/someIntent",
+      "constraint": "icm/actionable_missing_function"
+    },
+    {
+      "focusNode": "http://example.org/wrong_content_using",
+      "constraint": "insp/content_using_not_vocab_template"
+    },
+    {
+      "focusNode": "http://example.org/wrong_content_using_intent",
+      "constraint": "insp/content_using_not_vocab_template"
+    }
+  ]
+}

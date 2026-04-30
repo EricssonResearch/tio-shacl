@@ -1,35 +1,33 @@
 # Test: Valid usage of Event metadata properties
 # Concepts covered: event, eventFor, eventIssuedBy, eventIssuedFor
-# This test validates that event-related properties can be used correctly.
 
 @prefix ex: <http://example.org/> .
-@prefix fun: <http://tio.models.tmforum.org/tio/v3.6.0/FunctionOntology/> .
 @prefix imo: <http://tio.models.tmforum.org/tio/v3.6.0/IntentManagementOntology/> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-# === event property ===
+# === event property (no domain) ===
 ex:test_event_subject
   a rdfs:Resource ;
   imo:event ex:event1 .
 
-# === eventFor property ===
+# === eventFor property — domain imo:Event ===
 ex:test_eventfor_subject
-  a rdfs:Resource ;
+  a imo:Event ;
   imo:eventFor ex:test_value .
 
-# === eventIssuedBy property (must reference imo:IntentManager) ===
+# === eventIssuedBy property — domain imo:Event ===
 ex:test_eventissuedby_subject
-  a rdfs:Resource ;
+  a imo:IntentHandlingEvent ;
   imo:eventIssuedBy ex:manager1 .
 
-# === eventIssuedFor property ===
+# === eventIssuedFor property — domain imo:Event ===
 ex:test_eventissuedfor_subject
-  a rdfs:Resource ;
+  a imo:IntentHandlingEvent ;
   imo:eventIssuedFor ex:test_value .
 
 # Supporting instances
-ex:event1 a imo:Event .
+ex:event1 a imo:IntentHandlingEvent .
 ex:manager1 a imo:IntentManager .
 ex:test_value a rdfs:Resource .

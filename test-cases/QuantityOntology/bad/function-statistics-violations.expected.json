@@ -1,0 +1,28 @@
+{
+  "phase": 3,
+  "conforms": false,
+  "focusNodes": [
+    "http://example.org/invalid_mean",
+    "http://example.org/invalid_meanofset",
+    "http://example.org/invalid_median",
+    "http://example.org/invalid_medianofset"
+  ],
+  "violations": [
+    {
+      "focusNode": "http://example.org/invalid_mean",
+      "constraint": "function/arity_min"
+    },
+    {
+      "focusNode": "http://example.org/invalid_meanofset",
+      "constraint": "function/arity_min"
+    },
+    {
+      "focusNode": "http://example.org/invalid_median",
+      "constraint": "function/arity_min"
+    },
+    {
+      "focusNode": "http://example.org/invalid_medianofset",
+      "constraint": "function/arity_min"
+    }
+  ]
+}

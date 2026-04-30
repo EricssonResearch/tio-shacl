@@ -4,59 +4,73 @@
 
 @prefix ex: <http://example.org/> .
 @prefix pho: <http://tio.models.tmforum.org/tio/v3.6.0/PreferenceOfHandlingOutcomes/> .
+@prefix quan: <http://tio.models.tmforum.org/tio/v3.6.0/QuantityOntology/> .
+@prefix icm: <http://tio.models.tmforum.org/tio/v3.6.0/IntentCommonModel/> .
+@prefix log: <http://tio.models.tmforum.org/tio/v3.6.0/LogicalOperators/> .
+@prefix t: <http://www.w3.org/2006/time#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
 ex:test_about
-  a rdfs:Resource ;
+  a pho:Preference ;
   pho:about ex:resource1 .
 ex:test_aboutoption
-  a rdfs:Resource ;
+  a pho:PreferenceScore ;
   pho:aboutOption ex:option1 .
 ex:test_judgementrequest
-  a rdfs:Resource ;
+  a icm:IntentReport ;
   pho:judgementRequest ex:request1 .
 ex:test_maxscore
-  a rdfs:Resource ;
+  a pho:ScoreInterpretation ;
   pho:maxScore "100"^^xsd:decimal .
 ex:test_minscore
-  a rdfs:Resource ;
+  a pho:ScoreInterpretation ;
   pho:minScore "0"^^xsd:decimal .
 ex:test_neutral
-  a rdfs:Resource ;
-  pho:neutral "50"^^xsd:decimal .
+  a pho:Preference ;
+  pho:neutral ex:report_neutral .
 ex:test_objected
-  a rdfs:Resource ;
-  pho:objected true .
+  a pho:Preference ;
+  pho:objected ex:report_objected .
 ex:test_objectedthreshold
-  a rdfs:Resource ;
+  a pho:ScoreInterpretation ;
   pho:objectedThreshold "25"^^xsd:decimal .
 ex:test_preference
-  a rdfs:Resource ;
+  a icm:Intent ;
+  log:allOf ( ex:dummy_exp ) ;
   pho:preference ex:pref1 .
 ex:test_preferencedeadline
-  a rdfs:Resource ;
-  pho:preferenceDeadline "2024-12-31"^^xsd:date .
+  a pho:JudgementRequest ;
+  pho:preferenceDeadline ex:deadline1 .
 ex:test_preferred
-  a rdfs:Resource ;
-  pho:preferred true .
+  a pho:Preference ;
+  pho:preferred ex:report_preferred .
 ex:test_preferredthreshold
-  a rdfs:Resource ;
+  a pho:ScoreInterpretation ;
   pho:preferredThreshold "75"^^xsd:decimal .
 ex:test_score
-  a rdfs:Resource ;
+  a pho:Preference ;
   pho:score ex:score1 .
 ex:test_scoreinterpretation
-  a rdfs:Resource ;
+  a pho:Preference ;
   pho:scoreInterpretation ex:interp1 .
 ex:test_scorevalue
-  a rdfs:Resource ;
+  a pho:PreferenceScore ;
   pho:scoreValue "85"^^xsd:decimal .
 
-ex:resource1 a rdfs:Resource .
-ex:option1 a rdfs:Resource .
+ex:resource1 a pho:JudgementRequest .
+ex:option1 a icm:IntentReport .
 ex:request1 a pho:JudgementRequest .
 ex:pref1 a pho:Preference .
 ex:score1 a pho:PreferenceScore .
 ex:interp1 a pho:ScoreInterpretation .
+
+ex:report_neutral a icm:IntentReport .
+ex:report_objected a icm:IntentReport .
+ex:report_preferred a icm:IntentReport .
+ex:deadline1 a t:Instant .
+
+ex:dummy_exp a icm:DeliveryExpectation ;
+    icm:target ex:dummy_target .
+ex:dummy_target a icm:Target .

@@ -1,0 +1,18 @@
+{
+  "phase": 3,
+  "conforms": false,
+  "focusNodes": [
+    "http://example.org/proposal_literal_best",
+    "http://example.org/proposal_literal_for"
+  ],
+  "violations": [
+    {
+      "focusNode": "http://example.org/proposal_literal_best",
+      "constraint": "pbi/proposed_best_literal"
+    },
+    {
+      "focusNode": "http://example.org/proposal_literal_for",
+      "constraint": "pbi/proposed_for_literal"
+    }
+  ]
+}

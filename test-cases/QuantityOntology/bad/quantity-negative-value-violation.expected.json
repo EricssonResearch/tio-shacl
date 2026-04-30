@@ -1,0 +1,18 @@
+{
+  "phase": 3,
+  "conforms": false,
+  "focusNodes": [
+    "http://example.org/qty_negative",
+    "http://example.org/qty_negative_decimal"
+  ],
+  "violations": [
+    {
+      "focusNode": "http://example.org/qty_negative",
+      "constraint": "quan/negative_value"
+    },
+    {
+      "focusNode": "http://example.org/qty_negative_decimal",
+      "constraint": "quan/negative_value"
+    }
+  ]
+}

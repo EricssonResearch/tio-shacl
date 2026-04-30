@@ -1,0 +1,18 @@
+{
+  "phase": 3,
+  "conforms": false,
+  "focusNodes": [
+    "http://example.org/event_issuer_literal",
+    "http://example.org/event_issuer_wrong_type"
+  ],
+  "violations": [
+    {
+      "focusNode": "http://example.org/event_issuer_literal",
+      "constraint": "imo/event_issued_by_literal"
+    },
+    {
+      "focusNode": "http://example.org/event_issuer_wrong_type",
+      "constraint": "imo/event_issued_by_not_manager"
+    }
+  ]
+}

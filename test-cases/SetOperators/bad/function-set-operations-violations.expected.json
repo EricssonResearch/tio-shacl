@@ -1,0 +1,23 @@
+{
+  "phase": 3,
+  "conforms": false,
+  "focusNodes": [
+    "http://example.org/invalid_empty",
+    "http://example.org/invalid_includedin",
+    "http://example.org/invalid_intersectswith"
+  ],
+  "violations": [
+    {
+      "focusNode": "http://example.org/invalid_empty",
+      "constraint": "function/arity_min"
+    },
+    {
+      "focusNode": "http://example.org/invalid_includedin",
+      "constraint": "function/arity_min"
+    },
+    {
+      "focusNode": "http://example.org/invalid_intersectswith",
+      "constraint": "function/arity_min"
+    }
+  ]
+}

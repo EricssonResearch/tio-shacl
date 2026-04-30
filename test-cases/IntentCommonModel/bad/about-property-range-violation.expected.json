@@ -1,0 +1,13 @@
+{
+  "phase": 3,
+  "conforms": false,
+  "focusNodes": [
+    "http://example.org/IR1"
+  ],
+  "violations": [
+    {
+      "focusNode": "http://example.org/IR1",
+      "constraint": "icm/about_must_be_iri"
+    }
+  ]
+}

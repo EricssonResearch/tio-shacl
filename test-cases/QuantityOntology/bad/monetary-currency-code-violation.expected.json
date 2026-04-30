@@ -1,0 +1,23 @@
+{
+  "phase": 3,
+  "conforms": false,
+  "focusNodes": [
+    "http://example.org/money_long_code",
+    "http://example.org/money_lowercase",
+    "http://example.org/money_symbol"
+  ],
+  "violations": [
+    {
+      "focusNode": "http://example.org/money_long_code",
+      "constraint": "quan/currency_code_invalid"
+    },
+    {
+      "focusNode": "http://example.org/money_lowercase",
+      "constraint": "quan/currency_code_invalid"
+    },
+    {
+      "focusNode": "http://example.org/money_symbol",
+      "constraint": "quan/currency_code_invalid"
+    }
+  ]
+}

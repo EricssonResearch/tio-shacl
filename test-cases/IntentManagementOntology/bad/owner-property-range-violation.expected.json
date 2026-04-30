@@ -1,0 +1,18 @@
+{
+  "phase": 3,
+  "conforms": false,
+  "focusNodes": [
+    "http://example.org/intent_literal_owner",
+    "http://example.org/intent_wrong_owner_type"
+  ],
+  "violations": [
+    {
+      "focusNode": "http://example.org/intent_literal_owner",
+      "constraint": "imo/owner_literal"
+    },
+    {
+      "focusNode": "http://example.org/intent_wrong_owner_type",
+      "constraint": "imo/owner_not_manager"
+    }
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "phase": 3,
+  "conforms": false,
+  "focusNodes": [
+    "http://example.org/violation_unwrapped_atmost",
+    "http://example.org/violation_unwrapped_basic",
+    "http://example.org/violation_unwrapped_wrong_type"
+  ],
+  "violations": [
+    {
+      "focusNode": "http://example.org/violation_unwrapped_atmost",
+      "constraint": "function/arg_type_mismatch"
+    },
+    {
+      "focusNode": "http://example.org/violation_unwrapped_atmost",
+      "constraint": "function/arity_max"
+    },
+    {
+      "focusNode": "http://example.org/violation_unwrapped_basic",
+      "constraint": "function/arg_type_mismatch"
+    },
+    {
+      "focusNode": "http://example.org/violation_unwrapped_basic",
+      "constraint": "function/arity_max"
+    },
+    {
+      "focusNode": "http://example.org/violation_unwrapped_wrong_type",
+      "constraint": "function/arg_type_mismatch"
+    },
+    {
+      "focusNode": "http://example.org/violation_unwrapped_wrong_type",
+      "constraint": "function/arity_max"
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "phase": 3,
+  "conforms": false,
+  "focusNodes": [
+    "http://example.org/wrong_confidence_int",
+    "http://example.org/wrong_confidence_string",
+    "http://example.org/wrong_confidence_untyped"
+  ],
+  "violations": [
+    {
+      "focusNode": "http://example.org/wrong_confidence_int",
+      "constraint": "ig/confidence_level_type"
+    },
+    {
+      "focusNode": "http://example.org/wrong_confidence_string",
+      "constraint": "ig/confidence_level_type"
+    },
+    {
+      "focusNode": "http://example.org/wrong_confidence_untyped",
+      "constraint": "ig/confidence_level_type"
+    }
+  ]
+}

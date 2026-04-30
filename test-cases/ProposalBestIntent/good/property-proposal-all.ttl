@@ -4,24 +4,25 @@
 
 @prefix ex: <http://example.org/> .
 @prefix pbi: <http://tio.models.tmforum.org/tio/v3.6.0/ProposalBestIntent/> .
+@prefix icm: <http://tio.models.tmforum.org/tio/v3.6.0/IntentCommonModel/> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
 ex:test_proposal
-  a rdfs:Resource ;
+  a icm:IntentReport ;
   pbi:proposal ex:proposal1 .
 ex:test_proposed
-  a rdfs:Resource ;
+  a pbi:BestProposalReport ;
   pbi:proposed ex:value1 .
 ex:test_proposedbest
-  a rdfs:Resource ;
+  a pbi:Proposal ;
   pbi:proposedBest ex:best1 .
 ex:test_proposedfor
-  a rdfs:Resource ;
+  a pbi:Proposal ;
   pbi:proposedFor ex:intent1 .
 
-ex:proposal1 a pbi:Proposal .
-ex:value1 a rdfs:Resource .
+ex:proposal1 a pbi:BestProposalReport .
+ex:value1 a pbi:Proposal .
 ex:best1 a rdfs:Resource .
 ex:intent1 a rdfs:Resource .

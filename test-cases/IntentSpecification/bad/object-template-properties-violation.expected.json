@@ -1,0 +1,13 @@
+{
+  "phase": 3,
+  "conforms": false,
+  "focusNodes": [
+    "http://example.org/template_literal_type"
+  ],
+  "violations": [
+    {
+      "focusNode": "http://example.org/template_literal_type",
+      "constraint": "insp/template_type_literal"
+    }
+  ]
+}

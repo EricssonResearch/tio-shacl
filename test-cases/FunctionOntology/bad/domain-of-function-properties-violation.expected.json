@@ -1,0 +1,13 @@
+{
+  "phase": 3,
+  "conforms": false,
+  "focusNodes": [
+    "http://example.org/intent_with_arity"
+  ],
+  "violations": [
+    {
+      "focusNode": "http://example.org/intent_with_arity",
+      "constraint": "icm/actionable_missing_function"
+    }
+  ]
+}

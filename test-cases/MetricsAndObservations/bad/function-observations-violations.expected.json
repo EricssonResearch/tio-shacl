@@ -1,0 +1,23 @@
+{
+  "phase": 3,
+  "conforms": false,
+  "focusNodes": [
+    "http://example.org/invalid_lastobserved",
+    "http://example.org/invalid_lastvalue",
+    "http://example.org/invalid_observedvalue"
+  ],
+  "violations": [
+    {
+      "focusNode": "http://example.org/invalid_lastobserved",
+      "constraint": "function/arity_min"
+    },
+    {
+      "focusNode": "http://example.org/invalid_lastvalue",
+      "constraint": "function/arity_min"
+    },
+    {
+      "focusNode": "http://example.org/invalid_observedvalue",
+      "constraint": "function/arity_min"
+    }
+  ]
+}

@@ -17,7 +17,7 @@
 ################################################################################
 
 ex:test_intent a icm:Intent ;
-  log:allOf ( ex:test_reporting ex:guarantee_one_day ex:guarantee_one_hour ex:guarantee_30_minutes ex:guarantee_one_month ex:guarantee_one_year ex:guarantee_complex_period ex:guarantee_fast_updates ex:guarantee_hourly_updates ex:guarantee_daily_updates ex:sla_uptime_guarantee ex:performance_guarantee ex:data_integrity_guarantee ) .
+  log:allOf ( ex:test_reporting ) .
 
 ################################################################################
 # Supporting instances
@@ -180,3 +180,24 @@ ex:monthly_guarantee_report a ig:GuaranteeReport ;
 
 ex:conflicting_performance_guarantees a ig:ConflictingGuarantees ;
     rdfs:label "Conflicting Latency vs Throughput Guarantees" .
+
+################################################################################
+# Wrapper intent to reference all expectations (avoids unreferenced warnings)
+################################################################################
+
+ex:wrapper_intent a icm:Intent ;
+    log:allOf (
+        ex:test_reporting
+        ex:guarantee_one_day
+        ex:guarantee_one_hour
+        ex:guarantee_30_minutes
+        ex:guarantee_one_month
+        ex:guarantee_one_year
+        ex:guarantee_complex_period
+        ex:guarantee_fast_updates
+        ex:guarantee_hourly_updates
+        ex:guarantee_daily_updates
+        ex:sla_uptime_guarantee
+        ex:performance_guarantee
+        ex:data_integrity_guarantee
+    ) .

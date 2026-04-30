@@ -1,0 +1,13 @@
+{
+  "phase": 3,
+  "conforms": false,
+  "focusNodes": [
+    "http://example.org/obs_no_metric"
+  ],
+  "violations": [
+    {
+      "focusNode": "http://example.org/obs_no_metric",
+      "constraint": "met/missing_observed_metric"
+    }
+  ]
+}

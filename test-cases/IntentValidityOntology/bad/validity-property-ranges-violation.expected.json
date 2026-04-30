@@ -1,0 +1,27 @@
+{
+  "phase": 3,
+  "conforms": false,
+  "focusNodes": [
+    "http://example.org/exp_wrong_sameas",
+    "http://example.org/intent_validif_wrong_class",
+    "http://example.org/intent_wrong_validif"
+  ],
+  "violations": [
+    {
+      "focusNode": "http://example.org/exp_wrong_sameas",
+      "constraint": "icm/actionable_missing_function"
+    },
+    {
+      "focusNode": "http://example.org/exp_wrong_sameas",
+      "constraint": "icm/unreferenced_expectation"
+    },
+    {
+      "focusNode": "http://example.org/intent_validif_wrong_class",
+      "constraint": "iv/valid_if_not_validity"
+    },
+    {
+      "focusNode": "http://example.org/intent_wrong_validif",
+      "constraint": "iv/valid_if_not_validity"
+    }
+  ]
+}

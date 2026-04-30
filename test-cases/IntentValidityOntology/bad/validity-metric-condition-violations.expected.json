@@ -1,0 +1,13 @@
+{
+  "phase": 3,
+  "conforms": false,
+  "focusNodes": [
+    "http://example.org/InvalidV1"
+  ],
+  "violations": [
+    {
+      "focusNode": "http://example.org/InvalidV1",
+      "constraint": "function/arity_min"
+    }
+  ]
+}

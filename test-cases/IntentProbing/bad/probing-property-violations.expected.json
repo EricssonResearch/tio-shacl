@@ -1,0 +1,23 @@
+{
+  "phase": 3,
+  "conforms": false,
+  "focusNodes": [
+    "http://example.org/result_integer",
+    "http://example.org/result_string",
+    "http://example.org/result_untyped"
+  ],
+  "violations": [
+    {
+      "focusNode": "http://example.org/result_integer",
+      "constraint": "pro/expected_result_type"
+    },
+    {
+      "focusNode": "http://example.org/result_string",
+      "constraint": "pro/expected_result_type"
+    },
+    {
+      "focusNode": "http://example.org/result_untyped",
+      "constraint": "pro/expected_result_type"
+    }
+  ]
+}

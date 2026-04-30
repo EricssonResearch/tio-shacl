@@ -1,0 +1,17 @@
+{
+  "phase": 3,
+  "conforms": false,
+  "focusNodes": [
+    "http://example.org/guarantee_reporting_no_target"
+  ],
+  "violations": [
+    {
+      "focusNode": "http://example.org/guarantee_reporting_no_target",
+      "constraint": "icm/missing_target"
+    },
+    {
+      "focusNode": "http://example.org/guarantee_reporting_no_target",
+      "constraint": "icm/unreferenced_expectation"
+    }
+  ]
+}

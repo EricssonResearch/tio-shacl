@@ -1,0 +1,46 @@
+{
+  "phase": 3,
+  "conforms": false,
+  "focusNodes": [
+    "http://example.org/invalid_timeoflasteventfor_wrong_type",
+    "http://example.org/invalid_timeoflasteventfor_zero_args",
+    "http://example.org/invalid_timeoflasteventsfor_wrong_type",
+    "http://example.org/invalid_timeoflasteventsfor_zero_args",
+    "http://example.org/invalid_timeoflastreportfor_wrong_type",
+    "http://example.org/invalid_timeoflastreportfor_zero_args"
+  ],
+  "violations": [
+    {
+      "focusNode": "http://example.org/invalid_timeoflasteventfor_wrong_type",
+      "constraint": "function/arg_type_mismatch"
+    },
+    {
+      "focusNode": "http://example.org/invalid_timeoflasteventfor_wrong_type",
+      "constraint": "function/arity_min"
+    },
+    {
+      "focusNode": "http://example.org/invalid_timeoflasteventfor_zero_args",
+      "constraint": "function/arity_min"
+    },
+    {
+      "focusNode": "http://example.org/invalid_timeoflasteventsfor_wrong_type",
+      "constraint": "function/arg_type_mismatch"
+    },
+    {
+      "focusNode": "http://example.org/invalid_timeoflasteventsfor_wrong_type",
+      "constraint": "function/arity_min"
+    },
+    {
+      "focusNode": "http://example.org/invalid_timeoflasteventsfor_zero_args",
+      "constraint": "function/arity_min"
+    },
+    {
+      "focusNode": "http://example.org/invalid_timeoflastreportfor_wrong_type",
+      "constraint": "function/arg_type_mismatch"
+    },
+    {
+      "focusNode": "http://example.org/invalid_timeoflastreportfor_zero_args",
+      "constraint": "function/arity_min"
+    }
+  ]
+}

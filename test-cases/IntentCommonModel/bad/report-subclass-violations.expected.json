@@ -1,0 +1,33 @@
+{
+  "phase": 3,
+  "conforms": false,
+  "focusNodes": [
+    "http://example.org/condition_report_literal_about",
+    "http://example.org/context_report_literal_about",
+    "http://example.org/delivery_expectation_report_literal_about",
+    "http://example.org/property_expectation_report_literal_about",
+    "http://example.org/reporting_expectation_report_literal_about"
+  ],
+  "violations": [
+    {
+      "focusNode": "http://example.org/condition_report_literal_about",
+      "constraint": "icm/about_must_be_iri"
+    },
+    {
+      "focusNode": "http://example.org/context_report_literal_about",
+      "constraint": "icm/about_must_be_iri"
+    },
+    {
+      "focusNode": "http://example.org/delivery_expectation_report_literal_about",
+      "constraint": "icm/about_must_be_iri"
+    },
+    {
+      "focusNode": "http://example.org/property_expectation_report_literal_about",
+      "constraint": "icm/about_must_be_iri"
+    },
+    {
+      "focusNode": "http://example.org/reporting_expectation_report_literal_about",
+      "constraint": "icm/about_must_be_iri"
+    }
+  ]
+}

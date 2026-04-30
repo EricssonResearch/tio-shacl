@@ -1,0 +1,48 @@
+{
+  "phase": 3,
+  "conforms": false,
+  "focusNodes": [
+    "http://example.org/invalid_chosenall",
+    "http://example.org/invalid_chosenallfor",
+    "http://example.org/invalid_chosenany",
+    "http://example.org/invalid_chosenanyfor",
+    "http://example.org/invalid_selectvalues",
+    "http://example.org/invalid_usedvocabularyfor",
+    "http://example.org/invalid_valueselected",
+    "http://example.org/invalid_valueselectedfor"
+  ],
+  "violations": [
+    {
+      "focusNode": "http://example.org/invalid_chosenall",
+      "constraint": "function/arity_min"
+    },
+    {
+      "focusNode": "http://example.org/invalid_chosenallfor",
+      "constraint": "function/arity_min"
+    },
+    {
+      "focusNode": "http://example.org/invalid_chosenany",
+      "constraint": "function/arity_min"
+    },
+    {
+      "focusNode": "http://example.org/invalid_chosenanyfor",
+      "constraint": "function/arity_min"
+    },
+    {
+      "focusNode": "http://example.org/invalid_selectvalues",
+      "constraint": "function/arity_min"
+    },
+    {
+      "focusNode": "http://example.org/invalid_usedvocabularyfor",
+      "constraint": "function/arity_min"
+    },
+    {
+      "focusNode": "http://example.org/invalid_valueselected",
+      "constraint": "function/arity_min"
+    },
+    {
+      "focusNode": "http://example.org/invalid_valueselectedfor",
+      "constraint": "function/arity_min"
+    }
+  ]
+}

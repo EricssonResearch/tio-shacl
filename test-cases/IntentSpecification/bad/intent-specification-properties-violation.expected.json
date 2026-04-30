@@ -1,0 +1,18 @@
+{
+  "phase": 3,
+  "conforms": false,
+  "focusNodes": [
+    "http://example.org/spec_literal_optional",
+    "http://example.org/spec_wrong_mandatory"
+  ],
+  "violations": [
+    {
+      "focusNode": "http://example.org/spec_literal_optional",
+      "constraint": "insp/optional_not_intent"
+    },
+    {
+      "focusNode": "http://example.org/spec_wrong_mandatory",
+      "constraint": "insp/mandatory_not_intent"
+    }
+  ]
+}

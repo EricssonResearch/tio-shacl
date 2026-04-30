@@ -1,0 +1,13 @@
+{
+  "phase": 3,
+  "conforms": false,
+  "focusNodes": [
+    "http://example.org/test_missing_type"
+  ],
+  "violations": [
+    {
+      "focusNode": "http://example.org/test_missing_type",
+      "constraint": "function/arg_type_mismatch"
+    }
+  ]
+}

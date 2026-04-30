@@ -1,0 +1,13 @@
+{
+  "phase": 3,
+  "conforms": false,
+  "focusNodes": [
+    "http://example.org/TestIntent"
+  ],
+  "violations": [
+    {
+      "focusNode": "http://example.org/TestIntent",
+      "constraint": "iv/valid_if_not_validity"
+    }
+  ]
+}

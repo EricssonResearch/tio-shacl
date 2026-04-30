@@ -1,0 +1,23 @@
+{
+  "phase": 3,
+  "conforms": false,
+  "focusNodes": [
+    "http://example.org/valid_integer",
+    "http://example.org/valid_string",
+    "http://example.org/valid_untyped"
+  ],
+  "violations": [
+    {
+      "focusNode": "http://example.org/valid_integer",
+      "constraint": "iv/is_valid_type"
+    },
+    {
+      "focusNode": "http://example.org/valid_string",
+      "constraint": "iv/is_valid_type"
+    },
+    {
+      "focusNode": "http://example.org/valid_untyped",
+      "constraint": "iv/is_valid_type"
+    }
+  ]
+}

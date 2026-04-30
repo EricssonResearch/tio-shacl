@@ -1,0 +1,18 @@
+{
+  "phase": 3,
+  "conforms": false,
+  "focusNodes": [
+    "http://example.org/invalid_resourceswithpropertyobject",
+    "http://example.org/invalid_valuesofobjectproperty"
+  ],
+  "violations": [
+    {
+      "focusNode": "http://example.org/invalid_resourceswithpropertyobject",
+      "constraint": "function/arity_min"
+    },
+    {
+      "focusNode": "http://example.org/invalid_valuesofobjectproperty",
+      "constraint": "function/arity_min"
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "phase": 3,
+  "conforms": false,
+  "focusNodes": [
+    "http://example.org/invalid_match",
+    "http://example.org/invalid_matchall",
+    "http://example.org/invalid_matchany",
+    "http://example.org/invalid_matchnone",
+    "http://example.org/invalid_matchone",
+    "http://example.org/invalid_matchstatement"
+  ],
+  "violations": [
+    {
+      "focusNode": "http://example.org/invalid_match",
+      "constraint": "function/arity_min"
+    },
+    {
+      "focusNode": "http://example.org/invalid_matchall",
+      "constraint": "function/arity_min"
+    },
+    {
+      "focusNode": "http://example.org/invalid_matchany",
+      "constraint": "function/arity_min"
+    },
+    {
+      "focusNode": "http://example.org/invalid_matchnone",
+      "constraint": "function/arity_min"
+    },
+    {
+      "focusNode": "http://example.org/invalid_matchone",
+      "constraint": "function/arity_min"
+    },
+    {
+      "focusNode": "http://example.org/invalid_matchstatement",
+      "constraint": "function/arity_min"
+    }
+  ]
+}

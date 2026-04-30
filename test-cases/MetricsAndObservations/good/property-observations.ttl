@@ -16,10 +16,11 @@ ex:test_observed
   a rdfs:Resource ;
   met:observed ex:observation1 .
 ex:test_observedmetric
-  a rdfs:Resource ;
+  a met:Observation ;
   met:observedMetric ex:metric1 .
 ex:test_obtainedat
-  a rdfs:Resource ;
+  a met:Observation ;
+  met:observedMetric ex:metric1 ;
   met:obtainedAt "2024-01-01T00:00:00"^^xsd:dateTime .
 
 # Supporting instances

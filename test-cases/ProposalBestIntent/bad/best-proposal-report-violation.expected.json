@@ -1,0 +1,13 @@
+{
+  "phase": 3,
+  "conforms": false,
+  "focusNodes": [
+    "http://example.org/report_wrong_proposed"
+  ],
+  "violations": [
+    {
+      "focusNode": "http://example.org/report_wrong_proposed",
+      "constraint": "pbi/proposed_literal"
+    }
+  ]
+}

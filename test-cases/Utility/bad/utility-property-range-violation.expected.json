@@ -1,0 +1,18 @@
+{
+  "phase": 3,
+  "conforms": false,
+  "focusNodes": [
+    "http://example.org/intent_literal_utility",
+    "http://example.org/intent_wrong_utility"
+  ],
+  "violations": [
+    {
+      "focusNode": "http://example.org/intent_literal_utility",
+      "constraint": "ut/utility_literal"
+    },
+    {
+      "focusNode": "http://example.org/intent_wrong_utility",
+      "constraint": "ut/utility_not_info"
+    }
+  ]
+}
