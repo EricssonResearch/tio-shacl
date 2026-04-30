@@ -14,7 +14,7 @@ from pathlib import Path
 import pytest
 from click.testing import CliRunner
 
-from tests.conftest import GOOD_CASES, BAD_CASES
+from tests.conftest import BAD_CASES, GOOD_CASES
 
 
 @pytest.fixture
@@ -65,6 +65,33 @@ class TestValidateCommand:
 
         result = runner.invoke(main, ["validate", "/nonexistent/path.ttl"])
         assert result.exit_code != 0
+
+    def test_validate_accepts_repeatable_ontology_dir(
+        self, runner: CliRunner, tio_ontology_dir: Path, tmp_path: Path
+    ) -> None:
+        """``-O`` / ``--ontology-dir`` composes TIO with an extra catalogue dir."""
+        from tio_shacl.cli import main
+
+        catalogue = tmp_path / "catalogue"
+        catalogue.mkdir()
+        (catalogue / "catalogue.ttl").write_text(
+            "@prefix ex: <http://example.org/catalogue/> .\n"
+            "ex:Foo a <http://www.w3.org/2000/01/rdf-schema#Class> .\n"
+        )
+
+        assert GOOD_CASES, "no good cases available for test"
+        result = runner.invoke(
+            main,
+            [
+                "validate",
+                "-O",
+                str(tio_ontology_dir),
+                "-O",
+                str(catalogue),
+                str(GOOD_CASES[0].path),
+            ],
+        )
+        assert result.exit_code == 0, result.output
 
 
 class TestTestCommand:

@@ -16,9 +16,9 @@ from pathlib import Path
 import click
 
 import tio_shacl
+
 from .validation import TestOrchestrator, ValidationRunner
 from .validation.orchestrator import SuiteReport
-
 
 # -----------------------------------------------------------------------------
 # Global results cache (populated by ``test``, consumed by ``report``)
@@ -130,13 +130,27 @@ def main() -> None:
     type=click.Path(exists=True, dir_okay=False, readable=True, path_type=Path),
 )
 @click.option(
+    "--ontology-dir",
+    "-O",
+    "ontology_dirs",
+    multiple=True,
+    type=click.Path(exists=True, file_okay=False, dir_okay=True, path_type=Path),
+    help=(
+        "Additional directory whose .ttl files are loaded into the ontology "
+        "graph. Repeat for multiple directories, e.g. one for TIO and one "
+        "for a custom catalogue. Overrides TIO_ONTOLOGY_DIR when given."
+    ),
+)
+@click.option(
     "--verbose",
     "-v",
     is_flag=True,
     help="Print the full SHACL report for each violation.",
 )
-def validate_cmd(path: Path, verbose: bool) -> None:
-    runner = ValidationRunner()
+def validate_cmd(path: Path, ontology_dirs: tuple[Path, ...], verbose: bool) -> None:
+    runner = ValidationRunner(
+        ontology_dirs=list(ontology_dirs) if ontology_dirs else None,
+    )
     result = runner.validate_file(path)
 
     if result.conforms:

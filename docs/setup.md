@@ -65,7 +65,7 @@ uv run python -c "import tio_shacl; print(tio_shacl.__version__)"
 
 ### Steps
 
-1. Go to <https://www.tmforum.org/intent-ontology/>
+1. Go to <https://projects.tmforum.org/wiki/pages/viewpageattachments.action?pageId=328567625>
 2. Sign in (free TM Forum account required).
 3. Download **TIO release 3.6.0**.
 4. Extract the archive — you should see 15 `.ttl` files:

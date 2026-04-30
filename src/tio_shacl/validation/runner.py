@@ -11,6 +11,7 @@ or implicitly via the ``TIO_VALIDATOR`` environment variable.
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -18,7 +19,6 @@ from typing import Any
 from rdflib import Graph
 
 from ..core.loader import GraphSet, load_graphs
-
 
 # -----------------------------------------------------------------------------
 # Result types (backends produce these)
@@ -60,7 +60,12 @@ class ValidationRunner:
     """Validate one RDF file (or in-memory graph) against the TIO SHACL shapes.
 
     Args:
-        ontology_dir: Override for TIO ontology directory.
+        ontology_dir: Override for a single TIO ontology directory. Mutually
+            exclusive with ``ontology_dirs``.
+        ontology_dirs: Override for multiple ontology directories whose TTLs
+            are unioned into the ontology graph — use this to compose TIO
+            with custom catalogues without copying files. Mutually exclusive
+            with ``ontology_dir``.
         shapes_dir: Override for SHACL shapes directory.
         lib_dir: Override for reusable SHACL library.
         extensions_dir: Override for ontology extensions.
@@ -78,10 +83,18 @@ class ValidationRunner:
         lib_dir: Path | None = None,
         extensions_dir: Path | None = None,
         *,
+        ontology_dirs: Sequence[Path] | None = None,
         include_extensions: bool = True,
-        backend: "str | Any | None" = None,
+        backend: str | Any | None = None,
     ) -> None:
+        if ontology_dir is not None and ontology_dirs is not None:
+            raise ValueError(
+                "ValidationRunner: pass either ontology_dir or ontology_dirs, not both."
+            )
         self.ontology_dir = ontology_dir
+        self.ontology_dirs: tuple[Path, ...] | None = (
+            tuple(ontology_dirs) if ontology_dirs is not None else None
+        )
         self.shapes_dir = shapes_dir
         self.lib_dir = lib_dir
         self.extensions_dir = extensions_dir
@@ -89,10 +102,10 @@ class ValidationRunner:
         self._backend = self._resolve_backend(backend)
 
     @staticmethod
-    def _resolve_backend(explicit: "str | Any | None"):
+    def _resolve_backend(explicit: str | Any | None) -> Any:
         """Import the registry lazily to avoid circular imports at package init."""
         # Local import to break the circular dependency with backends/base.py
-        from .backends import get_backend, resolve_backend
+        from .backends import resolve_backend
 
         if explicit is None or isinstance(explicit, str):
             return resolve_backend(explicit)
@@ -106,6 +119,7 @@ class ValidationRunner:
     def graphs(self) -> GraphSet:
         return load_graphs(
             ontology_dir=self.ontology_dir,
+            ontology_dirs=self.ontology_dirs,
             shapes_dir=self.shapes_dir,
             lib_dir=self.lib_dir,
             extensions_dir=self.extensions_dir,

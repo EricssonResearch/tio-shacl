@@ -77,6 +77,40 @@ class TestValidationRunner:
         runner = ValidationRunner(ontology_dir=tio_ontology_dir)
         assert runner.ontology_dir == tio_ontology_dir
 
+    def test_runner_accepts_multiple_ontology_dirs(
+        self, tio_ontology_dir: Path, tmp_path: Path
+    ) -> None:
+        """``ontology_dirs`` composes TIO with one or more catalogues."""
+        from tio_shacl.validation import ValidationRunner
+
+        catalogue = tmp_path / "catalogue"
+        catalogue.mkdir()
+        (catalogue / "catalogue.ttl").write_text(
+            "@prefix ex: <http://example.org/catalogue/> .\n"
+            "ex:Foo a <http://www.w3.org/2000/01/rdf-schema#Class> .\n"
+        )
+
+        runner = ValidationRunner(ontology_dirs=[tio_ontology_dir, catalogue])
+        assert runner.ontology_dirs == (tio_ontology_dir, catalogue)
+
+        good_file = next(
+            (c.path for c in ALL_CASES if c.expected_conforms), None
+        )
+        assert good_file is not None
+        result = runner.validate_file(good_file)
+        assert result.conforms is True
+
+    def test_runner_rejects_conflicting_ontology_args(
+        self, tio_ontology_dir: Path
+    ) -> None:
+        from tio_shacl.validation import ValidationRunner
+
+        with pytest.raises(ValueError):
+            ValidationRunner(
+                ontology_dir=tio_ontology_dir,
+                ontology_dirs=[tio_ontology_dir],
+            )
+
 
 # -----------------------------------------------------------------------------
 # Parametrized: every good case must conform

@@ -8,6 +8,7 @@ shapes graph is passed as the ``shacl_graph`` argument.
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
@@ -81,15 +82,28 @@ def _collect_shape_files(
 
 
 def _collect_ontology_files(
-    ontology_dir: Path,
+    ontology_dirs: Sequence[Path],
     extensions_dir: Path | None,
 ) -> list[Path]:
     """Enumerate every TTL that belongs in the ontology graph.
 
-    Includes the 15 TIO files plus any local ontology extensions (which add
-    vocabulary, not validation rules).
+    Includes the 15 TIO files plus any additional catalogues/vocabularies found
+    in the extra ontology directories, plus any local ontology extensions
+    (which add vocabulary, not validation rules).
+
+    The directories are visited in the order given so that if two files share a
+    name, the first one encountered wins — rdflib's graph union is idempotent on
+    identical triples but user-level ordering is still predictable.
     """
-    files: list[Path] = sorted(ontology_dir.glob("*.ttl"))
+    files: list[Path] = []
+    seen: set[str] = set()
+    for ontology_dir in ontology_dirs:
+        for path in sorted(ontology_dir.glob("*.ttl")):
+            if path.name in seen:
+                continue
+            seen.add(path.name)
+            files.append(path)
+
     if extensions_dir is not None and extensions_dir.is_dir():
         files.extend(sorted(extensions_dir.glob("*.ttl")))
     return files
@@ -99,13 +113,13 @@ def _collect_ontology_files(
 def _cached_graphset(
     shapes_dir: Path,
     lib_dir: Path,
-    ontology_dir: Path,
+    ontology_dirs: tuple[Path, ...],
     extensions_dir: Path | None,
     include_extensions: bool,
 ) -> GraphSet:
     """Cache the parsed graphs so repeated validations don't re-parse."""
     shape_files = _collect_shape_files(shapes_dir, lib_dir, include_extensions)
-    ontology_files = _collect_ontology_files(ontology_dir, extensions_dir)
+    ontology_files = _collect_ontology_files(ontology_dirs, extensions_dir)
 
     shapes = _parse_ttl_files(shape_files)
     ontology = _parse_ttl_files(ontology_files)
@@ -118,6 +132,7 @@ def load_graphs(
     lib_dir: Path | None = None,
     extensions_dir: Path | None = None,
     *,
+    ontology_dirs: Sequence[Path] | None = None,
     include_extensions: bool = True,
 ) -> GraphSet:
     """Load and merge all graphs required for SHACL validation.
@@ -127,8 +142,14 @@ def load_graphs(
     :func:`load_graphs` many times cheaply.
 
     Args:
-        ontology_dir: Directory containing the (patched) TIO 3.6.0 ``.ttl``
-            files. Defaults to :func:`tio_shacl.get_ontologies_dir`.
+        ontology_dir: Single directory containing the (patched) TIO 3.6.0
+            ``.ttl`` files. Mutually exclusive with ``ontology_dirs``. When
+            both are ``None``, the package resolves the directory list from
+            :func:`tio_shacl.get_ontologies_dirs`.
+        ontology_dirs: List of directories whose ``.ttl`` files are all unioned
+            into the ontology graph. Use this to compose TIO with one or more
+            custom catalogues without copying files. Mutually exclusive with
+            ``ontology_dir``.
         shapes_dir: Directory containing per-module SHACL shapes. Defaults to
             :func:`tio_shacl.get_shapes_dir`.
         lib_dir: Reusable SHACL library. Defaults to
@@ -138,9 +159,21 @@ def load_graphs(
         include_extensions: If ``False``, skip ``rdf/shapes/extensions/`` and
             the ``extensions/`` ontology add-ons.
     """
+    if ontology_dir is not None and ontology_dirs is not None:
+        raise ValueError(
+            "load_graphs: pass either ontology_dir or ontology_dirs, not both."
+        )
+
     resolved_shapes = shapes_dir or tio_shacl.get_shapes_dir()
     resolved_lib = lib_dir or tio_shacl.get_lib_dir()
-    resolved_ontology = ontology_dir or tio_shacl.get_ontologies_dir()
+
+    if ontology_dirs is not None:
+        resolved_ontology: tuple[Path, ...] = tuple(ontology_dirs)
+    elif ontology_dir is not None:
+        resolved_ontology = (ontology_dir,)
+    else:
+        resolved_ontology = tio_shacl.get_ontologies_dirs()
+
     resolved_extensions = (
         extensions_dir
         if extensions_dir is not None
@@ -150,7 +183,7 @@ def load_graphs(
     return _cached_graphset(
         shapes_dir=resolved_shapes,
         lib_dir=resolved_lib,
-        ontology_dir=resolved_ontology,
+        ontology_dirs=resolved_ontology,
         extensions_dir=resolved_extensions,
         include_extensions=include_extensions,
     )

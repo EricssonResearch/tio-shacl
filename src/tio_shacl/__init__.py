@@ -82,14 +82,6 @@ def get_test_cases_dir() -> Path:
     )
 
 
-def get_sparql_dir() -> Path:
-    """Directory with ad-hoc SPARQL queries."""
-    return _first_existing(
-        _PACKAGE_DIR / "sparql",
-        _REPO_ROOT / "sparql",
-    )
-
-
 def get_patches_dir() -> Path:
     """Directory containing the TIO 3.6.0 bugfix patch."""
     return _first_existing(
@@ -104,31 +96,71 @@ def get_patches_dir() -> Path:
 
 
 def get_ontologies_dir() -> Path:
-    """Resolve the directory holding the (patched) TIO 3.6.0 ``.ttl`` files.
+    """Resolve a single directory holding the (patched) TIO 3.6.0 ``.ttl`` files.
 
     Resolution order:
-        1. ``TIO_ONTOLOGY_DIR`` environment variable
+        1. First entry of ``TIO_ONTOLOGY_DIR`` (``os.pathsep``-separated)
         2. ``<cwd>/ontology``
 
     Raises:
         FileNotFoundError: if neither candidate is a directory. The user
             must download TIO 3.6.0 from TM Forum and run
             ``scripts/setup_tio.sh`` to create this directory.
+
+    See also:
+        :func:`get_ontologies_dirs` for the multi-directory form, which is what
+        most callers in this package actually use.
+    """
+    dirs = get_ontologies_dirs()
+    return dirs[0]
+
+
+def get_ontologies_dirs() -> tuple[Path, ...]:
+    """Resolve the list of directories holding TIO and optional catalogue TTLs.
+
+    Resolution order:
+        1. ``TIO_ONTOLOGY_DIR`` environment variable — may contain multiple
+           directories separated by ``os.pathsep`` (``:`` on Unix, ``;`` on
+           Windows). Every listed directory must exist.
+        2. ``<cwd>/ontology``
+
+    This supports the common case where TIO lives in one directory and a
+    custom service catalogue lives in another, without copying or symlinking.
+
+    Raises:
+        FileNotFoundError: if no candidate resolves to an existing directory.
     """
     env = os.environ.get("TIO_ONTOLOGY_DIR")
     candidates: list[Path] = []
     if env:
-        candidates.append(Path(env))
-    candidates.append(Path.cwd() / "ontology")
+        for part in env.split(os.pathsep):
+            part = part.strip()
+            if part:
+                candidates.append(Path(part))
+    else:
+        candidates.append(Path.cwd() / "ontology")
 
-    for candidate in candidates:
-        if candidate.is_dir():
-            return candidate
+    # Every explicit candidate from the env var must exist; fall back to
+    # ``./ontology`` only when the env var is unset.
+    existing = [c for c in candidates if c.is_dir()]
+    if existing and len(existing) == len(candidates):
+        return tuple(existing)
+
+    # Partial existence via env var is treated as a configuration error so
+    # users see the typo rather than silently dropping a directory.
+    if env and existing != candidates:
+        missing = [c for c in candidates if not c.is_dir()]
+        raise FileNotFoundError(
+            "TIO_ONTOLOGY_DIR references directories that do not exist: "
+            f"{', '.join(str(m) for m in missing)}"
+        )
 
     raise FileNotFoundError(
         "TIO ontology directory not found. Download TIO 3.6.0 from "
-        "https://www.tmforum.org/intent-ontology/ and either place it at "
-        "./ontology or set the TIO_ONTOLOGY_DIR environment variable. "
+        "https://projects.tmforum.org/wiki/pages/viewpageattachments.action?pageId=328567625 "
+        "(free TM Forum account required) and either place it at "
+        "./ontology or set the TIO_ONTOLOGY_DIR environment variable "
+        "(multiple directories may be separated by os.pathsep). "
         f"Checked: {', '.join(str(c) for c in candidates)}"
     )
 
@@ -141,7 +173,7 @@ __all__ = [
     "get_lib_dir",
     "get_extensions_dir",
     "get_test_cases_dir",
-    "get_sparql_dir",
     "get_patches_dir",
     "get_ontologies_dir",
+    "get_ontologies_dirs",
 ]

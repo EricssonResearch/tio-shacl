@@ -95,6 +95,11 @@ known-first-party = ["tio_shacl"]
 
 [tool.mypy]
 python_version = "3.11"
+# Tell mypy that ``src/`` is the package root so ``src/tio_shacl/`` is only
+# ever resolved under the name ``tio_shacl`` (not also ``src.tio_shacl``),
+# which is what triggered "Source file found twice under different module
+# names" when invoking ``mypy src/tio_shacl/``.
+mypy_path = "src"
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = true

@@ -7,7 +7,8 @@
 # ontology_dir defaults to ./ontology
 #
 # The directory must contain the 15 TIO 3.6.0 .ttl files downloaded from:
-#   https://www.tmforum.org/intent-ontology/
+#   https://projects.tmforum.org/wiki/pages/viewpageattachments.action?pageId=328567625
+#   (free TM Forum account required)
 #
 # We DO NOT redistribute TIO ontology files. You must download them yourself.
 
@@ -46,7 +47,7 @@ fi
 
 if [[ ! -d "$ONTOLOGY_DIR" ]]; then
   err "Ontology directory not found: $ONTOLOGY_DIR"
-  err "Download TIO 3.6.0 from https://www.tmforum.org/intent-ontology/"
+  err "Download TIO 3.6.0 from https://projects.tmforum.org/wiki/pages/viewpageattachments.action?pageId=328567625"
   err "and place the .ttl files there, then re-run this script."
   exit 1
 fi

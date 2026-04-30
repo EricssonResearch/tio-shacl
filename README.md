@@ -23,23 +23,175 @@ The project also ships bugfixes for the TIO 3.6.0 release (missing class declara
 
 ## Quick start
 
+### What you need to provide
+
+`tio-shacl` combines three kinds of RDF graphs at validation time. Two of them
+ship with the repo; the third is yours. Knowing which is which is usually the
+thing that trips people up:
+
+| Graph | Who provides it | Where it lives | Purpose |
+|-------|-----------------|----------------|---------|
+| **SHACL shapes** | *ships with this repo* | `rdf/shapes/`, `rdf/lib/`, `extensions/` | The validation rules. You do not edit these to validate your intents. |
+| **TIO 3.6.0 ontology** | *you download from TM Forum* | `./ontology/` (git-ignored) | The class/property definitions your intents reference. Required. |
+| **Intent document** *(your input)* | *you write* | anywhere — pass the path to the CLI | The RDF file describing the intent you want to check. |
+
+Optionally, you can also add:
+
+- **Custom ontology extensions / catalogues** (e.g. your own service model or
+  vocabulary) — point `TIO_ONTOLOGY_DIR` at a directory containing both the TIO
+  files and your extra `.ttl` files. Everything in that directory is loaded
+  into the data graph at validation time.
+- **Custom SHACL shapes** — drop additional `.ttl` files into `rdf/shapes/` or
+  `extensions/` (or point `TIO_SHAPES_DIR` at your own directory). The runner
+  loads every `.ttl` under the shapes directory.
+
+You do **not** need to understand or modify the SHACL shapes to validate an
+intent — treat them as a library. You only author the intent document.
+
+### Install and set up
+
 ```bash
 # 1. Clone
 git clone https://github.com/earejma/tio-shacl.git
 cd tio-shacl
 
-# 2. Install Python deps (requires pyenv + uv)
+# 2. Install Python deps (requires pyenv + uv — see docs/setup.md)
 make install
 
-# 3. Download TIO 3.6.0 from TM Forum and place the .ttl files in ./ontology/
-#    (see docs/setup.md for the download link and file list)
+# 3. Download TIO 3.6.0 from TM Forum and place the 15 .ttl files in ./ontology/
+#    Requires a free TM Forum account. See docs/setup.md for the download URL
+#    and the exact file list.
 
-# 4. Apply our bugfix patch
+# 4. Apply the TIO 3.6.0 bugfix patch (idempotent; safe to re-run)
 make setup-tio
 
-# 5. Run the test suite
+# 5. Smoke-test: run the bundled 133 good/bad cases
 make test
 ```
+
+### Walkthrough: validate your first intent
+
+Once setup is complete, the CLI has three subcommands:
+
+```bash
+tio-shacl --help
+#   validate   Validate a single RDF file.
+#   test       Run validation test suites.
+#   report     Emit a report from the most recent 'test' run.
+```
+
+**1. Validate a known-good intent from the bundled test cases.**
+
+This confirms the toolchain works end-to-end before you point it at your own
+file:
+
+```bash
+uv run tio-shacl validate test-cases/IntentCommonModel/good/class-expectations.ttl
+# ✓ test-cases/IntentCommonModel/good/class-expectations.ttl: conforms
+```
+
+**2. Validate a known-bad intent to see what a violation looks like.**
+
+```bash
+uv run tio-shacl validate test-cases/IntentCommonModel/bad/expectation-target-violation.ttl
+# ✗ test-cases/IntentCommonModel/bad/expectation-target-violation.ttl: 1 violation(s)
+#   [1] http://example.org/bad_expectation — Value does not have class icm:Target
+```
+
+Add `-v` / `--verbose` to see the full SHACL report (focus node, source shape,
+constraint component, severity) for each violation.
+
+**3. Validate your own intent.**
+
+Write an intent that references TIO classes via their IRIs. A minimal
+well-formed intent looks like this:
+
+```turtle
+# my_intent.ttl
+@prefix ex:  <http://example.org/> .
+@prefix icm: <http://tio.models.tmforum.org/tio/v3.6.0/IntentCommonModel/> .
+@prefix log: <http://tio.models.tmforum.org/tio/v3.6.0/LogicalOperators/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+ex:my_target      a icm:Target .
+
+ex:my_expectation a icm:DeliveryExpectation ;
+    icm:target ex:my_target .
+
+ex:my_intent      a icm:Intent ;
+    rdfs:label "Example intent"@en ;
+    log:allOf ( ex:my_expectation ) .
+```
+
+Validate it:
+
+```bash
+uv run tio-shacl validate my_intent.ttl
+# ✓ my_intent.ttl: conforms
+```
+
+For a richer example that exercises multiple TIO modules (validity, guarantees,
+quantities), see
+[`test-cases/CompleteIntents/good/scenario-intent-validity-guarantee.ttl`](test-cases/CompleteIntents/good/scenario-intent-validity-guarantee.ttl).
+
+### Using a custom ontology or catalogue
+
+If your intent references concepts from your own service catalogue or a
+domain-specific ontology, the runner needs to see those definitions at the
+same time as TIO — otherwise SHACL cannot resolve class membership or
+`rdfs:domain` / `rdfs:range` against your vocabulary.
+
+Point the CLI at both directories — TIO and your catalogue — with the
+repeatable `-O` / `--ontology-dir` flag:
+
+```bash
+uv run tio-shacl validate \
+    -O ./ontology \
+    -O ~/tio-src/tio-catalog \
+    my_intent.ttl
+```
+
+You can pass `-O` as many times as you need (one per directory). Every `.ttl`
+found in each directory is unioned into the ontology graph. No copying or
+symlinking required.
+
+The same composition also works via the environment, using `os.pathsep`
+(`:` on Unix, `;` on Windows) to separate directories:
+
+```bash
+export TIO_ONTOLOGY_DIR="$PWD/ontology:$HOME/tio-src/tio-catalog"
+uv run tio-shacl validate my_intent.ttl
+```
+
+From Python:
+
+```python
+from tio_shacl.validation import ValidationRunner
+
+runner = ValidationRunner(ontology_dirs=[
+    "ontology",
+    "/home/me/tio-src/tio-catalog",
+])
+result = runner.validate_file("my_intent.ttl")
+```
+
+`owl:imports` inside your intent is still not followed automatically — the
+catalogue has to be reachable through one of the ontology directories you
+pass.
+
+### Switching SHACL backends
+
+By default validation runs through `pyshacl`. To cross-check with another
+engine:
+
+```bash
+TIO_VALIDATOR=topbraid uv run tio-shacl validate my_intent.ttl
+TIO_VALIDATOR=jena     uv run tio-shacl validate my_intent.ttl
+```
+
+`topbraid` and `jena` require Java 17+ and `make java-build` once. All three
+backends are expected to produce the same verdict on every intent — if they
+don't, please open an issue.
 
 ---
 
@@ -95,7 +247,7 @@ The conversion is performed by the jar itself, not by the Python runner, so invo
 
 ## IPR note
 
-We do **not** redistribute the TIO ontology files. They are published by TM Forum under their own licensing terms. You must download them yourself from <https://www.tmforum.org/intent-ontology/> and let our `scripts/setup_tio.sh` apply the bugfix patch.
+We do **not** redistribute the TIO ontology files. They are published by TM Forum under their own licensing terms. You must download them yourself from <https://projects.tmforum.org/wiki/pages/viewpageattachments.action?pageId=328567625> (free TM Forum account required) and let our `scripts/setup_tio.sh` apply the bugfix patch.
 
 Everything else in this repo (SHACL shapes, extensions, test cases, Python code, Java wrappers) is original work by Ericsson Research under the **MIT License**.
 

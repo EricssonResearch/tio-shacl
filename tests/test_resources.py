@@ -8,13 +8,11 @@ development mode (``rdf/`` at repo root) and installed-package mode
 
 from __future__ import annotations
 
-import os
 from pathlib import Path
 
 import pytest
 
 import tio_shacl
-
 
 # -----------------------------------------------------------------------------
 # Package metadata
@@ -100,10 +98,6 @@ class TestPathResolvers:
         assert patches.is_dir()
         assert (patches / "tio-3.6.0-fixes.patch").is_file()
 
-    def test_get_sparql_dir(self) -> None:
-        sparql = tio_shacl.get_sparql_dir()
-        assert sparql.is_dir()
-
 
 # -----------------------------------------------------------------------------
 # TIO ontology directory resolution
@@ -137,3 +131,47 @@ class TestGetOntologiesDir:
 
         with pytest.raises(FileNotFoundError):
             tio_shacl.get_ontologies_dir()
+
+
+# -----------------------------------------------------------------------------
+# Multi-directory ontology resolution
+# -----------------------------------------------------------------------------
+
+
+class TestGetOntologiesDirs:
+    def test_single_dir_returns_one_entry_tuple(self, tio_ontology_dir: Path) -> None:
+        dirs = tio_shacl.get_ontologies_dirs()
+        assert isinstance(dirs, tuple)
+        assert len(dirs) >= 1
+        assert all(d.is_dir() for d in dirs)
+
+    def test_env_var_accepts_pathsep_separated_dirs(
+        self, tio_ontology_dir: Path, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+    ) -> None:
+        import os as _os
+
+        catalogue = tmp_path / "catalogue"
+        catalogue.mkdir()
+        (catalogue / "my_catalogue.ttl").write_text(
+            "@prefix ex: <http://example.org/catalogue/> . ex:Foo a ex:Bar .\n"
+        )
+
+        monkeypatch.setenv(
+            "TIO_ONTOLOGY_DIR",
+            _os.pathsep.join([str(tio_ontology_dir), str(catalogue)]),
+        )
+        dirs = tio_shacl.get_ontologies_dirs()
+        assert dirs == (tio_ontology_dir, catalogue)
+
+    def test_env_var_rejects_missing_member(
+        self, monkeypatch: pytest.MonkeyPatch, tmp_path: Path, tio_ontology_dir: Path
+    ) -> None:
+        import os as _os
+
+        monkeypatch.setenv(
+            "TIO_ONTOLOGY_DIR",
+            _os.pathsep.join([str(tio_ontology_dir), str(tmp_path / "missing")]),
+        )
+        with pytest.raises(FileNotFoundError) as exc:
+            tio_shacl.get_ontologies_dirs()
+        assert "missing" in str(exc.value)
