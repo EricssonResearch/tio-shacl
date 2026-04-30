@@ -29,7 +29,7 @@ When you `cd` into the repo, pyenv switches to 3.11 automatically.
 ## 2. Clone the repository
 
 ```bash
-git clone https://github.com/earejma/tio-shacl.git
+git clone https://github.com/EricssonResearch/tio-shacl.git
 cd tio-shacl
 python --version   # should print Python 3.11.x
 ```
