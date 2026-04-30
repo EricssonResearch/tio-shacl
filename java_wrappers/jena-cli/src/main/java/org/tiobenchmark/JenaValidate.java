@@ -13,7 +13,10 @@ import org.apache.jena.shacl.ValidationReport;
 /**
  * Apache Jena SHACL validation CLI for tio-benchmark.
  *
- * Pre-loads data and shapes graphs, then times shape parsing + validation.
+ * Pre-loads data and shapes graphs, applies the generic SHACL-AF
+ * {@link SparqlTargetTypePolyfill} so parameterised {@code sh:SPARQLTargetType}
+ * instances validate correctly, then times shape parsing + validation.
+ *
  * Output: JSON to stdout: {"conforms":true/false,"violations":N,"validation_ms":...}
  */
 public class JenaValidate {
@@ -31,6 +34,11 @@ public class JenaValidate {
             // Pre-load graphs (NOT timed — excludes I/O from measurement)
             Graph dataGraph = RDFDataMgr.loadGraph(dataPath);
             Graph shapesGraph = RDFDataMgr.loadGraph(shapesPath);
+
+            // Polyfill sh:SPARQLTargetType — also NOT timed since it is
+            // semantically identical to what AF-compliant validators do
+            // internally.
+            SparqlTargetTypePolyfill.apply(shapesGraph);
 
             // Time shape parsing + validation
             long t0 = System.nanoTime();

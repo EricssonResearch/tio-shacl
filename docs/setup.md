@@ -135,7 +135,7 @@ Without these, the Python package uses `pyshacl` for all validation. To pick a s
 
 ```bash
 TIO_VALIDATOR=topbraid tio-shacl validate my_intent.ttl
-TIO_VALIDATOR=jena     tio-shacl validate my_intent.ttl    # see README for limitations
+TIO_VALIDATOR=jena     tio-shacl validate my_intent.ttl
 TIO_VALIDATOR=pyshacl  tio-shacl validate my_intent.ttl    # default
 ```
 

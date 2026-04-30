@@ -139,9 +139,11 @@ The orchestrator discovers every `*.ttl` under `test-cases/`, validates it, and 
 |---------|-------------|-------------|
 | `pyshacl` | Python library call | Default; no extra setup |
 | `topbraid` | `java -jar topbraid-shacl-cli.jar …` | Reference implementation; passes all TIO test cases |
-| `jena` | `java -jar jena-shacl-cli.jar …` | Benchmarking; errors on TIO's parameterised SPARQL targets (see README) |
+| `jena` | `java -jar jena-shacl-cli.jar …` | Reference implementation; passes all TIO cases via the built-in `SparqlTargetTypePolyfill` (see README) |
 
-The pyshacl and TopBraid backends must produce the same pass/fail verdict on every test case. The Jena backend is best-effort. This is enforced by the test suite when `TIO_VALIDATOR` cycles through each backend in CI.
+All three backends must produce the same pass/fail verdict on every test case. This is enforced by the test suite when `TIO_VALIDATOR` cycles through each backend in CI.
+
+The Jena jar bundles a generic SHACL-AF `sh:SPARQLTargetType` polyfill because Jena's engine does not implement that feature natively. The polyfill rewrites every target-type instance into an inline `sh:SPARQLTarget` before the shapes are parsed, following the W3C SHACL-AF §4.2 semantics.
 
 ---
 

@@ -1,14 +1,10 @@
 """Apache Jena 5.2.0 backend — driven through ``jena-shacl-cli.jar``.
 
-.. note::
-
-   Jena's SHACL implementation requires every ``sh:SPARQLTargetType`` instance
-   to fully bind each declared parameter. TIO's shapes use parameterised target
-   types where some parameters are bound implicitly; pyshacl and TopBraid
-   tolerate this, Jena does not. As a result, this backend errors out on most
-   TIO shapes with ``Missing required parameter``. It is shipped for
-   completeness and for benchmarking shapes that do not rely on parameterised
-   targets.
+The bundled CLI jar includes a generic SHACL-AF ``sh:SPARQLTargetType``
+polyfill (``SparqlTargetTypePolyfill.java``) that rewrites every target-type
+instance into an inline ``sh:SPARQLTarget`` before Jena parses the shapes.
+This makes the backend a full peer of the TopBraid and pyshacl backends on
+TIO's shapes.
 """
 
 from __future__ import annotations

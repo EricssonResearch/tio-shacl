@@ -1,11 +1,9 @@
 """Tests for the three validator backends.
 
-The pyshacl and TopBraid backends must agree on the verdict for every sample
-case (pass/fail on good/bad). The Jena backend is tested separately — it is
-expected to error out on shapes that use parameterised SPARQL target types,
-which covers most of the TIO suite. We keep one smoke test to make sure the
-backend can be instantiated and returns a :class:`ValidationResult` (even if
-that result indicates an error).
+All three backends — pyshacl, TopBraid, Jena — must agree on the verdict for
+every sample case (pass/fail on good/bad). Jena's SHACL-AF ``sh:SPARQLTargetType``
+polyfill is tested implicitly by this agreement: without it Jena would error
+out on almost every TIO case.
 """
 
 from __future__ import annotations
@@ -25,6 +23,8 @@ _SAMPLE_NAMES = [
     "LogicalOperators/bad/function-logical-violations.ttl",
     "QuantityOntology/good/function-comparison.ttl",
     "QuantityOntology/bad/quantity-value-datatype-violation.ttl",
+    "IntentCommonModel/good/property-report-metadata.ttl",
+    "IntentCommonModel/bad/observation-reporting-expectation-violation.ttl",
 ]
 
 
@@ -94,13 +94,15 @@ class TestBackendRegistry:
 
 
 # -----------------------------------------------------------------------------
-# Behaviour: pyshacl and TopBraid should agree on every sample case.
+# Behaviour: all three backends must agree on every sample case.
 # -----------------------------------------------------------------------------
 
 
 @pytest.mark.skipif(not _java_available(), reason="java runtime not on PATH")
 @pytest.mark.parametrize(("path", "expected"), _sample_cases(), ids=_SAMPLE_NAMES)
-class TestPyshaclVsTopbraidAgreement:
+class TestBackendAgreement:
+    """All three backends must produce the same verdict on each sample case."""
+
     def test_pyshacl(self, path: Path, expected: bool, tio_ontology_dir: Path) -> None:
         from tio_shacl.validation import ValidationRunner
 
@@ -118,33 +120,16 @@ class TestPyshaclVsTopbraidAgreement:
         result = runner.validate_file(path)
         assert result.conforms == expected, f"topbraid disagreed on {path}"
 
-
-# -----------------------------------------------------------------------------
-# Jena backend smoke test (known-limited — see module docstring).
-# -----------------------------------------------------------------------------
-
-
-class TestJenaBackendSmoke:
-    @pytest.mark.skipif(not _java_available(), reason="java runtime not on PATH")
-    def test_jena_backend_returns_result(self, tio_ontology_dir: Path) -> None:
-        """Jena returns a :class:`ValidationResult`, even when it errors.
-
-        TIO's shapes use parameterised ``sh:SPARQLTargetType`` instances that
-        Jena cannot fully resolve (see ``docs/architecture.md`` and the README).
-        We accept any outcome — conforms true or false — so long as the backend
-        produces a structured result and does not raise.
-        """
-        from tio_shacl.validation import ValidationResult, ValidationRunner
+    def test_jena(self, path: Path, expected: bool, tio_ontology_dir: Path) -> None:
+        """Jena must also agree — this exercises the ``SparqlTargetTypePolyfill``."""
+        from tio_shacl.validation import ValidationRunner
 
         try:
             runner = ValidationRunner(backend="jena")
         except Exception as exc:
             pytest.skip(f"Jena backend unavailable: {exc}")
-
-        sample = _sample_cases()[0][0]  # LogicalOperators/good/function-logical.ttl
-        result = runner.validate_file(sample)
-        assert isinstance(result, ValidationResult)
-        # We do not assert conforms — Jena's behaviour on TIO is an open item.
+        result = runner.validate_file(path)
+        assert result.conforms == expected, f"jena disagreed on {path}"
 
 
 # -----------------------------------------------------------------------------
