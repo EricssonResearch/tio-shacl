@@ -97,7 +97,7 @@ The conversion is performed by the jar itself, not by the Python runner, so invo
 
 We do **not** redistribute the TIO ontology files. They are published by TM Forum under their own licensing terms. You must download them yourself from <https://www.tmforum.org/intent-ontology/> and let our `scripts/setup_tio.sh` apply the bugfix patch.
 
-Everything else in this repo (SHACL shapes, extensions, test cases, Python code, Java wrappers) is original work under **Apache-2.0**.
+Everything else in this repo (SHACL shapes, extensions, test cases, Python code, Java wrappers) is original work by Ericsson Research under the **MIT License**.
 
 ---
 
@@ -109,4 +109,4 @@ This repository is in active migration from an internal Ericsson codebase. See [
 
 ## License
 
-[Apache-2.0](LICENSE)
+[MIT](LICENSE) — Copyright (c) 2025 Ericsson Research

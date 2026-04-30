@@ -4,13 +4,13 @@ version = "1.0.0"
 description = "SHACL shapes and validation framework for the TM Forum Intent Ontology (TIO) v3.6.0"
 readme = "README.md"
 requires-python = ">=3.11"
-license = { text = "Apache-2.0" }
-authors = [{ name = "tio-shacl contributors" }]
+license = { text = "MIT" }
+authors = [{ name = "Ericsson Research" }]
 keywords = ["rdf", "shacl", "ontology", "intent", "tmforum", "tio", "validation"]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: Apache Software License",
+    "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
@@ -19,9 +19,6 @@ classifiers = [
 dependencies = [
     "rdflib>=7.1.4",
     "pyshacl>=0.30.1",
-    "psutil>=6.1.0",
-    "python-dotenv>=1.0.0",
-    "pydantic>=2.0.0",
     "click>=8.0.0",
 ]
 
@@ -47,7 +44,6 @@ packages = ["src/tio_shacl"]
 "rdf" = "tio_shacl/rdf"
 "extensions" = "tio_shacl/extensions"
 "test-cases" = "tio_shacl/test-cases"
-"sparql" = "tio_shacl/sparql"
 "patches" = "tio_shacl/patches"
 
 [tool.hatch.build.targets.sdist]
@@ -56,7 +52,6 @@ include = [
     "/rdf",
     "/extensions",
     "/test-cases",
-    "/sparql",
     "/patches",
     "/scripts",
     "/docs",

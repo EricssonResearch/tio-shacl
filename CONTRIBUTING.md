@@ -136,4 +136,4 @@ Please do not include TIO ontology .ttl content in issues, PRs, or test cases. R
 
 ## License
 
-By contributing, you agree your contributions are licensed under [Apache-2.0](LICENSE).
+By contributing, you agree your contributions are licensed under the [MIT License](LICENSE).
