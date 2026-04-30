@@ -52,3 +52,7 @@ java_wrappers/**/dependency-reduced-pom.xml
 VALIDATION_REPORT.md
 docs/validation-report.md
 *.junit.xml
+
+# --- Cross-backend run artifacts (scripts/run_full_suite.py) ---
+run_*.json
+logs/
