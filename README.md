@@ -219,7 +219,6 @@ tio-shacl/
 - **[docs/setup.md](docs/setup.md)** — step-by-step setup including TIO download
 - **[docs/architecture.md](docs/architecture.md)** — how the validator is put together
 - **[CONTRIBUTING.md](CONTRIBUTING.md)** — development workflow, test layout, PR process
-- **[MIGRATION_PLAN.md](MIGRATION_PLAN.md)** — plan for the clean-room public rewrite
 
 ---
 
@@ -255,7 +254,9 @@ Everything else in this repo (SHACL shapes, extensions, test cases, Python code,
 
 ## Status
 
-This repository is in active migration from an internal Ericsson codebase. See [MIGRATION_PLAN.md](MIGRATION_PLAN.md) for the roadmap. Until it is complete, the Python package is not yet functional — only the static SHACL shapes and test cases are ready.
+This repository is in active migration from an internal Ericsson codebase.
+Until it is complete, the Python package is not yet functional — only the
+static SHACL shapes and test cases are ready.
 
 ---
 
