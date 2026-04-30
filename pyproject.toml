@@ -135,11 +135,12 @@ addopts = [
     "--strict-config",
     "-ra",
     "--tb=short",
+    "-m", "not slow",
 ]
 markers = [
     "unit: Unit tests",
     "integration: Integration tests (require TIO ontology)",
-    "slow: Slow running tests",
+    "slow: Slow running tests — full 133-case validation, use 'make test-slow'",
     "java: Tests requiring Java validators (TopBraid/Jena)",
 ]
 

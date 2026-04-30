@@ -4,8 +4,10 @@ help:
 	@echo "Available targets:"
 	@echo "  install       Install all deps (api, mcp, dev) via uv"
 	@echo "  setup-tio     Apply TIO 3.6.0 patch (ontology/ must exist)"
-	@echo "  test          Run full test suite"
-	@echo "  test-fast     Run tests in parallel (pytest-xdist)"
+	@echo "  test          Run fast test suite (skips slow 133-case validations)"
+	@echo "  test-fast     Run fast tests in parallel (pytest-xdist)"
+	@echo "  test-slow     Run ALL tests incl. full 133-case validations (parallel)"
+	@echo "  test-full     Same as test-slow but serial (debugging)"
 	@echo "  lint          Run ruff linter"
 	@echo "  format        Run ruff formatter + autofix"
 	@echo "  type-check    Run mypy"
@@ -24,6 +26,12 @@ test:
 
 test-fast:
 	uv run pytest -n auto
+
+test-slow:
+	uv run pytest -m "slow or not slow" -n auto
+
+test-full:
+	uv run pytest -m "slow or not slow"
 
 lint:
 	uv run ruff check src/ tests/

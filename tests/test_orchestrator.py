@@ -32,6 +32,7 @@ class TestSuiteDiscovery:
 
 
 class TestSuiteExecution:
+    @pytest.mark.slow
     def test_run_single_suite(self, tio_ontology_dir: Path) -> None:
         from tio_shacl.validation import TestOrchestrator
 
@@ -45,6 +46,7 @@ class TestSuiteExecution:
         assert report.total > 0
         assert report.passed + report.failed == report.total
 
+    @pytest.mark.slow
     def test_run_all_suites(self, tio_ontology_dir: Path) -> None:
         from tio_shacl.validation import TestOrchestrator
 
@@ -55,6 +57,7 @@ class TestSuiteExecution:
         total = sum(r.total for r in reports)
         assert total >= 133
 
+    @pytest.mark.slow
     def test_parallel_execution_is_faster(self, tio_ontology_dir: Path) -> None:
         """Running in parallel should not produce different results than serial."""
         from tio_shacl.validation import TestOrchestrator

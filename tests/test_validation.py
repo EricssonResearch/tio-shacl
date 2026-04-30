@@ -83,6 +83,7 @@ class TestValidationRunner:
 # -----------------------------------------------------------------------------
 
 
+@pytest.mark.slow
 @pytest.mark.parametrize("case", GOOD_CASES, ids=lambda c: c.id)
 def test_good_case_conforms(case: ValidationCase, tio_ontology_dir: Path) -> None:
     """Every ``good/`` test case must pass SHACL validation."""
@@ -101,6 +102,7 @@ def test_good_case_conforms(case: ValidationCase, tio_ontology_dir: Path) -> Non
 # -----------------------------------------------------------------------------
 
 
+@pytest.mark.slow
 @pytest.mark.parametrize("case", BAD_CASES, ids=lambda c: c.id)
 def test_bad_case_violates(case: ValidationCase, tio_ontology_dir: Path) -> None:
     """Every ``bad/`` test case must fail SHACL validation with at least one violation."""

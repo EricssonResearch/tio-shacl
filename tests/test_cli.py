@@ -68,6 +68,7 @@ class TestValidateCommand:
 
 
 class TestTestCommand:
+    @pytest.mark.slow
     def test_test_runs_full_suite(
         self, runner: CliRunner, tio_ontology_dir: Path
     ) -> None:
@@ -83,9 +84,10 @@ class TestTestCommand:
     ) -> None:
         from tio_shacl.cli import main
 
-        result = runner.invoke(main, ["test", "-s", "IntentCommonModel"])
+        # LogicalOperators has 4 small cases — fastest suite for smoke test
+        result = runner.invoke(main, ["test", "-s", "LogicalOperators"])
         assert result.exit_code in (0, 1)
-        assert "IntentCommonModel" in result.output
+        assert "LogicalOperators" in result.output
 
 
 class TestReportCommand:
@@ -95,10 +97,11 @@ class TestReportCommand:
         from tio_shacl.cli import main
 
         out_file = tmp_path / "report.md"
-        # Run test first to populate cache, then report
-        runner.invoke(main, ["test", "-s", "LogicalOperators"])
-        result = runner.invoke(main, ["report", "-o", str(out_file)])
-        assert result.exit_code == 0
+        # Run a single small suite first to populate cache, then report.
+        # Use ``standalone_mode=False`` so the first invoke does not call sys.exit.
+        runner.invoke(main, ["test", "-s", "LogicalOperators"], standalone_mode=False)
+        result = runner.invoke(main, ["report", "-o", str(out_file)], standalone_mode=False)
+        assert result.exit_code == 0, result.output
         assert out_file.is_file()
         assert out_file.stat().st_size > 0
 
@@ -108,11 +111,13 @@ class TestReportCommand:
         from tio_shacl.cli import main
 
         out_file = tmp_path / "report.json"
-        runner.invoke(main, ["test", "-s", "LogicalOperators"])
+        runner.invoke(main, ["test", "-s", "LogicalOperators"], standalone_mode=False)
         result = runner.invoke(
-            main, ["report", "--format", "json", "-o", str(out_file)]
+            main,
+            ["report", "--format", "json", "-o", str(out_file)],
+            standalone_mode=False,
         )
-        assert result.exit_code == 0
+        assert result.exit_code == 0, result.output
         assert out_file.is_file()
 
         import json
