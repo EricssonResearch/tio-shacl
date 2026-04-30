@@ -1,0 +1,32 @@
+# Exclude everything the runtime image doesn't need. Keeps the build context
+# small and prevents the user's host-side ontology (IPR) from being baked in
+# by accident.
+
+.git
+.github
+.venv
+.mypy_cache
+.ruff_cache
+.pytest_cache
+__pycache__
+*.pyc
+
+# Tests aren't in the runtime image.
+tests/
+
+# Host-side TIO ontology is mounted at run time, never baked in.
+ontology/
+
+# Runtime artefacts from previous local runs.
+run_*.json
+logs/
+
+# Java build outputs — the Dockerfile rebuilds these from sources in stage 1.
+java_wrappers/**/target/
+java_wrappers/**/dependency-reduced-pom.xml
+
+# Editor / OS noise.
+.idea
+.vscode
+*.swp
+.DS_Store
