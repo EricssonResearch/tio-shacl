@@ -54,7 +54,7 @@ Everything else in this repo (SHACL shapes, extensions, test cases, Python code,
 If you use tio-shacl in your research, please cite:
 
 ```bibtex
-@misc{martins2026tioshaclcomprehensiveshaclvalidation,
+@misc{martins2026tioshacl,
       title={TIO-SHACL: Comprehensive SHACL validation for TMF Intent Ontologies}, 
       author={Jean Martins and Leonid Mokrushin and Marin Orlic},
       year={2026},
