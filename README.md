@@ -49,6 +49,22 @@ We do **not** redistribute the TIO ontology files. They are published by TM Foru
 
 Everything else in this repo (SHACL shapes, extensions, test cases, Python code, Java wrappers) is original work by Ericsson Research under the **MIT License**.
 
+## Citation
+
+If you use tio-shacl in your research, please cite:
+
+```bibtex
+@misc{martins2026tioshaclcomprehensiveshaclvalidation,
+      title={TIO-SHACL: Comprehensive SHACL validation for TMF Intent Ontologies}, 
+      author={Jean Martins and Leonid Mokrushin and Marin Orlic},
+      year={2026},
+      eprint={2604.27359},
+      archivePrefix={arXiv},
+      primaryClass={cs.AI},
+      url={https://arxiv.org/abs/2604.27359}, 
+}
+```
+
 ## License
 
 [MIT](LICENSE) — Copyright (c) 2025 Ericsson Research
