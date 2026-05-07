@@ -87,6 +87,20 @@ uv run python -c "import tio_shacl; print(tio_shacl.__version__)"
 
 The `ontology/` directory is git-ignored, so you will never accidentally commit TIO files.
 
+### What lives where
+
+`tio-shacl` combines three kinds of RDF graphs at validation time. Two ship
+with the repo; the third is yours:
+
+| Graph | Who provides it | Where it lives | Purpose |
+|-------|-----------------|----------------|---------|
+| **SHACL shapes** | *ships with this repo* | `rdf/shapes/`, `rdf/lib/`, `extensions/` | The validation rules. You do not edit these to validate your intents. |
+| **TIO 3.6.0 ontology** | *you download from TM Forum* | `./ontology/` (git-ignored) | The class/property definitions your intents reference. Required. |
+| **Intent document** *(your input)* | *you write* | anywhere — pass the path to the CLI | The RDF file describing the intent you want to check. |
+
+You do **not** need to understand or modify the SHACL shapes to validate an
+intent — treat them as a library. You only author the intent document.
+
 ---
 
 ## 5. Apply the bugfix patch
